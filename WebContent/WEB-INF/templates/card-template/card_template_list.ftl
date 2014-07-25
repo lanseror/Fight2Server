@@ -1,10 +1,22 @@
 <#include "/WEB-INF/templates/head.ftl" />
 
+<script type="text/javascript">
+<!--
+function confirmDelete(deleteUrl)
+{
+    if (confirm("真的要删除吗？")) {
+        if (!confirm("这是误操作吗？")) {
+            document.location = deleteUrl;
+        }
+    }
+}
 
+-->
+</script>
 
 <center>
 <br/><br/>
-<table border="1" width="80%">
+<table border="1" width="80%" align="center">
     <tr>
         <td>ID</td>
         <td>名字</td>
@@ -16,13 +28,14 @@
     <#list datas as entry>
     <tr>
         <td>${entry.id}</td>
-        <td>${entry.name?default("")}</td>
+        <td><a href="<@s.url namespace="/card-template" action="edit"><@s.param name="id" value="${entry.id}" /></@s.url>">${entry.name?default("")}</a></td>
         <td>${entry.star?default("")}</td>
         <td>${entry.hp?default("")}</td>
         <td>万分之${entry.probability?default("")}</td>
-        <td>
+        <td align="center">
             <a href="<@s.url namespace="/card-template" action="edit"><@s.param name="id" value="${entry.id}" /></@s.url>">修改</a>
-            <a href="<@s.url namespace="/card-template" action="delete"><@s.param name="id" value="${entry.id}" /></@s.url>">删除</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="javascript:confirmDelete('<@s.url namespace="/card-template" action="delete"><@s.param name="id" value="${entry.id}" /></@s.url>')">删除</a>
         </td>
     </tr>
      </#list>

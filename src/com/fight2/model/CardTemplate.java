@@ -3,8 +3,7 @@ package com.fight2.model;
 import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 @Entity
 public class CardTemplate extends BaseEntity {
@@ -35,7 +34,7 @@ public class CardTemplate extends BaseEntity {
         this.name = name;
     }
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cardTemplate")
+    @Transient
     public List<CardImage> getAvatars() {
         return avatars;
     }
@@ -44,7 +43,7 @@ public class CardTemplate extends BaseEntity {
         this.avatars = avatars;
     }
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cardTemplate")
+    @Transient
     public List<CardImage> getMainImages() {
         return mainImages;
     }
@@ -53,7 +52,7 @@ public class CardTemplate extends BaseEntity {
         this.mainImages = mainImages;
     }
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cardTemplate")
+    @Transient
     public List<CardImage> getThumbImages() {
         return thumbImages;
     }

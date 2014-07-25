@@ -58,7 +58,6 @@ public class ImageCommon {
         final int extensionIndex = imgFileName.lastIndexOf(".");
         final String extension = imgFileName.substring(extensionIndex, imgFileName.length()).toLowerCase();
         fileName.append(MD5.crypt(imgFileName + System.currentTimeMillis()));
-        fileName.append('_').append(0);
         fileName.append(extension);
 
         return fileName.toString();
