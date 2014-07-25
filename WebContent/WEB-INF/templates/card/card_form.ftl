@@ -1,9 +1,9 @@
 <#include "/WEB-INF/templates/head.ftl" />
 
-
+<#--
 <@sj.datepicker name="birthday" />
-
-
+-->
+<center>
 
 <@s.form namespace="/card" action="save" method="post" cssClass="required-validate">
 <table>
@@ -33,3 +33,5 @@
 </table>
 <@s.token />
 </@s.form>
+
+</center>

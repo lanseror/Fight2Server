@@ -42,6 +42,8 @@ if(typeof Prototype != 'undefined' && (typeof $ != 'undefined')) {
 Validator = Class.create();
 
 Validator.messageSource = {};
+/**
+ * Temporarily disable en messages.
 Validator.messageSource['en-us'] = [
 	['validation-failed' , 'Validation failed.'],
 	['required' , 'This is a required field.'],
@@ -83,7 +85,7 @@ Validator.messageSource['en-us'] = [
 ]
 
 Validator.messageSource['en'] = Validator.messageSource['en-us']
-
+*/
 Validator.messageSource['zh-cn'] = [
 	['validation-failed' , '验证失败.'],
 	['required' , '请输入值.'],
