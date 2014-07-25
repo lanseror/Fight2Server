@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+  <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+  <constant name="struts.convention.result.path" value="/WEB-INF/templates/" />
+  <constant name="struts.convention.default.parent.package" value="default" />
+  <constant name="struts.devMode" value="false" />
+  <constant name="struts.convention.classes.reload" value="false" />
+  <constant name="struts.ui.theme" value="simple" />
+  <constant name="struts.multipart.maxSize" value="5242880" /><!-- 5MB -->
+
+  <package name="default" namespace="/" extends="struts-default">
+    <interceptors>
+      <interceptor-stack name="appDefaultStack">
+        <interceptor-ref name="defaultStack">
+          <param name="exception.logEnabled">true</param>
+          <param name="exception.logLevel">ERROR</param>
+        </interceptor-ref>
+      </interceptor-stack>
+    </interceptors>
+
+    <default-interceptor-ref name="appDefaultStack" />
+
+	<global-results>
+      <result name="invalid.token" type="freemarker">/templates/invalid_token.ftl</result>
+    </global-results>
+<!--     <global-results> -->
+<!--       <result name="login" type="redirect">/admin/login</result> -->
+<!--       <result name="exception" type="freemarker">/WEB-INF/templates/exception.ftl</result> -->
+<!--     </global-results> -->
+
+<!--     <global-exception-mappings> -->
+<!--       <exception-mapping exception="java.lang.Throwable" result="exception" /> -->
+<!--     </global-exception-mappings> -->
+
+
+  </package>
+
+
+</struts> 

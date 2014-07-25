@@ -18,11 +18,11 @@
         <td><@s.textfield cssClass="post" size="80" name="card.name" cssClass="required max-length-80" /></td>
     </tr>
     <tr>
-        <td>URL</td>
+        <td>头像</td>
         <td><@s.textfield cssClass="post" size="80" name="card.avatar" cssClass="required max-length-80" /></td>
     </tr>
     <tr>
-        <td>Description</td>
+        <td>图片</td>
         <td><@s.textfield cssClass="post" size="80" name="card.image" cssClass="required max-length-80" /></td>
     </tr>
     <tr>
