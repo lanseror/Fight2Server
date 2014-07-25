@@ -26,6 +26,21 @@
         <td><@s.textfield cssClass="post" size="80" name="card.image" cssClass="required max-length-80" /></td>
     </tr>
     <tr>
+        <td>星级</td>
+        <td><@s.textfield cssClass="post" size="80" name="card.star" cssClass="required int-range-1-7" /></td>
+    </tr>
+
+    <tr>
+        <td>生命值</td>
+        <td><@s.textfield cssClass="post" size="80" name="card.hp" cssClass="required validate-integer" /></td>
+    </tr>
+
+    <tr>
+        <td>攻击力</td>
+        <td><@s.textfield cssClass="post" size="80" name="card.atk" cssClass="required validate-integer" /></td>
+    </tr>
+
+    <tr>
         <td>&nbsp;</td>
         <td align="right"> <@s.submit value="更新" /></td>
     </tr>

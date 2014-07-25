@@ -1,21 +1,31 @@
 package com.fight2.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 
 @Entity
-public class Card extends BaseEntity {
+public class CardTemplate extends BaseEntity {
     private static final long serialVersionUID = 4701021880325329063L;
     private String name;
-    private String avatar;
-    private String image;
+    private List<CardImage> avatars;
+    private List<CardImage> mainImages;
+    private List<CardImage> thumbImages;
     private int star;
     private int level;
     private int tier;// Evolution tier
     private int hp;
     private int atk;// Attack value;
+    private int probability; // Summon probability, unit is 1/10000.
     private String skill;
     private int skillLevel;
     private int cardVersion;
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
 
     public String getName() {
         return name;
@@ -25,20 +35,31 @@ public class Card extends BaseEntity {
         this.name = name;
     }
 
-    public String getAvatar() {
-        return avatar;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cardTemplate")
+    public List<CardImage> getAvatars() {
+        return avatars;
     }
 
-    public void setAvatar(final String avatar) {
-        this.avatar = avatar;
+    public void setAvatars(final List<CardImage> avatars) {
+        this.avatars = avatars;
     }
 
-    public String getImage() {
-        return image;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cardTemplate")
+    public List<CardImage> getMainImages() {
+        return mainImages;
     }
 
-    public void setImage(final String image) {
-        this.image = image;
+    public void setMainImages(final List<CardImage> mainImages) {
+        this.mainImages = mainImages;
+    }
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cardTemplate")
+    public List<CardImage> getThumbImages() {
+        return thumbImages;
+    }
+
+    public void setThumbImages(final List<CardImage> thumbImages) {
+        this.thumbImages = thumbImages;
     }
 
     public int getStar() {
@@ -79,6 +100,14 @@ public class Card extends BaseEntity {
 
     public void setAtk(final int atk) {
         this.atk = atk;
+    }
+
+    public int getProbability() {
+        return probability;
+    }
+
+    public void setProbability(final int probability) {
+        this.probability = probability;
     }
 
     public String getSkill() {

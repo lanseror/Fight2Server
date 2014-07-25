@@ -6,7 +6,7 @@
 	<br/>
     <a href="<@s.url namespace="/video" action="list" />">Sample module</a>
     <br/><br/>
-    <a href="<@s.url namespace="/card" action="list" />">管理卡片</a>
+    <a href="<@s.url namespace="/card-template" action="list" />">管理卡片</a>
     <br/>
     
 </h2>
