@@ -4,8 +4,12 @@
 <@sj.datepicker name="birthday" />
 -->
 <center>
-
-<@s.form namespace="/card-template" action="save" method="post" cssClass="required-validate">
+         <font color="red">
+         <@s.actionerror />
+         <@s.actionmessage />
+        <@s.fielderror />
+        </font>
+<@s.form namespace="/card-template" action="save" method="post" enctype="multipart/form-data" cssClass="required-validate">
 <table>
     <@s.if test="cardTemplate!=null">
     <tr>
@@ -19,7 +23,12 @@
     </tr>
     <tr>
         <td>头像</td>
-        <td><@s.textfield cssClass="post" size="80" name="cardTemplate.avatar" cssClass="required max-length-80" /></td>
+        <td>
+        <span>头像 1:</span><@s.file id="avatar1" name="avatar" accept="image/png,image/jpeg,image/pjpeg" cssClass="required validate-file-png-jpg" />
+        <span>头像 2:</span><@s.file id="avatar2" name="avatar" accept="image/png,image/jpeg,image/pjpeg" cssClass="required validate-file-png-jpg" />:
+        <span>头像 3:</span><@s.file id="avatar3" name="avatar" accept="image/png,image/jpeg,image/pjpeg" cssClass="required validate-file-png-jpg" />
+        <span>头像 4:</span><@s.file id="avatar4" name="avatar" accept="image/png,image/jpeg,image/pjpeg" cssClass="required validate-file-png-jpg" />
+        </td>
     </tr>
     <tr>
         <td>图片</td>

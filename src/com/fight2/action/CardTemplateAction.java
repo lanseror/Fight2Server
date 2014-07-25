@@ -1,5 +1,6 @@
 package com.fight2.action;
 
+import java.io.File;
 import java.util.List;
 
 import org.apache.struts2.convention.annotation.Action;
@@ -23,6 +24,10 @@ public class CardTemplateAction extends ActionSupport {
     private CardTemplate cardTemplate;
     private List<CardTemplate> datas;
     private int id;
+
+    private File[] avatar;
+    private String[] avatarFileName;
+    private String[] avatarContentType;
 
     @Action(value = "list", results = { @Result(name = SUCCESS, location = "card_template_list.ftl") })
     public String list() {
@@ -48,7 +53,7 @@ public class CardTemplateAction extends ActionSupport {
         cardTemplate = cardTemplateDao.get(id);
         return SUCCESS;
     }
-    
+
     @Action(value = "delete", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
     public String delete() {
         cardTemplate = cardTemplateDao.get(id);
@@ -56,8 +61,12 @@ public class CardTemplateAction extends ActionSupport {
         return SUCCESS;
     }
 
-    @Action(value = "save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = { @Result(
-            name = SUCCESS, location = "list", type = "redirect") })
+    @Action(value = "save",
+            interceptorRefs = {
+                    @InterceptorRef("tokenSession"),
+                    @InterceptorRef(value = "fileUpload", params = { "allowedExtensions ", ".jpg,.png", "allowedTypes",
+                            "image/png,image/jpeg,image/pjpeg" }), @InterceptorRef("defaultStack") }, results = {
+                    @Result(name = SUCCESS, location = "list", type = "redirect"), @Result(name = INPUT, location = "card_template_form.ftl") })
     public String save() {
         if (cardTemplate.getId() == BaseEntity.EMPTY_ID) {
             return createSave();
@@ -108,4 +117,31 @@ public class CardTemplateAction extends ActionSupport {
         this.id = id;
     }
 
+    public File[] getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(final File[] avatar) {
+        this.avatar = avatar;
+    }
+
+    public String[] getAvatarFileName() {
+        return avatarFileName;
+    }
+
+    public void setAvatarFileName(final String[] avatarFileName) {
+        this.avatarFileName = avatarFileName;
+    }
+
+    public String[] getAvatarContentType() {
+        return avatarContentType;
+    }
+
+    public void setAvatarContentType(final String[] avatarContentType) {
+        this.avatarContentType = avatarContentType;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
 }
