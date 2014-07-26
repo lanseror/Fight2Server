@@ -5,6 +5,8 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 
 @Entity
@@ -13,7 +15,9 @@ public class Party extends BaseEntity {
 
     private int partyNumber;
 
-    private List<Card> partyCards;
+    private List<PartyGrid> partyGrids;
+
+    private List<Card> cards;
 
     private User user;
 
@@ -25,13 +29,14 @@ public class Party extends BaseEntity {
         this.partyNumber = partyNumber;
     }
 
-    @Transient
-    public List<Card> getPartyCards() {
-        return partyCards;
+    @OneToMany(mappedBy = "party")
+    @OrderBy("gridNumber ASC")
+    public List<PartyGrid> getPartyGrids() {
+        return partyGrids;
     }
 
-    public void setPartyCards(final List<Card> partyCards) {
-        this.partyCards = partyCards;
+    public void setPartyGrids(final List<PartyGrid> partyGrids) {
+        this.partyGrids = partyGrids;
     }
 
     @ManyToOne
@@ -44,10 +49,17 @@ public class Party extends BaseEntity {
         this.user = user;
     }
 
-    
-    
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    @Transient
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(final List<Card> cards) {
+        this.cards = cards;
     }
 
 }

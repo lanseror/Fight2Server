@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
+import javax.persistence.OrderBy;
 
 @Entity
 public class User extends BaseEntity {
@@ -88,7 +88,8 @@ public class User extends BaseEntity {
         this.cards = cards;
     }
 
-    @Transient
+    @OneToMany(mappedBy = "user")
+    @OrderBy("partyNumber ASC")
     public List<Party> getParties() {
         return parties;
     }

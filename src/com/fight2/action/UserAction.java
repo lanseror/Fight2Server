@@ -8,18 +8,25 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.PartyDao;
+import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.BaseEntity;
+import com.fight2.model.Party;
+import com.fight2.model.PartyGrid;
 import com.fight2.model.User;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
-import com.opensymphony.xwork2.ActionSupport;
 
 @Namespace("/user")
-public class UserAction extends ActionSupport {
+public class UserAction extends BaseAction {
     private static final long serialVersionUID = -4473064014262040889L;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private PartyDao partyDao;
+    @Autowired
+    private PartyGridDao partyGridDao;
     private User user;
     private List<User> datas;
     private int id;
@@ -47,6 +54,19 @@ public class UserAction extends ActionSupport {
             user.setInstallUUID(installUUID);
             user.setName("User" + System.currentTimeMillis());
             userDao.add(user);
+            for (int i = 1; i < 4; i++) {
+                final Party party = new Party();
+                party.setPartyNumber(i);
+                party.setUser(user);
+                partyDao.add(party);
+                for (int gridIndex = 1; gridIndex < 5; gridIndex++) {
+                    final PartyGrid partyGrid = new PartyGrid();
+                    partyGrid.setGridNumber(gridIndex);
+                    partyGrid.setParty(party);
+                    partyGridDao.add(partyGrid);
+                }
+            }
+
         }
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(user));
@@ -55,15 +75,19 @@ public class UserAction extends ActionSupport {
 
     @Action(value = "login", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String login() {
-        final User checkUser = userDao.getByInstallUUID(installUUID);
-        if (checkUser == null) {
-            user = new User();
-            user.setInstallUUID(installUUID);
-            user.setName("User" + System.currentTimeMillis());
-            userDao.add(user);
-        }
+        user = userDao.getByInstallUUID(installUUID);
+        final User voUser = new User();
+        voUser.setId(user.getId());
+        voUser.setAvatar(user.getAvatar());
+        voUser.setCardCount(user.getCardCount());
+        voUser.setLevel(user.getLevel());
+        voUser.setName(user.getName());
+        voUser.setInstallUUID(user.getInstallUUID());
+        voUser.setUsername(user.getUsername());
+        
         final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(user));
+        context.put("jsonMsg", new Gson().toJson(voUser));
+        this.getSession().put(LOGIN_USER, user);
         return SUCCESS;
     }
 
@@ -140,6 +164,22 @@ public class UserAction extends ActionSupport {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    public PartyDao getPartyDao() {
+        return partyDao;
+    }
+
+    public void setPartyDao(final PartyDao partyDao) {
+        this.partyDao = partyDao;
+    }
+
+    public PartyGridDao getPartyGridDao() {
+        return partyGridDao;
+    }
+
+    public void setPartyGridDao(final PartyGridDao partyGridDao) {
+        this.partyGridDao = partyGridDao;
     }
 
 }
