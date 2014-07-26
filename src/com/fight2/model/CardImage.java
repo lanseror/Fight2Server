@@ -59,7 +59,7 @@ public class CardImage extends BaseEntity {
     }
 
     @ManyToOne
-    @JoinColumn(name = "card_template")
+    @JoinColumn(name = "card_template_id")
     public CardTemplate getCardTemplate() {
         return cardTemplate;
     }

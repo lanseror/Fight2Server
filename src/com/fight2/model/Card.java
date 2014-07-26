@@ -1,6 +1,8 @@
 package com.fight2.model;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class Card extends BaseEntity {
@@ -16,6 +18,7 @@ public class Card extends BaseEntity {
     private String skill;
     private int skillLevel;
     private int cardVersion;
+    private User user;
 
     public String getName() {
         return name;
@@ -103,6 +106,20 @@ public class Card extends BaseEntity {
 
     public void setCardVersion(final int cardVersion) {
         this.cardVersion = cardVersion;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "user")
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(final User user) {
+        this.user = user;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
     }
 
 }

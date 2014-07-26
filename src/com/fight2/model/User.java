@@ -1,6 +1,9 @@
 package com.fight2.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 
 @Entity
 public class User extends BaseEntity {
@@ -11,6 +14,7 @@ public class User extends BaseEntity {
     private String avatar;
     private int cardCount;
     private int level;
+    private List<Card> cards;
 
     public String getInstallUUID() {
         return installUUID;
@@ -62,6 +66,15 @@ public class User extends BaseEntity {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    @OneToMany(mappedBy = "user")
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(final List<Card> cards) {
+        this.cards = cards;
     }
 
 }
