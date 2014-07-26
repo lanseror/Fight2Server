@@ -6,7 +6,7 @@ import javax.persistence.Lob;
 
 @Entity
 public class Video extends BaseEntity {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -470563435241117834L;
     private String title;
     private String url;
     private String desc;

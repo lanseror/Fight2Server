@@ -38,6 +38,12 @@ public class CardAction extends ActionSupport {
         return SUCCESS;
     }
 
+    @Action(value = "summon", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String summon() {
+
+        return SUCCESS;
+    }
+
     @Action(value = "add", results = { @Result(name = SUCCESS, location = "card_form.ftl") })
     public String add() {
         return SUCCESS;
