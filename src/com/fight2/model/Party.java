@@ -44,6 +44,8 @@ public class Party extends BaseEntity {
         this.user = user;
     }
 
+    
+    
     public static long getSerialversionuid() {
         return serialVersionUID;
     }

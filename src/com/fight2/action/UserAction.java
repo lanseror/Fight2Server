@@ -23,6 +23,7 @@ public class UserAction extends ActionSupport {
     private User user;
     private List<User> datas;
     private int id;
+    private String installUUID;
 
     @Action(value = "list", results = { @Result(name = SUCCESS, location = "user_list.ftl") })
     public String list() {
@@ -38,9 +39,31 @@ public class UserAction extends ActionSupport {
         return SUCCESS;
     }
 
-    @Action(value = "summon", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String summon() {
+    @Action(value = "register", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String register() {
+        final User checkUser = userDao.getByInstallUUID(installUUID);
+        if (checkUser == null) {
+            user = new User();
+            user.setInstallUUID(installUUID);
+            user.setName("User" + System.currentTimeMillis());
+            userDao.add(user);
+        }
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(user));
+        return SUCCESS;
+    }
 
+    @Action(value = "login", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String login() {
+        final User checkUser = userDao.getByInstallUUID(installUUID);
+        if (checkUser == null) {
+            user = new User();
+            user.setInstallUUID(installUUID);
+            user.setName("User" + System.currentTimeMillis());
+            userDao.add(user);
+        }
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(user));
         return SUCCESS;
     }
 
@@ -105,6 +128,18 @@ public class UserAction extends ActionSupport {
 
     public void setId(final int id) {
         this.id = id;
+    }
+
+    public String getInstallUUID() {
+        return installUUID;
+    }
+
+    public void setInstallUUID(final String installUUID) {
+        this.installUUID = installUUID;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
     }
 
 }

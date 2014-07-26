@@ -4,17 +4,20 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 @Entity
 public class User extends BaseEntity {
     private static final long serialVersionUID = -4914598284011248917L;
     private String installUUID;
+    private String name;
     private String username;
     private String password;
     private String avatar;
     private int cardCount;
     private int level;
     private List<Card> cards;
+    private List<Party> parties;
 
     public String getInstallUUID() {
         return installUUID;
@@ -22,6 +25,14 @@ public class User extends BaseEntity {
 
     public void setInstallUUID(final String installUUID) {
         this.installUUID = installUUID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
     }
 
     public String getUsername() {
@@ -75,6 +86,15 @@ public class User extends BaseEntity {
 
     public void setCards(final List<Card> cards) {
         this.cards = cards;
+    }
+
+    @Transient
+    public List<Party> getParties() {
+        return parties;
+    }
+
+    public void setParties(final List<Party> parties) {
+        this.parties = parties;
     }
 
 }

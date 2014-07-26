@@ -19,7 +19,7 @@ public class CardImageDaoImpl extends BaseDaoImpl<CardImage> implements CardImag
 
     @Override
     public List<CardImage> listByTypeAndCardTemplate(final String type, final CardTemplate cardTemplate) {
-        final Criteria criteria = getSession().createCriteria(CardImage.class);
+        final Criteria criteria = getSession().createCriteria(getMyType());
         criteria.add(Restrictions.eq("type", type));
         criteria.add(Restrictions.eq("cardTemplate", cardTemplate));
         @SuppressWarnings("unchecked")
@@ -29,7 +29,7 @@ public class CardImageDaoImpl extends BaseDaoImpl<CardImage> implements CardImag
 
     @Override
     public CardImage getByTypeTierAndCardTemplate(final String type, final int tier, final CardTemplate cardTemplate) {
-        final Criteria criteria = getSession().createCriteria(CardImage.class);
+        final Criteria criteria = getSession().createCriteria(getMyType());
         criteria.add(Restrictions.eq("type", type));
         criteria.add(Restrictions.eq("tier", tier));
         criteria.add(Restrictions.eq("cardTemplate", cardTemplate));
