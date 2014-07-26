@@ -19,6 +19,7 @@ public class Card extends BaseEntity {
     private int skillLevel;
     private int cardVersion;
     private User user;
+    private CardTemplate cardTemplate;
 
     public String getName() {
         return name;
@@ -109,13 +110,23 @@ public class Card extends BaseEntity {
     }
 
     @ManyToOne
-    @JoinColumn(name = "user")
+    @JoinColumn(name = "user_id")
     public User getUser() {
         return user;
     }
 
     public void setUser(final User user) {
         this.user = user;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "card_template_id")
+    public CardTemplate getCardTemplate() {
+        return cardTemplate;
+    }
+
+    public void setCardTemplate(final CardTemplate cardTemplate) {
+        this.cardTemplate = cardTemplate;
     }
 
     public static long getSerialversionuid() {
