@@ -15,6 +15,7 @@ import com.fight2.dao.CardTemplateDao;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
+import com.fight2.util.SummonHelper;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
@@ -26,6 +27,8 @@ public class CardTemplateAction extends ActionSupport {
     private CardTemplateDao cardTemplateDao;
     @Autowired
     private CardImageDao cardImageDao;
+    @Autowired
+    private SummonHelper summonHelper;
     private CardTemplate cardTemplate;
     private List<CardTemplate> datas;
     private int id;
@@ -114,12 +117,14 @@ public class CardTemplateAction extends ActionSupport {
     private String createSave() {
         cardTemplateDao.add(cardTemplate);
         saveImages();
+        summonHelper.reLoadData();
         return SUCCESS;
     }
 
     private String editSave() {
         cardTemplateDao.update(cardTemplate);
         saveImages();
+        summonHelper.reLoadData();
         return SUCCESS;
     }
 
@@ -390,6 +395,14 @@ public class CardTemplateAction extends ActionSupport {
 
     public void setMainImage4FileName(final String mainImage4FileName) {
         this.mainImage4FileName = mainImage4FileName;
+    }
+
+    public SummonHelper getSummonHelper() {
+        return summonHelper;
+    }
+
+    public void setSummonHelper(final SummonHelper summonHelper) {
+        this.summonHelper = summonHelper;
     }
 
     public static long getSerialversionuid() {

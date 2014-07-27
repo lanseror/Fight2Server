@@ -25,34 +25,17 @@ public class PartyAction extends BaseAction {
     private List<Party> datas;
     private int id;
 
-    @Action(value = "list", results = { @Result(name = SUCCESS, location = "party_list.ftl") })
-    public String list() {
-        datas = partyDao.list();
-        return SUCCESS;
-    }
-
-    @Action(value = "list-json", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String listJson() {
-        final ActionContext context = ActionContext.getContext();
-        final List<Party> list = partyDao.list();
-        context.put("jsonMsg", new Gson().toJson(list));
-        return SUCCESS;
-    }
-
     @Action(value = "my-parties", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String myParties() {
         final User user = (User) this.getSession().get(LOGIN_USER);
         final List<Party> poParties = partyDao.listByUser(user);
-        final List<Party> voParties = Lists.newArrayList();
+        final List<List<Card>> voParties = Lists.newArrayList();
         for (final Party poParty : poParties) {
-            final Party voParty = new Party();
-            voParty.setPartyNumber(poParty.getPartyNumber());
             final List<Card> cards = Lists.newArrayList();
             for (final PartyGrid partyGrid : poParty.getPartyGrids()) {
                 cards.add(partyGrid.getCard());
             }
-            voParty.setCards(cards);
-            voParties.add(voParty);
+            voParties.add(cards);
         }
 
         final ActionContext context = ActionContext.getContext();

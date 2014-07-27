@@ -3,6 +3,7 @@ package com.fight2.model;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 @Entity
 public class Card extends BaseEntity {
@@ -10,13 +11,12 @@ public class Card extends BaseEntity {
     private String name;
     private String avatar;
     private String image;
-    private int star;
-    private int level;
-    private int tier;// Evolution tier
+    private int star = 1;
+    private int level = 1;
+    private int tier = 1;// Evolution tier
     private int hp;
     private int atk;// Attack value;
     private String skill;
-    private int skillLevel;
     private int cardVersion;
     private User user;
     private CardTemplate cardTemplate;
@@ -29,6 +29,7 @@ public class Card extends BaseEntity {
         this.name = name;
     }
 
+    @Transient
     public String getAvatar() {
         return avatar;
     }
@@ -37,6 +38,7 @@ public class Card extends BaseEntity {
         this.avatar = avatar;
     }
 
+    @Transient
     public String getImage() {
         return image;
     }
@@ -91,14 +93,6 @@ public class Card extends BaseEntity {
 
     public void setSkill(final String skill) {
         this.skill = skill;
-    }
-
-    public int getSkillLevel() {
-        return skillLevel;
-    }
-
-    public void setSkillLevel(final int skillLevel) {
-        this.skillLevel = skillLevel;
     }
 
     public int getCardVersion() {

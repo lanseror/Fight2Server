@@ -5,9 +5,7 @@
 function confirmDelete(deleteUrl)
 {
     if (confirm("真的要删除吗？")) {
-        if (!confirm("这是误操作吗？")) {
-            document.location = deleteUrl;
-        }
+         document.location = deleteUrl;
     }
 }
 
