@@ -57,6 +57,12 @@ public class PartyAction extends BaseAction {
         final List<Party> poParties = partyDao.listByUser(user);
         @SuppressWarnings("unchecked")
         final List<List<Double>> parties = new Gson().fromJson(jsonMsg, List.class);
+        for (final Party poParty : poParties) {
+            for (final PartyGrid partyGrid : poParty.getPartyGrids()) {
+                partyGrid.setCard(null);
+            }
+            partyDao.update(poParty);
+        }
         for (int partyIndex = 0; partyIndex < parties.size(); partyIndex++) {
             final List<Double> party = parties.get(partyIndex);
             final Party poParty = poParties.get(partyIndex);
