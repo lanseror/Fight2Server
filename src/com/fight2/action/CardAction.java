@@ -65,6 +65,7 @@ public class CardAction extends BaseAction {
             final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), card.getCardTemplate());
             final String image = imageObj.getUrl();
             final Card voCard = new Card();
+            voCard.setId(card.getId());
             voCard.setAtk(card.getAtk());
             voCard.setAvatar(avatar);
             voCard.setHp(card.getHp());

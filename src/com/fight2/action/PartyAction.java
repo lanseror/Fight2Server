@@ -29,11 +29,17 @@ public class PartyAction extends BaseAction {
     public String myParties() {
         final User user = (User) this.getSession().get(LOGIN_USER);
         final List<Party> poParties = partyDao.listByUser(user);
-        final List<List<Card>> voParties = Lists.newArrayList();
+        final List<List<Integer>> voParties = Lists.newArrayList();
         for (final Party poParty : poParties) {
-            final List<Card> cards = Lists.newArrayList();
+            final List<Integer> cards = Lists.newArrayList();
             for (final PartyGrid partyGrid : poParty.getPartyGrids()) {
-                cards.add(partyGrid.getCard());
+                final Card card = partyGrid.getCard();
+                if (card != null) {
+                    cards.add(card.getId());
+                } else {
+                    cards.add(-1);
+                }
+
             }
             voParties.add(cards);
         }
