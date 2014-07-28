@@ -43,6 +43,7 @@ public class CardAction extends BaseAction {
         final Map<String, Object> jsonMap = Maps.newHashMap();
         if (user.getCardCount() >= 100) {
             jsonMap.put("status", 1);
+            context.put("jsonMsg", new Gson().toJson(jsonMap));
             return SUCCESS;
         }
 
