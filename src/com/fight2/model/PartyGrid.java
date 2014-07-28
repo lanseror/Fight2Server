@@ -34,7 +34,7 @@ public class PartyGrid extends BaseEntity {
     }
 
     @OneToOne
-    @JoinColumn(name = "card_id", unique = true, nullable = true, updatable = false)
+    @JoinColumn(name = "card_id", unique = true, nullable = true)
     public Card getCard() {
         return card;
     }

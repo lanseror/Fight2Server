@@ -7,6 +7,7 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.CardDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.model.Card;
 import com.fight2.model.Party;
@@ -14,16 +15,18 @@ import com.fight2.model.PartyGrid;
 import com.fight2.model.User;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.opensymphony.xwork2.ActionContext;
 
 @Namespace("/party")
 public class PartyAction extends BaseAction {
     private static final long serialVersionUID = -4473064014262040889L;
     @Autowired
     private PartyDao partyDao;
+    @Autowired
+    private CardDao cardDao;
     private Party party;
     private List<Party> datas;
     private int id;
+    private String jsonMsg;
 
     @Action(value = "my-parties", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String myParties() {
@@ -44,8 +47,32 @@ public class PartyAction extends BaseAction {
             voParties.add(cards);
         }
 
-        final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(voParties));
+        jsonMsg = new Gson().toJson(voParties);
+        return SUCCESS;
+    }
+
+    @Action(value = "edit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String edit() {
+        final User user = (User) this.getSession().get(LOGIN_USER);
+        final List<Party> poParties = partyDao.listByUser(user);
+        @SuppressWarnings("unchecked")
+        final List<List<Double>> parties = new Gson().fromJson(jsonMsg, List.class);
+        for (int partyIndex = 0; partyIndex < parties.size(); partyIndex++) {
+            final List<Double> party = parties.get(partyIndex);
+            final Party poParty = poParties.get(partyIndex);
+            final List<PartyGrid> partyGrids = poParty.getPartyGrids();
+            for (int cardIndex = 0; cardIndex < party.size(); cardIndex++) {
+                final int cardId = party.get(cardIndex).intValue();
+                final PartyGrid partyGrid = partyGrids.get(cardIndex);
+                if (cardId != -1) {
+                    final Card card = cardDao.get(cardId);
+                    partyGrid.setCard(card);
+                } else {
+                    partyGrid.setCard(null);
+                }
+            }
+            partyDao.update(poParty);
+        }
         return SUCCESS;
     }
 
@@ -83,6 +110,22 @@ public class PartyAction extends BaseAction {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    public String getJsonMsg() {
+        return jsonMsg;
+    }
+
+    public void setJsonMsg(final String jsonMsg) {
+        this.jsonMsg = jsonMsg;
+    }
+
+    public CardDao getCardDao() {
+        return cardDao;
+    }
+
+    public void setCardDao(final CardDao cardDao) {
+        this.cardDao = cardDao;
     }
 
 }
