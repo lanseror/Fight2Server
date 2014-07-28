@@ -1,6 +1,7 @@
 package com.fight2.action;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -9,12 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.CardDao;
 import com.fight2.dao.CardImageDao;
+import com.fight2.dao.UserDao;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.User;
 import com.fight2.util.SummonHelper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -27,16 +30,25 @@ public class CardAction extends BaseAction {
     private SummonHelper summonHelper;
     @Autowired
     private CardImageDao cardImageDao;
+    @Autowired
+    private UserDao userDao;
     private Card card;
     private List<Card> datas;
     private int id;
 
     @Action(value = "summon", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String summon() {
+        final ActionContext context = ActionContext.getContext();
+        final User user = (User) this.getSession().get(LOGIN_USER);
+        final Map<String, Object> jsonMap = Maps.newHashMap();
+        if (user.getCardCount() >= 100) {
+            jsonMap.put("status", 1);
+            return SUCCESS;
+        }
+
         final CardTemplate cardTemplate = summonHelper.summon();
         final String avatar = cardTemplate.getAvatars().get(0).getUrl();
         final String image = cardTemplate.getThumbImages().get(0).getUrl();
-        final User user = (User) this.getSession().get(LOGIN_USER);
         final Card card = new Card();
         card.setAtk(cardTemplate.getAtk());
         card.setAvatar(avatar);
@@ -45,12 +57,19 @@ public class CardAction extends BaseAction {
         card.setName(cardTemplate.getName());
         card.setSkill(cardTemplate.getSkill());
 
-        final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(card));
+        jsonMap.put("status", 0);
+        jsonMap.put("card", card);
+        context.put("jsonMsg", new Gson().toJson(jsonMap));
 
         card.setCardTemplate(cardTemplate);
         card.setUser(user);
         cardDao.add(card);
+
+        final List<Card> cards = cardDao.listByUser(user);
+        final User userUpdate = userDao.get(user.getId());
+        userUpdate.setCardCount(cards.size());
+        userDao.update(userUpdate);
+
         return SUCCESS;
     }
 
@@ -130,6 +149,14 @@ public class CardAction extends BaseAction {
 
     public void setCardImageDao(final CardImageDao cardImageDao) {
         this.cardImageDao = cardImageDao;
+    }
+
+    public UserDao getUserDao() {
+        return userDao;
+    }
+
+    public void setUserDao(final UserDao userDao) {
+        this.userDao = userDao;
     }
 
 }
