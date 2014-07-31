@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
+import javax.persistence.OneToOne;
 
 @Entity
 public class User extends BaseEntity {
@@ -15,9 +15,9 @@ public class User extends BaseEntity {
     private String password;
     private String avatar;
     private int cardCount;
-    private int level;
+    private int level = 1;
+    private PartyInfo partyInfo;
     private List<Card> cards;
-    private List<Party> parties;
 
     public String getInstallUUID() {
         return installUUID;
@@ -79,6 +79,15 @@ public class User extends BaseEntity {
         return serialVersionUID;
     }
 
+    @OneToOne(optional = false, mappedBy = "user")
+    public PartyInfo getPartyInfo() {
+        return partyInfo;
+    }
+
+    public void setPartyInfo(final PartyInfo partyInfo) {
+        this.partyInfo = partyInfo;
+    }
+
     @OneToMany(mappedBy = "user")
     public List<Card> getCards() {
         return cards;
@@ -86,16 +95,6 @@ public class User extends BaseEntity {
 
     public void setCards(final List<Card> cards) {
         this.cards = cards;
-    }
-
-    @OneToMany(mappedBy = "user")
-    @OrderBy("partyNumber ASC")
-    public List<Party> getParties() {
-        return parties;
-    }
-
-    public void setParties(final List<Party> parties) {
-        this.parties = parties;
     }
 
 }

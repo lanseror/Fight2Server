@@ -10,10 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
+import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
+import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
@@ -23,6 +25,8 @@ public class UserAction extends BaseAction {
     private static final long serialVersionUID = -4473064014262040889L;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private PartyInfoDao partyInfoDao;
     @Autowired
     private PartyDao partyDao;
     @Autowired
@@ -54,10 +58,13 @@ public class UserAction extends BaseAction {
             user.setInstallUUID(installUUID);
             user.setName("User" + System.currentTimeMillis());
             userDao.add(user);
+            final PartyInfo partyInfo = new PartyInfo();
+            partyInfo.setUser(user);
+            partyInfoDao.add(partyInfo);
             for (int i = 1; i < 4; i++) {
                 final Party party = new Party();
                 party.setPartyNumber(i);
-                party.setUser(user);
+                party.setPartyInfo(partyInfo);
                 partyDao.add(party);
                 for (int gridIndex = 1; gridIndex < 5; gridIndex++) {
                     final PartyGrid partyGrid = new PartyGrid();
@@ -84,7 +91,7 @@ public class UserAction extends BaseAction {
         voUser.setName(user.getName());
         voUser.setInstallUUID(user.getInstallUUID());
         voUser.setUsername(user.getUsername());
-        
+
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(voUser));
         this.getSession().put(LOGIN_USER, user);
@@ -164,6 +171,14 @@ public class UserAction extends BaseAction {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    public PartyInfoDao getPartyInfoDao() {
+        return partyInfoDao;
+    }
+
+    public void setPartyInfoDao(final PartyInfoDao partyInfoDao) {
+        this.partyInfoDao = partyInfoDao;
     }
 
     public PartyDao getPartyDao() {

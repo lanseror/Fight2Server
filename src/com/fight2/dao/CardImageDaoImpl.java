@@ -36,4 +36,13 @@ public class CardImageDaoImpl extends BaseDaoImpl<CardImage> implements CardImag
         return (CardImage) criteria.uniqueResult();
     }
 
+    @Override
+    public List<CardImage> listByCardTemplate(final CardTemplate cardTemplate) {
+        final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.add(Restrictions.eq("cardTemplate", cardTemplate));
+        @SuppressWarnings("unchecked")
+        final List<CardImage> list = criteria.addOrder(Order.asc("tier")).list();
+        return list;
+    }
+
 }

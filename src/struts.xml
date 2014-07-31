@@ -11,7 +11,7 @@
   <constant name="struts.devMode" value="false" />
   <constant name="struts.convention.classes.reload" value="false" />
   <constant name="struts.ui.theme" value="simple" />
-  <constant name="struts.multipart.maxSize" value="5242880" /><!-- 5MB -->
+  <constant name="struts.multipart.maxSize" value="31457280" /><!-- 30MB -->
 
   <package name="default" namespace="/" extends="struts-default">
     <interceptors>

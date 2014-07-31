@@ -15,11 +15,15 @@ public class Party extends BaseEntity {
 
     private int partyNumber;
 
+    private int hp;
+
+    private int atk;
+
     private List<PartyGrid> partyGrids;
 
-    private List<Card> cards;
+    private List<Integer> cards;
 
-    private User user;
+    private PartyInfo partyInfo;
 
     public int getPartyNumber() {
         return partyNumber;
@@ -27,6 +31,22 @@ public class Party extends BaseEntity {
 
     public void setPartyNumber(final int partyNumber) {
         this.partyNumber = partyNumber;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(final int hp) {
+        this.hp = hp;
+    }
+
+    public int getAtk() {
+        return atk;
+    }
+
+    public void setAtk(final int atk) {
+        this.atk = atk;
     }
 
     @OneToMany(mappedBy = "party")
@@ -39,27 +59,27 @@ public class Party extends BaseEntity {
         this.partyGrids = partyGrids;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    public User getUser() {
-        return user;
+    @Transient
+    public List<Integer> getCards() {
+        return cards;
     }
 
-    public void setUser(final User user) {
-        this.user = user;
+    public void setCards(final List<Integer> cards) {
+        this.cards = cards;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "party_info_id")
+    public PartyInfo getPartyInfo() {
+        return partyInfo;
+    }
+
+    public void setPartyInfo(final PartyInfo partyInfo) {
+        this.partyInfo = partyInfo;
     }
 
     public static long getSerialversionuid() {
         return serialVersionUID;
-    }
-
-    @Transient
-    public List<Card> getCards() {
-        return cards;
-    }
-
-    public void setCards(final List<Card> cards) {
-        this.cards = cards;
     }
 
 }

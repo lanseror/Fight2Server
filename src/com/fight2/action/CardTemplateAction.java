@@ -96,15 +96,18 @@ public class CardTemplateAction extends ActionSupport {
     @Action(value = "delete", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
     public String delete() {
         cardTemplate = cardTemplateDao.get(id);
+        final List<CardImage> images = cardImageDao.listByCardTemplate(cardTemplate);
+        for (final CardImage image : images) {
+            cardImageDao.delete(image);
+        }
         cardTemplateDao.delete(cardTemplate);
         return SUCCESS;
     }
 
     @Action(value = "save",
             interceptorRefs = {
-                    @InterceptorRef("tokenSession"),
                     @InterceptorRef(value = "fileUpload", params = { "allowedExtensions ", ".jpg,.png", "allowedTypes",
-                            "image/png,image/jpeg,image/pjpeg" }), @InterceptorRef("defaultStack") }, results = {
+                            "image/png,image/jpeg,image/pjpeg" }), @InterceptorRef("tokenSession"), @InterceptorRef("basicStack") }, results = {
                     @Result(name = SUCCESS, location = "list", type = "redirect"), @Result(name = INPUT, location = "card_template_form.ftl") })
     public String save() {
         if (cardTemplate.getId() == BaseEntity.EMPTY_ID) {

@@ -1,5 +1,9 @@
 <#include "/WEB-INF/templates/head.ftl" />
-
+    <script>
+        <!--  
+        javascript:window.history.forward(1);
+        //-->
+    </script>
 <#--
 <@sj.datepicker name="birthday" />
 -->
@@ -11,6 +15,7 @@
         </font>
 <@s.form namespace="/card-template" action="save" method="post" enctype="multipart/form-data" cssClass="required-validate">
 <table border="1" cellpadding="1" cellspacing="1">
+    <@s.token />
     <#assign isReuired="required " />
     <@s.if test="cardTemplate!=null">
     <#assign isReuired="" />
@@ -154,7 +159,7 @@
     </tr>
    
 </table>
-<@s.token />
+
 </@s.form>
 
 </center>

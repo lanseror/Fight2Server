@@ -39,9 +39,10 @@ public class CardAction extends BaseAction {
     @Action(value = "summon", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String summon() {
         final ActionContext context = ActionContext.getContext();
-        final User user = (User) this.getSession().get(LOGIN_USER);
+        final User sessionUser = (User) this.getSession().get(LOGIN_USER);
+        final User user = userDao.get(sessionUser.getId());
         final Map<String, Object> jsonMap = Maps.newHashMap();
-        if (user.getCardCount() >= 100) {
+        if (user.getCardCount() >= 500) {
             jsonMap.put("status", 1);
             context.put("jsonMsg", new Gson().toJson(jsonMap));
             return SUCCESS;
@@ -67,9 +68,9 @@ public class CardAction extends BaseAction {
         cardDao.add(card);
 
         final List<Card> cards = cardDao.listByUser(user);
-        final User userUpdate = userDao.get(user.getId());
-        userUpdate.setCardCount(cards.size());
-        userDao.update(userUpdate);
+        
+        user.setCardCount(cards.size());
+        userDao.update(user);
 
         return SUCCESS;
     }
