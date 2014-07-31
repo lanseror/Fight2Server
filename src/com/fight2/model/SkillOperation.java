@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 public class SkillOperation extends BaseEntity {
     private static final long serialVersionUID = -8724159517984094999L;
 
-    private int point;
+    private int point;// Percentage, 1/10000.
 
     private SkillPointType skillPointType;
 
