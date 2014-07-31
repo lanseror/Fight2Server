@@ -79,7 +79,7 @@ public class User extends BaseEntity {
         return serialVersionUID;
     }
 
-    @OneToOne(optional = false, mappedBy = "user")
+    @OneToOne(mappedBy = "user")
     public PartyInfo getPartyInfo() {
         return partyInfo;
     }

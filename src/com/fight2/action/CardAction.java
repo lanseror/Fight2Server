@@ -58,17 +58,24 @@ public class CardAction extends BaseAction {
         card.setImage(image);
         card.setName(cardTemplate.getName());
         card.setSkill(cardTemplate.getSkill());
-
-        jsonMap.put("status", 0);
-        jsonMap.put("card", card);
-        context.put("jsonMsg", new Gson().toJson(jsonMap));
-
         card.setCardTemplate(cardTemplate);
         card.setUser(user);
         cardDao.add(card);
 
+        final Card cardVo = new Card();
+        cardVo.setId(card.getId());
+        cardVo.setAtk(card.getAtk());
+        cardVo.setAvatar(avatar);
+        cardVo.setHp(card.getHp());
+        cardVo.setImage(image);
+        cardVo.setName(card.getName());
+        cardVo.setSkill(card.getSkill());
+        jsonMap.put("status", 0);
+        jsonMap.put("card", cardVo);
+        context.put("jsonMsg", new Gson().toJson(jsonMap));
+
         final List<Card> cards = cardDao.listByUser(user);
-        
+
         user.setCardCount(cards.size());
         userDao.update(user);
 

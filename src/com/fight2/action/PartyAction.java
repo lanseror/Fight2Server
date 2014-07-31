@@ -45,6 +45,7 @@ public class PartyAction extends BaseAction {
         for (final Party poParty : poParties) {
             final Party voParty = new Party();
             voParty.setId(poParty.getId());
+            voParty.setPartyNumber(poParty.getPartyNumber());
             voParty.setAtk(poParty.getAtk());
             voParty.setHp(poParty.getHp());
             final List<Integer> cards = Lists.newArrayList();
@@ -61,7 +62,7 @@ public class PartyAction extends BaseAction {
             voParties.add(voParty);
         }
         voPartyInfo.setParties(voParties);
-        jsonMsg = new Gson().toJson(voParties);
+        jsonMsg = new Gson().toJson(voPartyInfo);
         return SUCCESS;
     }
 
