@@ -10,11 +10,7 @@ public class Skill extends BaseEntity {
 
     private int probability;
 
-    private List<SkillOperation> hpOperation;
-
-    private int atk;
-
-    private int defence;
+    private List<SkillOperation> operation;
 
     public int getProbability() {
         return probability;
@@ -24,28 +20,12 @@ public class Skill extends BaseEntity {
         this.probability = probability;
     }
 
-    public List<SkillOperation> getHpOperation() {
-        return hpOperation;
+    public List<SkillOperation> getOperation() {
+        return operation;
     }
 
-    public void setHpOperation(final List<SkillOperation> hpOperation) {
-        this.hpOperation = hpOperation;
-    }
-
-    public int getAtk() {
-        return atk;
-    }
-
-    public void setAtk(final int atk) {
-        this.atk = atk;
-    }
-
-    public int getDefence() {
-        return defence;
-    }
-
-    public void setDefence(final int defence) {
-        this.defence = defence;
+    public void setOperation(final List<SkillOperation> operation) {
+        this.operation = operation;
     }
 
     public static long getSerialversionuid() {
