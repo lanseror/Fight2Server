@@ -17,6 +17,7 @@ import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -126,6 +127,25 @@ public class UserAction extends BaseAction {
 
     private String editSave() {
         userDao.update(user);
+        return SUCCESS;
+    }
+
+    @Action(value = "competitors", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String getArenaCompetitors() {
+        final User currentUser = (User) this.getSession().get(LOGIN_USER);
+        final List<User> datas = userDao.list();
+        final List<User> competitors = Lists.newArrayList();
+        for (final User user : datas) {
+            if (user.getId() != currentUser.getId()) {
+                final User competitor = new User();
+                competitor.setId(user.getId());
+                competitor.setAvatar(user.getAvatar());
+                competitor.setName(user.getName());
+                competitors.add(competitor);
+            }
+        }
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(competitors));
         return SUCCESS;
     }
 

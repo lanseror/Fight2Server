@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fight2.dao.CardDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyInfoDao;
+import com.fight2.dao.UserDao;
 import com.fight2.model.Card;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
@@ -21,6 +22,8 @@ import com.google.gson.Gson;
 @Namespace("/party")
 public class PartyAction extends BaseAction {
     private static final long serialVersionUID = -4473064014262040889L;
+    @Autowired
+    private UserDao userDao;
     @Autowired
     private PartyDao partyDao;
     @Autowired
@@ -81,6 +84,7 @@ public class PartyAction extends BaseAction {
         }
         int partyInfoAtk = 0;
         int partyInfoHp = 0;
+        String avatar = null;
         for (int partyIndex = 0; partyIndex < parties.size(); partyIndex++) {
             final List<Double> party = parties.get(partyIndex);
             final Party poParty = poParties.get(partyIndex);
@@ -96,6 +100,9 @@ public class PartyAction extends BaseAction {
                     partyGrid.setCard(card);
                     partyAtk += card.getAtk();
                     partyHp += card.getHp();
+                    if (avatar == null) {
+                        avatar = card.getAvatar();
+                    }
                 } else {
                     partyGrid.setCard(null);
                 }
@@ -109,7 +116,10 @@ public class PartyAction extends BaseAction {
         poPartyInfo.setAtk(partyInfoAtk);
         poPartyInfo.setHp(partyInfoHp);
         partyInfoDao.update(poPartyInfo);
-        return SUCCESS;
+        final User userUpdate = userDao.get(user.getId());
+        userUpdate.setAvatar(avatar);
+        userDao.update(userUpdate);
+        return myParties();
     }
 
     public PartyDao getPartyDao() {
@@ -170,6 +180,14 @@ public class PartyAction extends BaseAction {
 
     public void setCardDao(final CardDao cardDao) {
         this.cardDao = cardDao;
+    }
+
+    public UserDao getUserDao() {
+        return userDao;
+    }
+
+    public void setUserDao(final UserDao userDao) {
+        this.userDao = userDao;
     }
 
 }
