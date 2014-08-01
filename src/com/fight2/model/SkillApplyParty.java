@@ -2,11 +2,11 @@ package com.fight2.model;
 
 public enum SkillApplyParty {
     Self(false),
-    Opponnent(false),
+    Opponent(false),
     Leader(false),
-    OpponnentLeader(false),
+    OpponentLeader(false),
     SelfAll(true),
-    OpponnentAll(true);
+    OpponentAll(true);
 
     private final boolean isIndividual;
 

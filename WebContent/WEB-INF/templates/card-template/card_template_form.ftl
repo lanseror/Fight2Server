@@ -175,3 +175,5 @@
 </@s.form>
 
 </center>
+
+<#include "/WEB-INF/templates/foot.ftl" />

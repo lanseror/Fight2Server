@@ -9,6 +9,7 @@
     <script type="text/javascript" src="<@s.url value="/js/validation/tooltips.js" />"></script>
     <script type="text/javascript" src="<@s.url value="/js/validation/effects.js" />"></script>
     <script type="text/javascript" src="<@s.url value="/js/validation/validation_cn.js" />"></script>
+    <script type="text/javascript" src="<@s.url value="/js/lib/jquery.js" />"></script>
 
     <#assign sj=JspTaglibs["/struts-jquery-tags"]>
     <@sj.head />

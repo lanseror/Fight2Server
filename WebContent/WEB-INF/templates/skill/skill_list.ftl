@@ -26,3 +26,5 @@
     <a href="<@s.url namespace="/card" action="add" />">Add</a>&nbsp;&nbsp;
     <a href="<@s.url namespace="/card" action="list-json" />">List as Json</a>
 </center>
+
+<#include "/WEB-INF/templates/foot.ftl" />

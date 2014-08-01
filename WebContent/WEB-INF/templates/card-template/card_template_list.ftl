@@ -42,3 +42,5 @@ function confirmDelete(deleteUrl)
     <a href="<@s.url namespace="/card-template" action="add" />">添加</a>&nbsp;&nbsp;
     <a href="<@s.url namespace="/card-template" action="list-json" />">List as Json</a>
 </center>
+
+<#include "/WEB-INF/templates/foot.ftl" />
