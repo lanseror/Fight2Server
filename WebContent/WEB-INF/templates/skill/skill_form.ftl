@@ -30,36 +30,39 @@
             <table id="operationTable">
             <thead>
                 <tr>
-                    <td align="center">属性</td>
                     <td align="center" width="60px">符号</td>
-                    <td align="center">百分比</td>
                     <td>作用方</td>
+                    <td align="center">类型</td>
+                    <td width="160px" align="right">数值参考本方的属性</td>
+                    <td align="center">百分比</td>
                     <td width="60px">&nbsp;</td>
                 </tr>
             </thead>
             <tbody id="operationBody">
                 <@s.if test="skill==null">
                 <tr>
-                    <td align="center"><@s.select name="skillPointTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力', 'Skip':'击晕'}" value="'HP'" onchange="switchSkillPointType(this);" /></td>
                     <td align="center"><@s.select  name="signs" list=r"#{1:'加', -1:'减'}" value="1" /></td>
-                    <td align="center"><@s.textfield size="20" name="points" cssClass="required int-range-1-300" />%</td>
                     <td><@s.select name="skillApplyPartys" list=r"#{'Self':'本方', 'Opponent':'对方', 'Leader':'本方领队', 'OpponentLeader':'对方领队', 'SelfAll':'本方(全体)', 'OpponentAll':'对方(全体)'}" value="'Self'" /></td>
+                    <td align="center"><@s.select name="skillTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力', 'Skip':'击晕'}" value="'HP'" /></td>
+                    <td width="160px" align="right"><@s.select name="skillPointAttributes" list=r"#{'HP':'生命值', 'ATK':'攻击力'}" value="'HP'" onchange="switchSkillPointAttribute(this);" /></td>
+                    <td align="center"><@s.textfield size="20" name="points" cssClass="required int-range-1-300" />%</td>
                     <td align="right"><a href="###deleteOperation" onclick="deleteOperation(this);return false;">删除</a></td>
                 </tr>
                 </@s.if>
                 <@s.else>
                     <@s.iterator value="skill.operations">
                      <tr>
-                        <td align="center"><@s.select name="skillPointTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力'}" value="skillPointType" onchange="switchSkillPointType(this);" /></td>
                         <td align="center"><@s.select  name="signs" list=r"#{1:'加', -1:'减'}" value="sign" /></td>
+                        <td><@s.select name="skillApplyPartys" list=r"#{'Self':'本方', 'Opponent':'对方', 'Leader':'本方领队', 'OpponentLeader':'对方领队', 'SelfAll':'本方(全体)', 'OpponentAll':'对方(全体)'}" value="skillApplyParty" /></td>
+                        <td align="center"><@s.select name="skillTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力'}" value="skillType"  /></td>
+                        <td width="160px" align="right"><@s.select name="skillPointAttributes" list=r"#{'HP':'生命值', 'ATK':'攻击力'}" value="skillPointAttribute" onchange="switchSkillPointAttribute(this);" /></td>
                         <td align="center">
-                            <#if skillPointType=='ATK'>
+                            <#if skillPointAttribute=='ATK'>
                                 <@s.textfield size="20" name="points" cssClass="required int-range-100-1000" value="${point}" />%
                             <#else>
                                 <@s.textfield size="20" name="points" cssClass="required int-range-1-300" value="${point}" />%
                             </#if>
                         </td>
-                        <td><@s.select name="skillApplyPartys" list=r"#{'Self':'本方', 'Opponent':'对方', 'Leader':'本方领队', 'OpponentLeader':'对方领队', 'SelfAll':'本方(全体)', 'OpponentAll':'对方(全体)'}" value="skillApplyParty" /></td>
                         <td align="right"><a href="###deleteOperation" onclick="deleteOperation(this);return false;">删除</a></td>
                     </tr>
                     </@s.iterator>
@@ -95,10 +98,10 @@
             alert("至少要有一个动作!");
         }
     }
-    function switchSkillPointType(pointTypeObj){
-        var skillPointType = $(pointTypeObj);
-        var tr = skillPointType.parent().parent();
-        var type = skillPointType.val();
+    function switchSkillPointAttribute(pointAttribute){
+        var skillPointAttribute = $(pointAttribute);
+        var tr = skillPointAttribute.parent().parent();
+        var type = skillPointAttribute.val();
         var oldCss = "int-range-100-1000";
         var newCss = "int-range-1-300";
         if(type=='ATK'){

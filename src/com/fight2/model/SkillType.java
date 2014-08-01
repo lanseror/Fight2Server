@@ -1,6 +1,6 @@
 package com.fight2.model;
 
-public enum SkillPointType {
+public enum SkillType {
     HP,
     ATK,
     Defence,

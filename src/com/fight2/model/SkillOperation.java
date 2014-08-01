@@ -12,7 +12,9 @@ public class SkillOperation extends BaseEntity {
 
     private int point;// Percentage, 1/10000.
 
-    private SkillPointType skillPointType;
+    private SkillType skillType;
+
+    private SkillPointAttribute skillPointAttribute;
 
     private SkillApplyParty skillApplyParty;
 
@@ -44,12 +46,20 @@ public class SkillOperation extends BaseEntity {
         this.point = point;
     }
 
-    public SkillPointType getSkillPointType() {
-        return skillPointType;
+    public SkillType getSkillType() {
+        return skillType;
     }
 
-    public void setSkillPointType(final SkillPointType skillPointType) {
-        this.skillPointType = skillPointType;
+    public void setSkillType(final SkillType skillType) {
+        this.skillType = skillType;
+    }
+
+    public SkillPointAttribute getSkillPointAttribute() {
+        return skillPointAttribute;
+    }
+
+    public void setSkillPointAttribute(final SkillPointAttribute skillPointAttribute) {
+        this.skillPointAttribute = skillPointAttribute;
     }
 
     public SkillApplyParty getSkillApplyParty() {

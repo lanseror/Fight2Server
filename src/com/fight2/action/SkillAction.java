@@ -17,7 +17,8 @@ import com.fight2.model.CardTemplate;
 import com.fight2.model.Skill;
 import com.fight2.model.SkillApplyParty;
 import com.fight2.model.SkillOperation;
-import com.fight2.model.SkillPointType;
+import com.fight2.model.SkillPointAttribute;
+import com.fight2.model.SkillType;
 
 @Namespace("/skill")
 public class SkillAction extends BaseAction {
@@ -36,7 +37,8 @@ public class SkillAction extends BaseAction {
     private int cardTemplateId;
     private int[] signs;
     private int[] points;
-    private SkillPointType[] skillPointTypes;
+    private SkillType[] skillTypes;
+    private SkillPointAttribute[] skillPointAttributes;
     private SkillApplyParty[] skillApplyPartys;
 
     @Action(value = "add", results = { @Result(name = SUCCESS, location = "skill_form.ftl") })
@@ -47,6 +49,7 @@ public class SkillAction extends BaseAction {
     @Action(value = "edit", results = { @Result(name = SUCCESS, location = "skill_form.ftl") })
     public String edit() {
         skill = skillDao.get(id);
+        cardTemplateId = skill.getCardTemplate().getId();
         return SUCCESS;
     }
 
@@ -68,11 +71,13 @@ public class SkillAction extends BaseAction {
             final SkillOperation operation = new SkillOperation();
             final int sign = signs[i];
             final int point = points[i];
-            final SkillPointType skillPointType = skillPointTypes[i];
+            final SkillType skillType = skillTypes[i];
+            final SkillPointAttribute skillPointAttribute = skillPointAttributes[i];
             final SkillApplyParty skillApplyParty = skillApplyPartys[i];
             operation.setSign(sign);
+            operation.setSkillType(skillType);
             operation.setPoint(point);
-            operation.setSkillPointType(skillPointType);
+            operation.setSkillPointAttribute(skillPointAttribute);
             operation.setSkillApplyParty(skillApplyParty);
             operation.setSkill(skill);
             skillOperationDao.add(operation);
@@ -81,20 +86,30 @@ public class SkillAction extends BaseAction {
     }
 
     private String editSave() {
-        final CardTemplate cardTemplate = cardTemplateDao.get(cardTemplateId);
-        skill.setCardTemplate(cardTemplate);
-        skillDao.update(skill);
+        final Skill skillPo = skillDao.get(skill.getId());
+        skillPo.setName(skill.getName());
+        skillPo.setProbability(skill.getProbability());
+        skillDao.update(skillPo);
+
+        // Clear operations first.
+        final List<SkillOperation> skillOperations = skillPo.getOperations();
+        for (final SkillOperation skillOperation : skillOperations) {
+            skillOperationDao.delete(skillOperation);
+        }
+
         for (int i = 0; i < points.length; i++) {
             final SkillOperation operation = new SkillOperation();
             final int sign = signs[i];
             final int point = points[i];
-            final SkillPointType skillPointType = skillPointTypes[i];
+            final SkillType skillType = skillTypes[i];
+            final SkillPointAttribute skillPointAttribute = skillPointAttributes[i];
             final SkillApplyParty skillApplyParty = skillApplyPartys[i];
             operation.setSign(sign);
+            operation.setSkillType(skillType);
             operation.setPoint(point);
-            operation.setSkillPointType(skillPointType);
+            operation.setSkillPointAttribute(skillPointAttribute);
             operation.setSkillApplyParty(skillApplyParty);
-            operation.setSkill(skill);
+            operation.setSkill(skillPo);
             skillOperationDao.add(operation);
         }
 
@@ -161,12 +176,12 @@ public class SkillAction extends BaseAction {
         this.points = points;
     }
 
-    public SkillPointType[] getSkillPointTypes() {
-        return skillPointTypes;
+    public SkillPointAttribute[] getSkillPointAttributes() {
+        return skillPointAttributes;
     }
 
-    public void setSkillPointTypes(final SkillPointType[] skillPointTypes) {
-        this.skillPointTypes = skillPointTypes;
+    public void setSkillPointAttributes(final SkillPointAttribute[] skillPointAttributes) {
+        this.skillPointAttributes = skillPointAttributes;
     }
 
     public SkillApplyParty[] getSkillApplyPartys() {
@@ -199,6 +214,14 @@ public class SkillAction extends BaseAction {
 
     public void setSkillOperationDao(final SkillOperationDao skillOperationDao) {
         this.skillOperationDao = skillOperationDao;
+    }
+
+    public SkillType[] getSkillTypes() {
+        return skillTypes;
+    }
+
+    public void setSkillTypes(final SkillType[] skillTypes) {
+        this.skillTypes = skillTypes;
     }
 
 }
