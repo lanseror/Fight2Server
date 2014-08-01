@@ -1,6 +1,8 @@
 package com.fight2.model;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class SkillOperation extends BaseEntity {
@@ -11,6 +13,18 @@ public class SkillOperation extends BaseEntity {
     private SkillPointType skillPointType;
 
     private SkillApplyParty skillApplyParty;
+
+    private Skill skill;
+
+    @ManyToOne
+    @JoinColumn(name = "skill_id")
+    public Skill getSkill() {
+        return skill;
+    }
+
+    public void setSkill(final Skill skill) {
+        this.skill = skill;
+    }
 
     public int getPoint() {
         return point;

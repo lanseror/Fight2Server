@@ -3,6 +3,7 @@ package com.fight2.model;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 @Entity
@@ -18,7 +19,7 @@ public class CardTemplate extends BaseEntity {
     private int hp;
     private int atk;// Attack value;
     private int probability; // Summon probability, unit is 1/10000.
-    private String skill;
+    private Skill skill;
     private int skillLevel;
     private int cardVersion;
 
@@ -109,11 +110,12 @@ public class CardTemplate extends BaseEntity {
         this.probability = probability;
     }
 
-    public String getSkill() {
+    @OneToOne(mappedBy = "cardTemplate")
+    public Skill getSkill() {
         return skill;
     }
 
-    public void setSkill(final String skill) {
+    public void setSkill(final Skill skill) {
         this.skill = skill;
     }
 

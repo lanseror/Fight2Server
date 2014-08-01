@@ -57,7 +57,6 @@ public class CardAction extends BaseAction {
         card.setHp(cardTemplate.getHp());
         card.setImage(image);
         card.setName(cardTemplate.getName());
-        card.setSkill(cardTemplate.getSkill());
         card.setCardTemplate(cardTemplate);
         card.setUser(user);
         cardDao.add(card);

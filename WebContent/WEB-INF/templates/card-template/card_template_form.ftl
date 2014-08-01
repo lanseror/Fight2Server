@@ -21,12 +21,12 @@
     <#assign isReuired="" />
     <tr>
         <td><b>ID</b></td>
-        <td><@s.textfield cssClass="post" size="80" name="cardTemplate.id" readonly="true" /></td>
+        <td><@s.textfield size="80" name="cardTemplate.id" readonly="true" /></td>
     </tr>
     </@s.if>
     <tr>
         <td><b>名字</b></td>
-        <td><@s.textfield cssClass="post" size="80" name="cardTemplate.name" cssClass="required max-length-80" /></td>
+        <td><@s.textfield size="80" name="cardTemplate.name" cssClass="required max-length-80" /></td>
     </tr>
     <tr>
         <td><b>头像</b></td>
@@ -134,25 +134,37 @@
     </tr>
     <tr>
         <td><b>星级</b></td>
-        <td><@s.textfield cssClass="post" size="80" name="cardTemplate.star" cssClass="required int-range-1-7" /></td>
+        <td><@s.textfield size="80" name="cardTemplate.star" cssClass="required int-range-1-7" /></td>
     </tr>
 
     <tr>
         <td><b>初始生命值</b></td>
-        <td><@s.textfield cssClass="post" size="80" name="cardTemplate.hp" cssClass="required validate-integer" /></td>
+        <td><@s.textfield size="80" name="cardTemplate.hp" cssClass="required validate-integer" /></td>
     </tr>
 
     <tr>
         <td><b>初始攻击力</b></td>
-        <td><@s.textfield cssClass="post" size="80" name="cardTemplate.atk" cssClass="required validate-integer" /></td>
+        <td><@s.textfield size="80" name="cardTemplate.atk" cssClass="required validate-integer" /></td>
     </tr>
 
     <tr>
         <td><b>召唤机率(万分之*)</b></td>
-        <td><@s.textfield cssClass="post" size="80" name="cardTemplate.probability" cssClass="required int-range-0-10000" /></td>
+        <td><@s.textfield size="80" name="cardTemplate.probability" cssClass="required int-range-0-10000" /></td>
+    </tr>
+    
+    <@s.if test="cardTemplate!=null">
+    <tr>
+        <td><b>技能</b></td>
+        <@s.if test="cardTemplate.skill!=null">
+            <td><a href="<@s.url namespace="/skill" action="edit"><@s.param name="id" value="${cardTemplate.skill.id}" /></@s.url>">修改</a></td>
+        </@s.if>
+        <@s.else>
+            <td><a href="<@s.url namespace="/skill" action="add"><@s.param name="cardTemplateId" value="${cardTemplate.id}" /></@s.url>">添加</a></td>
+        </@s.else>
     </tr>
 
-
+    </@s.if>
+    
     <tr>
         <td><b>操作</b></td>
         <td align="right"> <@s.submit value="更新" /></td>
