@@ -1,23 +1,8 @@
 <#include "/WEB-INF/templates/head.ftl" />
 
-<script>
-    function addOperation() {
-        var tbody = $('#operationTable > tbody:last');
-        var copyTr = tbody.children("tr:first").clone();
-        tbody.append(copyTr);
-    }
-    function deleteOperation(deletehref) {
-        var count = $('#operationTable > tbody:last').children().length;
-        if(count>1) {
-            $(deletehref).parent().parent().remove();
-        } else {
-            alert("至少要有一个动作!");
-        }
-    }
-</script>
 <center>
 
-<@s.form namespace="/skill" action="save" method="post" cssClass="required-validate">
+<@s.form namespace="/skill" action="save" method="post" id="postFrom">
 <table border="1" cellpadding="1" cellspacing="0">
     <@s.hidden name="cardTemplateId" />
     <@s.if test="skill!=null">
@@ -46,7 +31,8 @@
             <thead>
                 <tr>
                     <td align="center">属性</td>
-                    <td>百分比</td>
+                    <td align="center" width="60px">符号</td>
+                    <td align="center">百分比</td>
                     <td>作用方</td>
                     <td width="60px">&nbsp;</td>
                 </tr>
@@ -54,8 +40,9 @@
             <tbody id="operationBody">
                 <@s.if test="skill==null">
                 <tr>
-                    <td><@s.select name="skillPointTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力', 'Skip':'击晕'}" value="'HP'" /></td>
-                    <td><@s.textfield size="20" name="points" cssClass="required int-range--100-100" />%</td>
+                    <td align="center"><@s.select name="skillPointTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力', 'Skip':'击晕'}" value="'HP'" onchange="switchSkillPointType(this);" /></td>
+                    <td align="center"><@s.select  name="signs" list=r"#{1:'加', -1:'减'}" value="1" /></td>
+                    <td align="center"><@s.textfield size="20" name="points" cssClass="required int-range-1-300" />%</td>
                     <td><@s.select name="skillApplyPartys" list=r"#{'Self':'本方', 'Opponent':'对方', 'Leader':'本方领队', 'OpponentLeader':'对方领队', 'SelfAll':'本方(全体)', 'OpponentAll':'对方(全体)'}" value="'Self'" /></td>
                     <td align="right"><a href="###deleteOperation" onclick="deleteOperation(this);return false;">删除</a></td>
                 </tr>
@@ -63,8 +50,15 @@
                 <@s.else>
                     <@s.iterator value="skill.operations">
                      <tr>
-                        <td><@s.select name="skillPointTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力'}" value="skillPointType" /></td>
-                        <td><@s.textfield size="20" name="points" cssClass="required int-range--100-100" value="${point}" />%</td>
+                        <td align="center"><@s.select name="skillPointTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力'}" value="skillPointType" onchange="switchSkillPointType(this);" /></td>
+                        <td align="center"><@s.select  name="signs" list=r"#{1:'加', -1:'减'}" value="sign" /></td>
+                        <td align="center">
+                            <#if skillPointType=='ATK'>
+                                <@s.textfield size="20" name="points" cssClass="required int-range-100-1000" value="${point}" />%
+                            <#else>
+                                <@s.textfield size="20" name="points" cssClass="required int-range-1-300" value="${point}" />%
+                            </#if>
+                        </td>
                         <td><@s.select name="skillApplyPartys" list=r"#{'Self':'本方', 'Opponent':'对方', 'Leader':'本方领队', 'OpponentLeader':'对方领队', 'SelfAll':'本方(全体)', 'OpponentAll':'对方(全体)'}" value="skillApplyParty" /></td>
                         <td align="right"><a href="###deleteOperation" onclick="deleteOperation(this);return false;">删除</a></td>
                     </tr>
@@ -84,6 +78,43 @@
 <@s.token />
 </@s.form>
 
+<script>
+    var valid = new Validation('postFrom', {immediate : true});
+    function addOperation() {
+        var tbody = $('#operationTable > tbody:last');
+        var copyTr = tbody.children("tr:first").clone();
+        tbody.append(copyTr);
+        valid = new Validation('postFrom', {immediate : true});
+    }
+    function deleteOperation(deletehref) {
+        var count = $('#operationTable > tbody:last').children().length;
+        if(count>1) {
+            $(deletehref).parent().parent().remove();
+            valid = new Validation('postFrom', {immediate : true});
+        } else {
+            alert("至少要有一个动作!");
+        }
+    }
+    function switchSkillPointType(pointTypeObj){
+        var skillPointType = $(pointTypeObj);
+        var tr = skillPointType.parent().parent();
+        var type = skillPointType.val();
+        var oldCss = "int-range-100-1000";
+        var newCss = "int-range-1-300";
+        if(type=='ATK'){
+           oldCss = "int-range-1-300";
+           newCss = "int-range-100-1000";
+        }
+        tr.find("input[name=points]").each(function(){
+            var point = $(this);
+            point.removeClass(oldCss);
+            point.addClass(newCss);
+        });
+        valid.validate();
+    }
+    
+    
+</script>
 </center>
 
 <#include "/WEB-INF/templates/foot.ftl" />

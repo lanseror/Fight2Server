@@ -34,6 +34,7 @@ public class SkillAction extends BaseAction {
     private List<Skill> datas;
     private int id;
     private int cardTemplateId;
+    private int[] signs;
     private int[] points;
     private SkillPointType[] skillPointTypes;
     private SkillApplyParty[] skillApplyPartys;
@@ -65,9 +66,11 @@ public class SkillAction extends BaseAction {
         skillDao.add(skill);
         for (int i = 0; i < points.length; i++) {
             final SkillOperation operation = new SkillOperation();
+            final int sign = signs[i];
             final int point = points[i];
             final SkillPointType skillPointType = skillPointTypes[i];
             final SkillApplyParty skillApplyParty = skillApplyPartys[i];
+            operation.setSign(sign);
             operation.setPoint(point);
             operation.setSkillPointType(skillPointType);
             operation.setSkillApplyParty(skillApplyParty);
@@ -78,7 +81,23 @@ public class SkillAction extends BaseAction {
     }
 
     private String editSave() {
+        final CardTemplate cardTemplate = cardTemplateDao.get(cardTemplateId);
+        skill.setCardTemplate(cardTemplate);
         skillDao.update(skill);
+        for (int i = 0; i < points.length; i++) {
+            final SkillOperation operation = new SkillOperation();
+            final int sign = signs[i];
+            final int point = points[i];
+            final SkillPointType skillPointType = skillPointTypes[i];
+            final SkillApplyParty skillApplyParty = skillApplyPartys[i];
+            operation.setSign(sign);
+            operation.setPoint(point);
+            operation.setSkillPointType(skillPointType);
+            operation.setSkillApplyParty(skillApplyParty);
+            operation.setSkill(skill);
+            skillOperationDao.add(operation);
+        }
+
         return SUCCESS;
     }
 
@@ -124,6 +143,14 @@ public class SkillAction extends BaseAction {
 
     public void setCardTemplateId(final int cardTemplateId) {
         this.cardTemplateId = cardTemplateId;
+    }
+
+    public int[] getSigns() {
+        return signs;
+    }
+
+    public void setSigns(final int[] signs) {
+        this.signs = signs;
     }
 
     public int[] getPoints() {

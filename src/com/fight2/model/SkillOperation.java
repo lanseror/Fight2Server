@@ -8,6 +8,8 @@ import javax.persistence.ManyToOne;
 public class SkillOperation extends BaseEntity {
     private static final long serialVersionUID = -8724159517984094999L;
 
+    private int sign; // +1/-1
+
     private int point;// Percentage, 1/10000.
 
     private SkillPointType skillPointType;
@@ -24,6 +26,14 @@ public class SkillOperation extends BaseEntity {
 
     public void setSkill(final Skill skill) {
         this.skill = skill;
+    }
+
+    public int getSign() {
+        return sign;
+    }
+
+    public void setSign(final int sign) {
+        this.sign = sign;
     }
 
     public int getPoint() {
