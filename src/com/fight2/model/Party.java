@@ -19,6 +19,8 @@ public class Party extends BaseEntity {
 
     private int atk;
 
+    private int defence;
+
     private List<PartyGrid> partyGrids;
 
     private List<Integer> cards;
@@ -47,6 +49,15 @@ public class Party extends BaseEntity {
 
     public void setAtk(final int atk) {
         this.atk = atk;
+    }
+
+    @Transient
+    public int getDefence() {
+        return defence;
+    }
+
+    public void setDefence(final int defence) {
+        this.defence = defence;
     }
 
     @OneToMany(mappedBy = "party")

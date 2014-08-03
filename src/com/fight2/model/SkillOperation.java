@@ -10,7 +10,7 @@ public class SkillOperation extends BaseEntity {
 
     private int sign; // +1/-1
 
-    private int point;// Percentage, 1/10000.
+    private int point;// Percentage, 1/100.
 
     private SkillType skillType;
 
