@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.fight2.model.BattleRecord;
 import com.fight2.model.Card;
@@ -30,6 +31,8 @@ public class BattleService {
     private final List<Party> defenderParties;
 
     private final Map<String, String> effectMap = Maps.newHashMap();
+    private final Map<Card, Random> randomMap = Maps.newHashMap();
+    private final Map<Card, int[]> randomGridMap = Maps.newHashMap();
 
     public BattleService(final User attacker, final User defender, final PartyInfo attackerPartyInfo, final PartyInfo defenderPartyInfo) {
         super();
@@ -47,6 +50,37 @@ public class BattleService {
         effectMap.put("1" + SkillType.Defence, "为%制造一个护盾");
         effectMap.put("-1" + SkillType.Skip, "对%造成眩晕");
         effectMap.put("1" + SkillType.Skip, "对%造成眩晕");
+
+        for (final Party party : attackerParties) {
+            for (final PartyGrid partyGrid : party.getPartyGrids()) {
+                final Card card = partyGrid.getCard();
+                final Skill skill = card.getCardTemplate().getSkill();
+                if (skill != null) {
+                    randomMap.put(card, new Random());
+                    final int[] randomGrid = new int[100];
+                    for (int i = 0; i < skill.getProbability(); i++) {
+                        randomGrid[i] = 1;
+                    }
+                    randomGridMap.put(card, randomGrid);
+                }
+            }
+
+        }
+
+        for (final Party party : defenderParties) {
+            for (final PartyGrid partyGrid : party.getPartyGrids()) {
+                final Card card = partyGrid.getCard();
+                final Skill skill = card.getCardTemplate().getSkill();
+                if (skill != null) {
+                    randomMap.put(card, new Random());
+                    final int[] randomGrid = new int[100];
+                    for (int i = 0; i < skill.getProbability(); i++) {
+                        randomGrid[i] = 1;
+                    }
+                    randomGridMap.put(card, randomGrid);
+                }
+            }
+        }
     }
 
     public List<BattleRecord> fight() {
@@ -125,11 +159,9 @@ public class BattleService {
 
         Collections.sort(atPartyGrids, new PartyGridComparator());
 
-        final PartyGrid partyGrid = atPartyGrids.size() > 0 ? atPartyGrids.get(0) : null;
-
-        if (partyGrid != null) {
+        final Card card = getSkillCard(atPartyGrids);
+        if (card != null) {
             final SkillRecord skillRecord = new SkillRecord();
-            final Card card = partyGrid.getCard();
             final CardTemplate cardTemplate = card.getCardTemplate();
             final Skill skill = cardTemplate.getSkill();
             final List<SkillOperation> operations = skill.getOperations();
@@ -164,7 +196,19 @@ public class BattleService {
                 for (final Party applyParty : applyParties) {
                     switch (skillType) {
                     case HP:
-                        applyParty.setHp(applyParty.getHp() + changePoint);
+                        if (changePoint < 0) {
+                            final int changeDefence = applyParty.getDefence() + changePoint;
+                            if (changeDefence > 0) {
+                                applyParty.setDefence(changeDefence);
+                            } else {
+                                applyParty.setDefence(0);
+                                final int changeHp = applyParty.getHp() + changeDefence;
+                                applyParty.setHp(changeHp < 0 ? 0 : changeHp);
+                            }
+
+                        } else {
+                            applyParty.setHp(applyParty.getHp() + changePoint);
+                        }
                     case ATK:
                         applyParty.setAtk(applyParty.getAtk() + changePoint);
                     case Defence:
@@ -181,6 +225,21 @@ public class BattleService {
 
         return null;
 
+    }
+
+    private Card getSkillCard(final List<PartyGrid> atPartyGrids) {
+        Card skillCard = null;
+        for (final PartyGrid partyGrid : atPartyGrids) {
+            final Card card = partyGrid.getCard();
+            final Random random = randomMap.get(card);
+            final int[] randomGrids = randomGridMap.get(card);
+            if (randomGrids[random.nextInt(randomGrids.length)] == 1) {
+                skillCard = card;
+                break;
+            }
+        }
+
+        return skillCard;
     }
 
     private int getAttribute(final SkillPointAttribute pointAttribute, final Card card) {
