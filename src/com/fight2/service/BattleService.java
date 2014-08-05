@@ -3,7 +3,9 @@ package com.fight2.service;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
+import com.fight2.model.BattleRecord;
 import com.fight2.model.Card;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.Party;
@@ -13,9 +15,11 @@ import com.fight2.model.Skill;
 import com.fight2.model.SkillApplyParty;
 import com.fight2.model.SkillOperation;
 import com.fight2.model.SkillPointAttribute;
+import com.fight2.model.SkillRecord;
 import com.fight2.model.SkillType;
 import com.fight2.model.User;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class BattleService {
     private final User attacker;
@@ -25,6 +29,8 @@ public class BattleService {
     private final List<Party> attackerParties;
     private final List<Party> defenderParties;
 
+    private final Map<String, String> effectMap = Maps.newHashMap();
+
     public BattleService(final User attacker, final User defender, final PartyInfo attackerPartyInfo, final PartyInfo defenderPartyInfo) {
         super();
         this.attacker = attacker;
@@ -33,9 +39,17 @@ public class BattleService {
         this.defenderPartyInfo = defenderPartyInfo;
         this.attackerParties = attackerPartyInfo.getParties();
         this.defenderParties = defenderPartyInfo.getParties();
+
+        effectMap.put("-1" + SkillType.HP, "对%造成伤害");
+        effectMap.put("1" + SkillType.HP, "为%恢复生命值");
+        effectMap.put("-1" + SkillType.ATK, "降低%的攻击力");
+        effectMap.put("1" + SkillType.HP, "增加%的攻击力");
+        effectMap.put("1" + SkillType.Defence, "为%制造一个护盾");
+        effectMap.put("-1" + SkillType.Skip, "对%造成眩晕");
+        effectMap.put("1" + SkillType.Skip, "对%造成眩晕");
     }
 
-    public String fight() {
+    public List<BattleRecord> fight() {
         System.out.println("----战斗开始！----");
         while (getPartiesRemainHp(attackerParties) > 0 && getPartiesRemainHp(defenderParties) > 0) {
 
@@ -78,7 +92,7 @@ public class BattleService {
         System.out.println("----战斗结束！----");
         final String winner = getPartiesRemainHp(attackerParties) > 0 ? "你" : defender.getName();
         System.out.println("----" + winner + "赢了！----");
-        return winner;
+        return null;
     }
 
     private void attack(final Party attackerParty, final Party defenderParty, final List<Party> attackerParties, final List<Party> defenderParties,
@@ -97,8 +111,8 @@ public class BattleService {
         defenderParty.setHp(remainHp);
     }
 
-    private void useSkill(final Party attackerParty, final Party defenderParty, final List<Party> attackerParties, final List<Party> defenderParties,
-            final String attacker, final String defender) {
+    private SkillRecord useSkill(final Party attackerParty, final Party defenderParty, final List<Party> attackerParties,
+            final List<Party> defenderParties, final String attacker, final String defender) {
         final List<PartyGrid> atPartyGrids = Lists.newArrayList();
         for (final PartyGrid partyGrid : attackerParty.getPartyGrids()) {
             final Card card = partyGrid.getCard();
@@ -106,32 +120,46 @@ public class BattleService {
             final Skill skill = cardTemplate.getSkill();
             if (skill != null) {
                 atPartyGrids.add(partyGrid);
-                // skill.getProbability()
-                // final List<SkillOperation> operations = skill.getOperations();
-                // for (final SkillOperation operation : operations) {
-                // final SkillApplyParty skillApplyParty = operation.getSkillApplyParty();
-                //
-                // }
             }
         }
 
         Collections.sort(atPartyGrids, new PartyGridComparator());
+
         final PartyGrid partyGrid = atPartyGrids.size() > 0 ? atPartyGrids.get(0) : null;
 
         if (partyGrid != null) {
+            final SkillRecord skillRecord = new SkillRecord();
             final Card card = partyGrid.getCard();
             final CardTemplate cardTemplate = card.getCardTemplate();
             final Skill skill = cardTemplate.getSkill();
             final List<SkillOperation> operations = skill.getOperations();
+            skillRecord.setCardId(card.getId());
+            skillRecord.setName(skill.getName());
+            final List<SkillOperation> operationRecords = skillRecord.getOperations();
             System.out.println(cardTemplate.getName() + "发动机能：" + skill.getName());
             System.out.println("效果：" + skill.getName());
+            final StringBuilder effectStrs = new StringBuilder();
             for (final SkillOperation operation : operations) {
-                final List<Party> applyParties = getApplyParties(attackerParty, defenderParty, operation.getSkillApplyParty());
+                final SkillApplyParty skillApplyParty = operation.getSkillApplyParty();
+                final List<Party> applyParties = getApplyParties(attackerParty, defenderParty, skillApplyParty);
                 final SkillType skillType = operation.getSkillType();
                 final int sign = operation.getSign();
                 final int point = operation.getPoint();
                 final SkillPointAttribute pointAttribute = operation.getSkillPointAttribute();
                 final int changePoint = sign * point * getAttribute(pointAttribute, card) / 100;
+
+                final String effectStr = effectMap.get(String.valueOf(sign) + skillType);
+                if (effectStrs.length() > 0) {
+                    effectStrs.append("，");
+                }
+                effectStrs.append(String.format(effectStr, skillApplyParty.getDescription()));
+
+                final SkillOperation operationRecord = new SkillOperation();
+                operationRecord.setSign(sign);
+                operationRecord.setPoint(changePoint * sign);
+                operationRecord.setSkillApplyParty(operation.getSkillApplyParty());
+                operationRecord.setSkillType(skillType);
+                operationRecords.add(operationRecord);
 
                 for (final Party applyParty : applyParties) {
                     switch (skillType) {
@@ -147,7 +175,11 @@ public class BattleService {
                 }
 
             }
+            effectStrs.append("。");
+            skillRecord.setEffect(effectStrs.toString());
         }
+
+        return null;
 
     }
 

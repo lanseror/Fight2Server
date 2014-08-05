@@ -69,9 +69,9 @@ public class SkillAction extends BaseAction {
         skillDao.add(skill);
         for (int i = 0; i < points.length; i++) {
             final SkillOperation operation = new SkillOperation();
-            final int sign = signs[i];
-            final int point = points[i];
             final SkillType skillType = skillTypes[i];
+            final int sign = (skillType == SkillType.Defence ? 1 : signs[i]);
+            final int point = points[i];
             final SkillPointAttribute skillPointAttribute = skillPointAttributes[i];
             final SkillApplyParty skillApplyParty = skillApplyPartys[i];
             operation.setSign(sign);

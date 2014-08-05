@@ -62,8 +62,7 @@ public class ArenaAction extends BaseAction {
 
         final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo);
         final ActionContext context = ActionContext.getContext();
-        final String[] result = { battleService.fight() };
-        context.put("jsonMsg", new Gson().toJson(result));
+        context.put("jsonMsg", new Gson().toJson(battleService.fight()));
         return SUCCESS;
     }
 
