@@ -43,17 +43,20 @@ public class BattleService {
         this.attackerParties = attackerPartyInfo.getParties();
         this.defenderParties = defenderPartyInfo.getParties();
 
-        effectMap.put("-1" + SkillType.HP, "对%造成伤害");
-        effectMap.put("1" + SkillType.HP, "为%恢复生命值");
-        effectMap.put("-1" + SkillType.ATK, "降低%的攻击力");
-        effectMap.put("1" + SkillType.HP, "增加%的攻击力");
-        effectMap.put("1" + SkillType.Defence, "为%制造一个护盾");
-        effectMap.put("-1" + SkillType.Skip, "对%造成眩晕");
-        effectMap.put("1" + SkillType.Skip, "对%造成眩晕");
+        effectMap.put("-1" + SkillType.HP, "对%s造成伤害");
+        effectMap.put("1" + SkillType.HP, "为%s恢复生命值");
+        effectMap.put("-1" + SkillType.ATK, "降低%s的攻击力");
+        effectMap.put("1" + SkillType.HP, "增加%s的攻击力");
+        effectMap.put("1" + SkillType.Defence, "为%s制造一个护盾");
+        effectMap.put("-1" + SkillType.Skip, "对%s造成眩晕");
+        effectMap.put("1" + SkillType.Skip, "对%s造成眩晕");
 
         for (final Party party : attackerParties) {
             for (final PartyGrid partyGrid : party.getPartyGrids()) {
                 final Card card = partyGrid.getCard();
+                if (card == null) {
+                    continue;
+                }
                 final Skill skill = card.getCardTemplate().getSkill();
                 if (skill != null) {
                     randomMap.put(card, new Random());
@@ -70,6 +73,9 @@ public class BattleService {
         for (final Party party : defenderParties) {
             for (final PartyGrid partyGrid : party.getPartyGrids()) {
                 final Card card = partyGrid.getCard();
+                if (card == null) {
+                    continue;
+                }
                 final Skill skill = card.getCardTemplate().getSkill();
                 if (skill != null) {
                     randomMap.put(card, new Random());
@@ -84,72 +90,121 @@ public class BattleService {
     }
 
     public List<BattleRecord> fight() {
+
+        System.out.println("----初始数值----");
+        for (int i = 0; i < attackerParties.size(); i++) {
+            final Party party = attackerParties.get(i);
+            System.out.println(String.format("%s的team%s - HP:%s  ATK:%s, 护盾: %s", "Player1", party.getPartyNumber(), party.getHp(), party.getAtk(),
+                    party.getDefence()));
+
+        }
+        System.out.println();
+        for (int i = 0; i < defenderParties.size(); i++) {
+            final Party party = defenderParties.get(i);
+            System.out.println(String.format("%s的team%s - HP:%s  ATK:%s, 护盾: %s", "Player2", party.getPartyNumber(), party.getHp(), party.getAtk(),
+                    party.getDefence()));
+
+        }
+        System.out.println();
         System.out.println("----战斗开始！----");
+
+        final List<BattleRecord> battleRecords = Lists.newArrayList();
         while (getPartiesRemainHp(attackerParties) > 0 && getPartiesRemainHp(defenderParties) > 0) {
 
             for (int partyIndex = 0; partyIndex < 3; partyIndex++) {
-                // Attacker attack fist
+                // Self attack fist
                 if (partyIndex < attackerParties.size()) {
                     final Party attackerParty = attackerParties.get(partyIndex);
                     if (attackerParty.getHp() > 0) {
-                        for (final Party defenderParty : defenderParties) {
+                        final BattleRecord atkBattleRecord = new BattleRecord();
+                        battleRecords.add(atkBattleRecord);
+                        atkBattleRecord.setActionPlayer("Player1");
+                        atkBattleRecord.setAtkParty(partyIndex);
+                        final SkillRecord skillRecord = useSkill(attackerParty, attackerParties, defenderParties, "Player1", "Player2");
+                        atkBattleRecord.setSkill(skillRecord);
+                        for (int defenderIndex = 0; defenderIndex < defenderParties.size(); defenderIndex++) {
+                            final Party defenderParty = defenderParties.get(defenderIndex);
                             if (defenderParty.getHp() <= 0) {
                                 continue;
                             } else {
-                                attack(attackerParty, defenderParty, attackerParties, defenderParties, "你", defender.getName());
+                                atkBattleRecord.setDefenceParty(defenderIndex);
+                                final int atk = attack(attackerParty, defenderParty, attackerParties, defenderParties, "Player1", "Player2");
+                                atkBattleRecord.setAtk(atk);
                                 break;
                             }
                         }
-
                     }
-
                 }
 
-                // Defender attack
+                // Opponent attack
                 if (partyIndex < defenderParties.size()) {
                     final Party defenderParty = defenderParties.get(partyIndex);
                     if (defenderParty.getHp() > 0) {
-                        for (final Party attackerParty : attackerParties) {
+                        final BattleRecord dfcBattleRecord = new BattleRecord();
+                        battleRecords.add(dfcBattleRecord);
+                        dfcBattleRecord.setActionPlayer("Player2");
+                        dfcBattleRecord.setAtkParty(partyIndex);
+                        final SkillRecord skillRecord = useSkill(defenderParty, defenderParties, attackerParties, "Player2", "Player1");
+                        dfcBattleRecord.setSkill(skillRecord);
+                        for (int attackeIndex = 0; attackeIndex < attackerParties.size(); attackeIndex++) {
+                            final Party attackerParty = attackerParties.get(attackeIndex);
                             if (attackerParty.getHp() <= 0) {
                                 continue;
                             } else {
-                                attack(defenderParty, attackerParty, defenderParties, attackerParties, defender.getName(), "你");
+                                dfcBattleRecord.setDefenceParty(attackeIndex);
+                                final int atk = attack(defenderParty, attackerParty, defenderParties, attackerParties, "Player2", "Player1");
+                                dfcBattleRecord.setAtk(atk);
                                 break;
                             }
                         }
-
                     }
                 }
             }
 
         }
         System.out.println("----战斗结束！----");
-        final String winner = getPartiesRemainHp(attackerParties) > 0 ? "你" : defender.getName();
+        final String winner = getPartiesRemainHp(attackerParties) > 0 ? "Player1" : "Player2";
         System.out.println("----" + winner + "赢了！----");
-        return null;
+        return battleRecords;
     }
 
-    private void attack(final Party attackerParty, final Party defenderParty, final List<Party> attackerParties, final List<Party> defenderParties,
+    private int attack(final Party attackerParty, final Party defenderParty, final List<Party> attackerParties, final List<Party> defenderParties,
             final String attacker, final String defender) {
         // useSkill(attackerParty, defenderParty, attackerParties, defenderParties, attacker, defender);
 
+        for (int i = 0; i < attackerParties.size(); i++) {
+            final Party party = attackerParties.get(i);
+            System.out.println(String.format("%s的team%s - HP:%s  ATK:%s, 护盾: %s", attacker, party.getPartyNumber(), party.getHp(), party.getAtk(),
+                    party.getDefence()));
+
+        }
+
         final int hp = defenderParty.getHp();
         final int atk = attackerParty.getAtk();
-        final int reduceToHp = hp - atk;
-        final int remainHp = reduceToHp < 0 ? 0 : reduceToHp;
-
-        System.out.println(attacker + "的队伍" + attackerParty.getPartyNumber() + "对" + defender + "的队伍" + defenderParty.getPartyNumber() + "发起进攻，造成"
-                + atk + "点伤害.");
-        System.out.println(defender + "的队伍" + defenderParty.getPartyNumber() + "剩下" + remainHp + "点血.");
-
-        defenderParty.setHp(remainHp);
+        final int defence = defenderParty.getDefence();
+        final int changeDefence = defence - atk;
+        if (changeDefence > 0) {
+            defenderParty.setDefence(changeDefence);
+        } else {
+            defenderParty.setDefence(0);
+            final int changeHp = hp + changeDefence;
+            defenderParty.setHp(changeHp < 0 ? 0 : changeHp);
+        }
+        System.out.println(String.format("%s的team%s攻击%s的team%s造成伤害: %s", attacker, attackerParty.getPartyNumber(), defender,
+                defenderParty.getPartyNumber(), atk));
+        System.out.println();
+        System.out.println();
+        return atk;
     }
 
-    private SkillRecord useSkill(final Party attackerParty, final Party defenderParty, final List<Party> attackerParties,
-            final List<Party> defenderParties, final String attacker, final String defender) {
+    private SkillRecord useSkill(final Party selfParty, final List<Party> selfParties, final List<Party> opponentParties, final String attacker,
+            final String defender) {
         final List<PartyGrid> atPartyGrids = Lists.newArrayList();
-        for (final PartyGrid partyGrid : attackerParty.getPartyGrids()) {
+        for (final PartyGrid partyGrid : selfParty.getPartyGrids()) {
             final Card card = partyGrid.getCard();
+            if (card == null) {
+                continue;
+            }
             final CardTemplate cardTemplate = card.getCardTemplate();
             final Skill skill = cardTemplate.getSkill();
             if (skill != null) {
@@ -168,12 +223,10 @@ public class BattleService {
             skillRecord.setCardId(card.getId());
             skillRecord.setName(skill.getName());
             final List<SkillOperation> operationRecords = skillRecord.getOperations();
-            System.out.println(cardTemplate.getName() + "发动机能：" + skill.getName());
-            System.out.println("效果：" + skill.getName());
             final StringBuilder effectStrs = new StringBuilder();
             for (final SkillOperation operation : operations) {
                 final SkillApplyParty skillApplyParty = operation.getSkillApplyParty();
-                final List<Party> applyParties = getApplyParties(attackerParty, defenderParty, skillApplyParty);
+                final List<Party> applyParties = getApplyParties(selfParty, skillApplyParty, selfParties, opponentParties);
                 final SkillType skillType = operation.getSkillType();
                 final int sign = operation.getSign();
                 final int point = operation.getPoint();
@@ -209,18 +262,25 @@ public class BattleService {
                         } else {
                             applyParty.setHp(applyParty.getHp() + changePoint);
                         }
+                        break;
                     case ATK:
                         applyParty.setAtk(applyParty.getAtk() + changePoint);
+                        break;
                     case Defence:
                         applyParty.setDefence(applyParty.getDefence() + changePoint);
+                        break;
                     case Skip:
                         // TODO
+                        break;
                     }
                 }
 
             }
             effectStrs.append("。");
             skillRecord.setEffect(effectStrs.toString());
+            System.out.println(String.format("%s的team%s - %s发动技能：%s. 效果：%s", attacker, selfParty.getPartyNumber(), cardTemplate.getName(),
+                    skill.getName(), effectStrs.toString()));
+            return skillRecord;
         }
 
         return null;
@@ -254,24 +314,53 @@ public class BattleService {
 
     }
 
-    private List<Party> getApplyParties(final Party attackerParty, final Party defenderParty, final SkillApplyParty skillApplyParty) {
+    private List<Party> getApplyParties(final Party selfParty, final SkillApplyParty skillApplyParty, final List<Party> selfParties,
+            final List<Party> opponentParties) {
 
         switch (skillApplyParty) {
         case Self:
-            return Lists.newArrayList(attackerParty);
+            return Lists.newArrayList(selfParty);
         case Opponent:
-            return Lists.newArrayList(defenderParty);
+            return Lists.newArrayList(getFirstAliveParty(opponentParties));
         case Leader:
-            return Lists.newArrayList(attackerParties.get(0));
+            return getLeaderParty(selfParties);
         case OpponentLeader:
-            return Lists.newArrayList(defenderParties.get(0));
+            return getLeaderParty(opponentParties);
         case SelfAll:
-            return attackerParties;
+            return getAliveParties(selfParties);
         case OpponentAll:
-            return defenderParties;
+            return getAliveParties(opponentParties);
         default:
-            return Lists.newArrayList(attackerParty);
+            return Lists.newArrayList(selfParty);
         }
+    }
+
+    private List<Party> getLeaderParty(final List<Party> parties) {
+        final List<Party> leaderParties = Lists.newArrayList();
+        final Party leaderParty = parties.get(0);
+        if (leaderParty.getHp() > 0) {
+            leaderParties.add(leaderParty);
+        }
+        return leaderParties;
+    }
+
+    private Party getFirstAliveParty(final List<Party> parties) {
+        for (final Party party : parties) {
+            if (party.getHp() > 0) {
+                return party;
+            }
+        }
+        return null;
+    }
+
+    private List<Party> getAliveParties(final List<Party> parties) {
+        final List<Party> aliveParties = Lists.newArrayList();
+        for (final Party party : parties) {
+            if (party.getHp() > 0) {
+                aliveParties.add(party);
+            }
+        }
+        return aliveParties;
     }
 
     private class PartyGridComparator implements Comparator<PartyGrid> {

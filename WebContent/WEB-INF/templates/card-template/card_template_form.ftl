@@ -163,8 +163,8 @@
                         <td>${cardTemplate.skill.name}</td>
                     </tr>
                     <tr>
-                        <td><b>触发机率(万分之*)</b></td>
-                        <td>${cardTemplate.skill.probability}</td>
+                        <td><b>触发机率(百分之*)</b></td>
+                        <td>${cardTemplate.skill.probability}%</td>
                     </tr>
                     <tr height="150px">
                         <td>

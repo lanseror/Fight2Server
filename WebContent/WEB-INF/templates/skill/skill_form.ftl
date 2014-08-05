@@ -16,8 +16,8 @@
         <td><@s.textfield size="80" name="skill.name" cssClass="required max-length-80" /></td>
     </tr>
     <tr>
-        <td><b>触发机率(万分之*)</b></td>
-        <td><@s.textfield size="80" name="skill.probability" cssClass="required int-range-0-10000" /></td>
+        <td><b>触发机率(百分之*)</b></td>
+        <td><@s.textfield size="80" name="skill.probability" cssClass="required int-range-0-100" />%</td>
     </tr>
     <tr height="150px">
         <td>
