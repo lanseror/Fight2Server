@@ -8,10 +8,12 @@ import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.CardDao;
+import com.fight2.dao.CardImageDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Card;
+import com.fight2.model.CardImage;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
@@ -30,6 +32,8 @@ public class PartyAction extends BaseAction {
     private PartyInfoDao partyInfoDao;
     @Autowired
     private CardDao cardDao;
+    @Autowired
+    private CardImageDao cardImageDao;
     private Party party;
     private List<Party> datas;
     private int id;
@@ -61,6 +65,51 @@ public class PartyAction extends BaseAction {
                     cards.add(-1);
                 }
 
+            }
+            voParties.add(voParty);
+        }
+        voPartyInfo.setParties(voParties);
+        jsonMsg = new Gson().toJson(voPartyInfo);
+        return SUCCESS;
+    }
+
+    @Action(value = "user-parties", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String userParties() {
+        final User user = userDao.get(id);
+        final PartyInfo poPartyInfo = partyInfoDao.getByUser(user);
+        final List<Party> poParties = poPartyInfo.getParties();
+        final PartyInfo voPartyInfo = new PartyInfo();
+        voPartyInfo.setId(poPartyInfo.getId());
+        voPartyInfo.setAtk(poPartyInfo.getAtk());
+        voPartyInfo.setHp(poPartyInfo.getHp());
+        final List<Party> voParties = Lists.newArrayList();
+        for (final Party poParty : poParties) {
+            final Party voParty = new Party();
+            voParty.setId(poParty.getId());
+            voParty.setPartyNumber(poParty.getPartyNumber());
+            voParty.setAtk(poParty.getAtk());
+            voParty.setHp(poParty.getHp());
+            final List<PartyGrid> voPartyGrids = Lists.newArrayList();
+            voParty.setPartyGrids(voPartyGrids);
+            for (final PartyGrid partyGrid : poParty.getPartyGrids()) {
+                final PartyGrid voPartyGrid = new PartyGrid();
+                voPartyGrid.setId(partyGrid.getId());
+                voPartyGrid.setGridNumber(partyGrid.getGridNumber());
+                final Card card = partyGrid.getCard();
+                if (card != null) {
+                    final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(),
+                            card.getCardTemplate());
+                    final Card voCard = new Card();
+                    voCard.setId(card.getId());
+                    voCard.setAtk(card.getAtk());
+                    voCard.setAvatar(avatarObj.getUrl());
+                    voCard.setHp(card.getHp());
+                    voCard.setStar(card.getStar());
+                    voCard.setTier(card.getTier());
+                    voCard.setLevel(card.getLevel());
+                    voPartyGrid.setCard(voCard);
+                }
+                voPartyGrids.add(voPartyGrid);
             }
             voParties.add(voParty);
         }
@@ -188,6 +237,14 @@ public class PartyAction extends BaseAction {
 
     public void setUserDao(final UserDao userDao) {
         this.userDao = userDao;
+    }
+
+    public CardImageDao getCardImageDao() {
+        return cardImageDao;
+    }
+
+    public void setCardImageDao(final CardImageDao cardImageDao) {
+        this.cardImageDao = cardImageDao;
     }
 
 }
