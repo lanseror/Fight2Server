@@ -214,13 +214,14 @@ public class BattleService {
 
         Collections.sort(atPartyGrids, new PartyGridComparator());
 
-        final Card card = getSkillCard(atPartyGrids);
-        if (card != null) {
+        final PartyGrid skillPartyGrid = getSkillCard(atPartyGrids);
+        if (skillPartyGrid != null && skillPartyGrid.getCard() != null) {
+            final Card card = skillPartyGrid.getCard();
             final SkillRecord skillRecord = new SkillRecord();
             final CardTemplate cardTemplate = card.getCardTemplate();
             final Skill skill = cardTemplate.getSkill();
             final List<SkillOperation> operations = skill.getOperations();
-            skillRecord.setCardId(card.getId());
+            skillRecord.setCardIndex(skillPartyGrid.getGridNumber());
             skillRecord.setName(skill.getName());
             final List<SkillOperation> operationRecords = skillRecord.getOperations();
             final StringBuilder effectStrs = new StringBuilder();
@@ -287,19 +288,19 @@ public class BattleService {
 
     }
 
-    private Card getSkillCard(final List<PartyGrid> atPartyGrids) {
-        Card skillCard = null;
+    private PartyGrid getSkillCard(final List<PartyGrid> atPartyGrids) {
+        PartyGrid skillPartyGrid = null;
         for (final PartyGrid partyGrid : atPartyGrids) {
             final Card card = partyGrid.getCard();
             final Random random = randomMap.get(card);
             final int[] randomGrids = randomGridMap.get(card);
             if (randomGrids[random.nextInt(randomGrids.length)] == 1) {
-                skillCard = card;
+                skillPartyGrid = partyGrid;
                 break;
             }
         }
 
-        return skillCard;
+        return skillPartyGrid;
     }
 
     private int getAttribute(final SkillPointAttribute pointAttribute, final Card card) {

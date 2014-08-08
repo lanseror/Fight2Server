@@ -5,17 +5,17 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public class SkillRecord {
-    private int cardId;
+    private int cardIndex;
     private String name;
     private String effect;
     private final List<SkillOperation> operations = Lists.newArrayList();
 
-    public int getCardId() {
-        return cardId;
+    public int getCardIndex() {
+        return cardIndex;
     }
 
-    public void setCardId(final int cardId) {
-        this.cardId = cardId;
+    public void setCardIndex(final int cardIndex) {
+        this.cardIndex = cardIndex;
     }
 
     public String getName() {
