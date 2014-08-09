@@ -39,7 +39,7 @@ public class ArenaAction extends BaseAction {
         final List<User> datas = userDao.list();
         final List<User> competitors = Lists.newArrayList();
         for (final User user : datas) {
-            if (user.getId() != currentUser.getId()) {
+            if (user.getId() != currentUser.getId() && !user.isDisabled()) {
                 final User competitor = new User();
                 competitor.setId(user.getId());
                 competitor.setAvatar(user.getAvatar());

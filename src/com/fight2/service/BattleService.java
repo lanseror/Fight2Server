@@ -120,7 +120,6 @@ public class BattleService {
                     final Party attackerParty = attackerParties.get(partyIndex);
                     if (attackerParty.getHp() > 0) {
                         final BattleRecord atkBattleRecord = new BattleRecord();
-                        battleRecords.add(atkBattleRecord);
                         atkBattleRecord.setActionPlayer("Player1");
                         atkBattleRecord.setAtkParty(partyIndex);
                         final SkillRecord skillRecord = useSkill(attackerParty, attackerParties, defenderParties, "Player1", "Player2");
@@ -133,6 +132,7 @@ public class BattleService {
                                 atkBattleRecord.setDefenceParty(defenderIndex);
                                 final int atk = attack(attackerParty, defenderParty, attackerParties, defenderParties, "Player1", "Player2");
                                 atkBattleRecord.setAtk(atk);
+                                battleRecords.add(atkBattleRecord);
                                 break;
                             }
                         }
@@ -144,7 +144,6 @@ public class BattleService {
                     final Party defenderParty = defenderParties.get(partyIndex);
                     if (defenderParty.getHp() > 0) {
                         final BattleRecord dfcBattleRecord = new BattleRecord();
-                        battleRecords.add(dfcBattleRecord);
                         dfcBattleRecord.setActionPlayer("Player2");
                         dfcBattleRecord.setAtkParty(partyIndex);
                         final SkillRecord skillRecord = useSkill(defenderParty, defenderParties, attackerParties, "Player2", "Player1");
@@ -157,6 +156,7 @@ public class BattleService {
                                 dfcBattleRecord.setDefenceParty(attackeIndex);
                                 final int atk = attack(defenderParty, attackerParty, defenderParties, attackerParties, "Player2", "Player1");
                                 dfcBattleRecord.setAtk(atk);
+                                battleRecords.add(dfcBattleRecord);
                                 break;
                             }
                         }

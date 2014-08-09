@@ -10,6 +10,7 @@
         <td>用户名</td>
         <td>名字</td>
         <td>拥有卡片数</td>
+        <td>状态</td>
         <td>等级</td>
         <td>操作</td>
     </tr>
@@ -19,8 +20,15 @@
         <td>${entry.username?default("")}</td>
         <td>${entry.name?default("")}</td>
         <td>${entry.cardCount?default("")}</td>
+        <td><#if entry.isDisabled()>停用<#else>正常</#if></td>
         <td>${entry.level?default("")}</td>
-        <td><a href="<@s.url namespace="/user" action="view"><@s.param name="id" value="${entry.id}" /></@s.url>">查看</a></td>
+        <td>
+        <#if entry.isDisabled()>
+            <a href="<@s.url namespace="/user" action="enable"><@s.param name="id" value="${entry.id}" /></@s.url>">启用</a>
+        <#else>
+            <a href="<@s.url namespace="/user" action="disable"><@s.param name="id" value="${entry.id}" /></@s.url>">停用</a>
+        </#if>
+        </td>
     </tr>
      </#list>
 </table>

@@ -109,6 +109,22 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "disable", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String disable() {
+        user = userDao.get(id);
+        user.setDisabled(true);
+        userDao.update(user);
+        return SUCCESS;
+    }
+
+    @Action(value = "enable", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String enable() {
+        user = userDao.get(id);
+        user.setDisabled(false);
+        userDao.update(user);
+        return SUCCESS;
+    }
+
     @Action(value = "save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = { @Result(
             name = SUCCESS, location = "list", type = "redirect") })
     public String save() {

@@ -18,6 +18,7 @@ public class User extends BaseEntity {
     private int level = 1;
     private PartyInfo partyInfo;
     private List<Card> cards;
+    private boolean isDisabled;
 
     public String getInstallUUID() {
         return installUUID;
@@ -95,6 +96,14 @@ public class User extends BaseEntity {
 
     public void setCards(final List<Card> cards) {
         this.cards = cards;
+    }
+
+    public boolean isDisabled() {
+        return isDisabled;
+    }
+
+    public void setDisabled(final boolean isDisabled) {
+        this.isDisabled = isDisabled;
     }
 
 }
