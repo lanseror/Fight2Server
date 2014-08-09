@@ -46,7 +46,8 @@ public class BattleService {
         effectMap.put("-1" + SkillType.HP, "对%s造成伤害");
         effectMap.put("1" + SkillType.HP, "为%s恢复生命值");
         effectMap.put("-1" + SkillType.ATK, "降低%s的攻击力");
-        effectMap.put("1" + SkillType.HP, "增加%s的攻击力");
+        effectMap.put("1" + SkillType.ATK, "增加%s的攻击力");
+        effectMap.put("-1" + SkillType.Defence, "为%s制造一个护盾");
         effectMap.put("1" + SkillType.Defence, "为%s制造一个护盾");
         effectMap.put("-1" + SkillType.Skip, "对%s造成眩晕");
         effectMap.put("1" + SkillType.Skip, "对%s造成眩晕");
@@ -94,6 +95,7 @@ public class BattleService {
         System.out.println("----初始数值----");
         for (int i = 0; i < attackerParties.size(); i++) {
             final Party party = attackerParties.get(i);
+            party.setFullHp(party.getHp());
             System.out.println(String.format("%s的team%s - HP:%s  ATK:%s, 护盾: %s", "Player1", party.getPartyNumber(), party.getHp(), party.getAtk(),
                     party.getDefence()));
 
@@ -101,6 +103,7 @@ public class BattleService {
         System.out.println();
         for (int i = 0; i < defenderParties.size(); i++) {
             final Party party = defenderParties.get(i);
+            party.setFullHp(party.getHp());
             System.out.println(String.format("%s的team%s - HP:%s  ATK:%s, 护盾: %s", "Player2", party.getPartyNumber(), party.getHp(), party.getAtk(),
                     party.getDefence()));
 
@@ -261,14 +264,17 @@ public class BattleService {
                             }
 
                         } else {
-                            applyParty.setHp(applyParty.getHp() + changePoint);
+                            final int currentHp = applyParty.getHp();
+                            final int fullHp = applyParty.getFullHp();
+                            final int toSetHp = currentHp + changePoint > fullHp ? fullHp : currentHp + changePoint;
+                            applyParty.setHp(toSetHp);
                         }
                         break;
                     case ATK:
                         applyParty.setAtk(applyParty.getAtk() + changePoint);
                         break;
                     case Defence:
-                        applyParty.setDefence(applyParty.getDefence() + changePoint);
+                        applyParty.setDefence(applyParty.getDefence() + Math.abs(changePoint));
                         break;
                     case Skip:
                         // TODO
@@ -317,12 +323,11 @@ public class BattleService {
 
     private List<Party> getApplyParties(final Party selfParty, final SkillApplyParty skillApplyParty, final List<Party> selfParties,
             final List<Party> opponentParties) {
-
         switch (skillApplyParty) {
         case Self:
             return Lists.newArrayList(selfParty);
         case Opponent:
-            return Lists.newArrayList(getFirstAliveParty(opponentParties));
+            return getFirstAliveParty(opponentParties);
         case Leader:
             return getLeaderParty(selfParties);
         case OpponentLeader:
@@ -345,13 +350,15 @@ public class BattleService {
         return leaderParties;
     }
 
-    private Party getFirstAliveParty(final List<Party> parties) {
+    private List<Party> getFirstAliveParty(final List<Party> parties) {
+        final List<Party> firstAliveParty = Lists.newArrayList();
         for (final Party party : parties) {
             if (party.getHp() > 0) {
-                return party;
+                firstAliveParty.add(party);
+                break;
             }
         }
-        return null;
+        return firstAliveParty;
     }
 
     private List<Party> getAliveParties(final List<Party> parties) {

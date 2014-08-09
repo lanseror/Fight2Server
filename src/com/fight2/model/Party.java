@@ -17,6 +17,8 @@ public class Party extends BaseEntity {
 
     private int hp;
 
+    private int fullHp;
+
     private int atk;
 
     private int defence;
@@ -41,6 +43,15 @@ public class Party extends BaseEntity {
 
     public void setHp(final int hp) {
         this.hp = hp;
+    }
+
+    @Transient
+    public int getFullHp() {
+        return fullHp;
+    }
+
+    public void setFullHp(final int fullHp) {
+        this.fullHp = fullHp;
     }
 
     public int getAtk() {
