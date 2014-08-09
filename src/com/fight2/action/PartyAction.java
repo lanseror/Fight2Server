@@ -150,7 +150,9 @@ public class PartyAction extends BaseAction {
                     partyAtk += card.getAtk();
                     partyHp += card.getHp();
                     if (avatar == null) {
-                        avatar = card.getAvatar();
+                        final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(),
+                                card.getCardTemplate());
+                        avatar = avatarObj.getUrl();
                     }
                 } else {
                     partyGrid.setCard(null);
