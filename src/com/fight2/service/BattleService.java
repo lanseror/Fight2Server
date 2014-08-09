@@ -124,6 +124,7 @@ public class BattleService {
                         atkBattleRecord.setAtkParty(partyIndex);
                         final SkillRecord skillRecord = useSkill(attackerParty, attackerParties, defenderParties, "Player1", "Player2");
                         atkBattleRecord.setSkill(skillRecord);
+                        battleRecords.add(atkBattleRecord);
                         for (int defenderIndex = 0; defenderIndex < defenderParties.size(); defenderIndex++) {
                             final Party defenderParty = defenderParties.get(defenderIndex);
                             if (defenderParty.getHp() <= 0) {
@@ -132,9 +133,11 @@ public class BattleService {
                                 atkBattleRecord.setDefenceParty(defenderIndex);
                                 final int atk = attack(attackerParty, defenderParty, attackerParties, defenderParties, "Player1", "Player2");
                                 atkBattleRecord.setAtk(atk);
-                                battleRecords.add(atkBattleRecord);
                                 break;
                             }
+                        }
+                        if (getPartiesRemainHp(defenderParties) <= 0) {
+                            break;
                         }
                     }
                 }
@@ -148,6 +151,7 @@ public class BattleService {
                         dfcBattleRecord.setAtkParty(partyIndex);
                         final SkillRecord skillRecord = useSkill(defenderParty, defenderParties, attackerParties, "Player2", "Player1");
                         dfcBattleRecord.setSkill(skillRecord);
+                        battleRecords.add(dfcBattleRecord);
                         for (int attackeIndex = 0; attackeIndex < attackerParties.size(); attackeIndex++) {
                             final Party attackerParty = attackerParties.get(attackeIndex);
                             if (attackerParty.getHp() <= 0) {
@@ -156,9 +160,11 @@ public class BattleService {
                                 dfcBattleRecord.setDefenceParty(attackeIndex);
                                 final int atk = attack(defenderParty, attackerParty, defenderParties, attackerParties, "Player2", "Player1");
                                 dfcBattleRecord.setAtk(atk);
-                                battleRecords.add(dfcBattleRecord);
                                 break;
                             }
+                        }
+                        if (getPartiesRemainHp(attackerParties) <= 0) {
+                            break;
                         }
                     }
                 }
