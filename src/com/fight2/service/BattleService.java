@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.fight2.model.BattleRecord;
+import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.Party;
@@ -90,7 +91,7 @@ public class BattleService {
         }
     }
 
-    public List<BattleRecord> fight() {
+    public BattleResult fight() {
 
         System.out.println("----初始数值----");
         for (int i = 0; i < attackerParties.size(); i++) {
@@ -174,7 +175,11 @@ public class BattleService {
         System.out.println("----战斗结束！----");
         final String winner = getPartiesRemainHp(attackerParties) > 0 ? "Player1" : "Player2";
         System.out.println("----" + winner + "赢了！----");
-        return battleRecords;
+        final BattleResult battleResult = new BattleResult();
+        battleResult.setBattleRecord(battleRecords);
+        battleResult.setWinner(getPartiesRemainHp(attackerParties) > 0);
+
+        return battleResult;
     }
 
     private int attack(final Party attackerParty, final Party defenderParty, final List<Party> attackerParties, final List<Party> defenderParties,
