@@ -58,6 +58,8 @@ public class UserAction extends BaseAction {
             user.setInstallUUID(installUUID);
             user.setName("User" + System.currentTimeMillis());
             userDao.add(user);
+            user.setName("User" + user.getId());
+            userDao.update(user);
             final PartyInfo partyInfo = new PartyInfo();
             partyInfo.setUser(user);
             partyInfoDao.add(partyInfo);
