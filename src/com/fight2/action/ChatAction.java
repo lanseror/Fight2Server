@@ -1,9 +1,10 @@
 package com.fight2.action;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +32,14 @@ public class ChatAction extends BaseAction {
     public String send() {
         final User user = getLoginUser();
         final Calendar calendar = Calendar.getInstance();
-        final Date datetime = calendar.getTime();
         final int dateKey = calendar.get(Calendar.DAY_OF_MONTH);
+        final DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        final String dateString = dateFormat.format(calendar.getTime());
         final List<ChatMessage> messages = MSG_DATA.containsKey(dateKey) ? MSG_DATA.get(dateKey) : newDayMessage(calendar, dateKey);
         final ChatMessage chatMessage = new ChatMessage();
         chatMessage.setSender(user.getName());
         chatMessage.setContent(msg);
-        chatMessage.setDate(datetime);
+        chatMessage.setDate(dateString);
         messages.add(chatMessage);
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", "ok");
@@ -46,22 +48,28 @@ public class ChatAction extends BaseAction {
 
     @Action(value = "get", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String get() {
+        final Map<String, Object> data = Maps.newHashMap();
         final ActionContext context = ActionContext.getContext();
         final Calendar calendar = Calendar.getInstance();
         final int dateKey = calendar.get(Calendar.DAY_OF_MONTH);
         final List<ChatMessage> messages = MSG_DATA.containsKey(dateKey) ? MSG_DATA.get(dateKey) : previousDayMessage(calendar);
         final int msgSize = messages.size();
-        if (msgSize == 0) {
-            context.put("jsonMsg", new Gson().toJson(Collections.EMPTY_LIST));
+        if (msgSize == 0 || index < -1) {
+            data.put("index", -1);
+            data.put("msg", Collections.EMPTY_LIST);
         } else if (index < msgSize - MAX_MSG_SIZE) {
             final List<ChatMessage> subMessages = msgSize > MAX_MSG_SIZE ? messages.subList(msgSize - MAX_MSG_SIZE, msgSize) : messages;
-            context.put("jsonMsg", new Gson().toJson(subMessages));
+            data.put("index", msgSize - 1);
+            data.put("msg", subMessages);
         } else if (index < msgSize - 1) {
             final List<ChatMessage> subMessages = messages.subList(index + 1, msgSize);
-            context.put("jsonMsg", new Gson().toJson(subMessages));
+            data.put("index", msgSize - 1);
+            data.put("msg", subMessages);
         } else {
-            context.put("jsonMsg", new Gson().toJson(Collections.EMPTY_LIST));
+            data.put("index", msgSize - 1);
+            data.put("msg", Collections.EMPTY_LIST);
         }
+        context.put("jsonMsg", new Gson().toJson(data));
         return SUCCESS;
     }
 
