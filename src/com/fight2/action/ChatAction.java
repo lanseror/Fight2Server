@@ -23,7 +23,8 @@ import com.opensymphony.xwork2.ActionContext;
 public class ChatAction extends BaseAction {
     private static final long serialVersionUID = 5916134694406462553L;
     private static final int MAX_MSG_SIZE = 1000;
-    private static final Map<Integer, List<ChatMessage>> MSG_DATA = Maps.newConcurrentMap();
+    private static final Map<Integer, List<ChatMessage>> MSG_DATA = Maps.newConcurrentMap();// In the future we will use msg id in db for index.
+    private static final Map<Integer, Integer> MSG_USER_INDEX = Maps.newConcurrentMap();
 
     private String msg;
     private int index;
@@ -54,15 +55,17 @@ public class ChatAction extends BaseAction {
         final int dateKey = calendar.get(Calendar.DAY_OF_MONTH);
         final List<ChatMessage> messages = MSG_DATA.containsKey(dateKey) ? MSG_DATA.get(dateKey) : previousDayMessage(calendar);
         final int msgSize = messages.size();
-        if (msgSize == 0 || index < -1) {
+
+        final int userIndex = getUserIndex(index);
+        if (msgSize == 0) {
             data.put("index", -1);
             data.put("msg", Collections.EMPTY_LIST);
-        } else if (index < msgSize - MAX_MSG_SIZE) {
+        } else if (userIndex < msgSize - MAX_MSG_SIZE) {
             final List<ChatMessage> subMessages = msgSize > MAX_MSG_SIZE ? messages.subList(msgSize - MAX_MSG_SIZE, msgSize) : messages;
             data.put("index", msgSize - 1);
             data.put("msg", subMessages);
-        } else if (index < msgSize - 1) {
-            final List<ChatMessage> subMessages = messages.subList(index + 1, msgSize);
+        } else if (userIndex < msgSize - 1) {
+            final List<ChatMessage> subMessages = messages.subList(userIndex + 1, msgSize);
             data.put("index", msgSize - 1);
             data.put("msg", subMessages);
         } else {
@@ -71,6 +74,26 @@ public class ChatAction extends BaseAction {
         }
         context.put("jsonMsg", new Gson().toJson(data));
         return SUCCESS;
+    }
+
+    private int getUserIndex(final int index) {
+        final User user = getLoginUser();
+        final int userId = user.getId();
+        final Integer userIndex = MSG_USER_INDEX.get(userId);
+        if (userIndex == null) {
+            final int initIndex = -1;
+            MSG_USER_INDEX.put(userId, initIndex);
+            return initIndex;
+        } else {
+            if (index > userIndex) {
+                MSG_USER_INDEX.put(userId, index);
+                return index;
+            } else {
+                return userIndex;
+            }
+
+        }
+
     }
 
     private static synchronized List<ChatMessage> previousDayMessage(final Calendar calendar) {
