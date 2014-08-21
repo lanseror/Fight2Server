@@ -7,6 +7,8 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.ArenaDao;
+import com.fight2.dao.ArenaRankingDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
@@ -21,6 +23,10 @@ import com.opensymphony.xwork2.ActionContext;
 @Namespace("/arena")
 public class ArenaAction extends BaseAction {
     private static final long serialVersionUID = -4473064014262040889L;
+    @Autowired
+    private ArenaDao arenaDao;
+    @Autowired
+    private ArenaRankingDao arenaRankingDao;
     @Autowired
     private UserDao userDao;
     @Autowired
@@ -124,6 +130,22 @@ public class ArenaAction extends BaseAction {
 
     public void setPartyGridDao(final PartyGridDao partyGridDao) {
         this.partyGridDao = partyGridDao;
+    }
+
+    public ArenaDao getArenaDao() {
+        return arenaDao;
+    }
+
+    public void setArenaDao(final ArenaDao arenaDao) {
+        this.arenaDao = arenaDao;
+    }
+
+    public ArenaRankingDao getArenaRankingDao() {
+        return arenaRankingDao;
+    }
+
+    public void setArenaRankingDao(final ArenaRankingDao arenaRankingDao) {
+        this.arenaRankingDao = arenaRankingDao;
     }
 
 }
