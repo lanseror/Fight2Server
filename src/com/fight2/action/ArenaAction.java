@@ -2,7 +2,11 @@ package com.fight2.action;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +17,8 @@ import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
+import com.fight2.model.Arena;
+import com.fight2.model.BaseEntity;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.service.BattleService;
@@ -35,8 +41,8 @@ public class ArenaAction extends BaseAction {
     private PartyDao partyDao;
     @Autowired
     private PartyGridDao partyGridDao;
-    private User user;
-    private List<User> datas;
+    private List<Arena> datas;
+    private Arena arena;
     private int id;
 
     @Action(value = "competitors", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
@@ -72,6 +78,53 @@ public class ArenaAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "list", results = { @Result(name = SUCCESS, location = "arena_list.ftl") })
+    public String list() {
+        datas = arenaDao.list();
+        return SUCCESS;
+    }
+
+    @Action(value = "add", results = { @Result(name = SUCCESS, location = "arena_form.ftl") })
+    public String add() {
+        return SUCCESS;
+    }
+
+    @Action(value = "edit", results = { @Result(name = SUCCESS, location = "arena_form.ftl") })
+    public String edit() {
+        arena = arenaDao.get(id);
+        return SUCCESS;
+    }
+
+    @Action(value = "save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = { @Result(
+            name = SUCCESS, location = "list", type = "redirect") })
+    public String save() {
+        final ActionContext context = ActionContext.getContext();
+        final HttpServletRequest request = ServletActionContext.getRequest();
+        if (arena.getId() == BaseEntity.EMPTY_ID) {
+            return createSave();
+        } else {
+            return editSave();
+        }
+    }
+
+    private String createSave() {
+        arenaDao.add(arena);
+        return SUCCESS;
+    }
+
+    private String editSave() {
+        arenaDao.update(arena);
+        return SUCCESS;
+    }
+
+    public Arena getArena() {
+        return arena;
+    }
+
+    public void setArena(final Arena arena) {
+        this.arena = arena;
+    }
+
     public UserDao getUserDao() {
         return userDao;
     }
@@ -80,19 +133,11 @@ public class ArenaAction extends BaseAction {
         this.userDao = userDao;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(final User user) {
-        this.user = user;
-    }
-
-    public List<User> getDatas() {
+    public List<Arena> getDatas() {
         return datas;
     }
 
-    public void setDatas(final List<User> datas) {
+    public void setDatas(final List<Arena> datas) {
         this.datas = datas;
     }
 

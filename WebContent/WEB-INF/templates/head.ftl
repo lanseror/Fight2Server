@@ -12,7 +12,7 @@
     <script type="text/javascript" src="<@s.url value="/js/lib/jquery.js" />"></script>
 
     <#assign sj=JspTaglibs["/struts-jquery-tags"]>
-    <@sj.head />
+    <@sj.head locale="cn" />
   </head>
 <body>
 <h3>
