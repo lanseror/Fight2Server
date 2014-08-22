@@ -2,9 +2,7 @@ package com.fight2.action;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -12,10 +10,11 @@ import java.util.Random;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.ChatMessageDao;
 import com.fight2.model.ChatMessage;
 import com.fight2.model.User;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
@@ -24,9 +23,11 @@ import com.opensymphony.xwork2.ActionContext;
 public class ChatAction extends BaseAction {
     private static final long serialVersionUID = 5916134694406462553L;
     private static final int MAX_MSG_SIZE = 1000;
-    private static final Map<Integer, List<ChatMessage>> MSG_DATA = Maps.newConcurrentMap();// In the future we will use msg id in db for index.
     private static final Map<Integer, Integer> MSG_USER_INDEX = Maps.newConcurrentMap();
 
+    @Autowired
+    private ChatMessageDao chatMessageDao;
+    private List<ChatMessage> datas;
     private String msg;
     private int index;
 
@@ -37,15 +38,13 @@ public class ChatAction extends BaseAction {
     public String send() {
         final User user = getLoginUser();
         final Calendar calendar = Calendar.getInstance();
-        final int dateKey = calendar.get(Calendar.DAY_OF_MONTH);
         final DateFormat dateFormat = new SimpleDateFormat("HH:mm");
         final String dateString = dateFormat.format(calendar.getTime());
-        final List<ChatMessage> messages = MSG_DATA.containsKey(dateKey) ? MSG_DATA.get(dateKey) : newDayMessage(calendar, dateKey);
         final ChatMessage chatMessage = new ChatMessage();
         chatMessage.setSender(user.getName());
         chatMessage.setContent(msg);
         chatMessage.setDate(dateString);
-        messages.add(chatMessage);
+        chatMessageDao.add(chatMessage);
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", "ok");
         return SUCCESS;
@@ -53,12 +52,9 @@ public class ChatAction extends BaseAction {
 
     @Action(value = "test", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String test() {
-
         final Calendar calendar = Calendar.getInstance();
-        final int dateKey = calendar.get(Calendar.DAY_OF_MONTH);
         final DateFormat dateFormat = new SimpleDateFormat("HH:mm");
         final String dateString = dateFormat.format(calendar.getTime());
-        final List<ChatMessage> messages = MSG_DATA.containsKey(dateKey) ? MSG_DATA.get(dateKey) : newDayMessage(calendar, dateKey);
         for (int i = 0; i < 100; i++) {
             final ChatMessage chatMessage = new ChatMessage();
             chatMessage.setSender("Chesley");
@@ -69,7 +65,7 @@ public class ChatAction extends BaseAction {
             final String content = String.valueOf(chars);
             chatMessage.setContent(content);
             chatMessage.setDate(dateString);
-            messages.add(chatMessage);
+            chatMessageDao.add(chatMessage);
         }
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", "ok");
@@ -84,27 +80,22 @@ public class ChatAction extends BaseAction {
     public String get() {
         final Map<String, Object> data = Maps.newHashMap();
         final ActionContext context = ActionContext.getContext();
-        final Calendar calendar = Calendar.getInstance();
-        final int dateKey = calendar.get(Calendar.DAY_OF_MONTH);
-        final List<ChatMessage> messages = MSG_DATA.containsKey(dateKey) ? MSG_DATA.get(dateKey) : previousDayMessage(calendar);
+        index = getUserIndex(index);
+
+        final int maxId = chatMessageDao.getMaxId();
+        if (maxId - index > MAX_MSG_SIZE) {
+            index = maxId - index;
+        }
+        final List<ChatMessage> messages = chatMessageDao.listFromId(index, MAX_MSG_SIZE);
         final int msgSize = messages.size();
 
-        final int userIndex = getUserIndex(index);
         if (msgSize == 0) {
-            data.put("index", -1);
-            data.put("msg", Collections.EMPTY_LIST);
-        } else if (userIndex < msgSize - MAX_MSG_SIZE) {
-            final List<ChatMessage> subMessages = msgSize > MAX_MSG_SIZE ? messages.subList(msgSize - MAX_MSG_SIZE, msgSize) : messages;
-            data.put("index", msgSize - 1);
-            data.put("msg", subMessages);
-        } else if (userIndex < msgSize - 1) {
-            final List<ChatMessage> subMessages = messages.subList(userIndex + 1, msgSize);
-            data.put("index", msgSize - 1);
-            data.put("msg", subMessages);
+            data.put("index", index);
         } else {
-            data.put("index", msgSize - 1);
-            data.put("msg", Collections.EMPTY_LIST);
+            final ChatMessage lastMsg = messages.get(msgSize - 1);
+            data.put("index", lastMsg.getId());
         }
+        data.put("msg", messages);
         context.put("jsonMsg", new Gson().toJson(data));
         return SUCCESS;
     }
@@ -129,29 +120,6 @@ public class ChatAction extends BaseAction {
 
     }
 
-    private static synchronized List<ChatMessage> previousDayMessage(final Calendar calendar) {
-        calendar.add(Calendar.DAY_OF_MONTH, -1);
-        final int oldDate = calendar.get(Calendar.DAY_OF_MONTH);
-        return MSG_DATA.containsKey(oldDate) ? MSG_DATA.get(oldDate) : new ArrayList<ChatMessage>();
-    }
-
-    /**
-     * 
-     * We will only keep 2 days messages, while insert new day messages, remove the messages before yesterday.
-     * 
-     * @param calendar
-     * @param date
-     * @return
-     */
-    private static synchronized List<ChatMessage> newDayMessage(final Calendar calendar, final int date) {
-        final List<ChatMessage> messages = Lists.newArrayList();
-        MSG_DATA.put(date, messages);
-        calendar.add(Calendar.DAY_OF_MONTH, -2);
-        final int oldDate = calendar.get(Calendar.DAY_OF_MONTH);
-        MSG_DATA.remove(oldDate);
-        return messages;
-    }
-
     public String getMsg() {
         return msg;
     }
@@ -166,6 +134,22 @@ public class ChatAction extends BaseAction {
 
     public void setIndex(final int index) {
         this.index = index;
+    }
+
+    public ChatMessageDao getChatMessageDao() {
+        return chatMessageDao;
+    }
+
+    public void setChatMessageDao(final ChatMessageDao chatMessageDao) {
+        this.chatMessageDao = chatMessageDao;
+    }
+
+    public List<ChatMessage> getDatas() {
+        return datas;
+    }
+
+    public void setDatas(final List<ChatMessage> datas) {
+        this.datas = datas;
     }
 
     public static long getSerialversionuid() {

@@ -1,8 +1,9 @@
 package com.fight2.model;
 
-import java.io.Serializable;
+import javax.persistence.Entity;
 
-public class ChatMessage implements Serializable {
+@Entity
+public class ChatMessage extends BaseEntity {
     private static final long serialVersionUID = 5519410863652000122L;
 
     private String date;
