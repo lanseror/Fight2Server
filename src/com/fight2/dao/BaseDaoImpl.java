@@ -22,6 +22,11 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
         this.sessionFactory = sessionFactory;
     }
 
+    @Override
+    public SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
     protected Session getSession() {
         return sessionFactory.getCurrentSession();
     }
@@ -30,6 +35,12 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
     @SuppressWarnings("unchecked")
     public T get(final int id) {
         return (T) getSession().get(type, id);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public T load(final int id) {
+        return (T) getSession().load(type, id);
     }
 
     @Override

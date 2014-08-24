@@ -2,14 +2,13 @@ package com.fight2.action;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.fight2.dao.ArenaDao;
 import com.fight2.dao.ArenaRankingDao;
@@ -18,10 +17,12 @@ import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Arena;
+import com.fight2.model.ArenaStatus;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.service.BattleService;
+import com.fight2.util.HibernateUtils;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
@@ -41,6 +42,9 @@ public class ArenaAction extends BaseAction {
     private PartyDao partyDao;
     @Autowired
     private PartyGridDao partyGridDao;
+
+    @Autowired
+    private TaskScheduler taskScheduler;
     private List<Arena> datas;
     private Arena arena;
     private int id;
@@ -98,8 +102,6 @@ public class ArenaAction extends BaseAction {
     @Action(value = "save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = { @Result(
             name = SUCCESS, location = "list", type = "redirect") })
     public String save() {
-        final ActionContext context = ActionContext.getContext();
-        final HttpServletRequest request = ServletActionContext.getRequest();
         if (arena.getId() == BaseEntity.EMPTY_ID) {
             return createSave();
         } else {
@@ -108,13 +110,61 @@ public class ArenaAction extends BaseAction {
     }
 
     private String createSave() {
+        arena.setStatus(ArenaStatus.Scheduled);
         arenaDao.add(arena);
+        final Runnable startSchedule = createStartSchedule(arena.getId());
+        taskScheduler.schedule(startSchedule, arena.getStartDate());
+        final Runnable stopSchedule = createStopSchedule(arena.getId());
+        taskScheduler.schedule(stopSchedule, arena.getEndDate());
         return SUCCESS;
     }
 
     private String editSave() {
         arenaDao.update(arena);
         return SUCCESS;
+    }
+
+    @Action(value = "delete", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String delete() {
+        arena = arenaDao.load(id);
+        arenaDao.delete(arena);
+        return SUCCESS;
+    }
+
+    private Runnable createStartSchedule(final int id) {
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                final SessionFactory sessionFactory = arenaDao.getSessionFactory();
+                HibernateUtils.openSession(sessionFactory);
+                final Arena arena = arenaDao.get(id);
+                if (arena != null && arena.getStatus() == ArenaStatus.Scheduled) {
+                    arena.setStatus(ArenaStatus.Started);
+                    arenaDao.update(arena);
+                }
+                HibernateUtils.closeSession(sessionFactory);
+            }
+
+        };
+        return runnable;
+    }
+
+    private Runnable createStopSchedule(final int id) {
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                final SessionFactory sessionFactory = arenaDao.getSessionFactory();
+                HibernateUtils.openSession(sessionFactory);
+                final Arena arena = arenaDao.get(id);
+                if (arena != null && arena.getStatus() == ArenaStatus.Started) {
+                    arena.setStatus(ArenaStatus.Stopped);
+                    arenaDao.update(arena);
+                }
+                HibernateUtils.closeSession(sessionFactory);
+            }
+
+        };
+        return runnable;
     }
 
     public Arena getArena() {
@@ -191,6 +241,14 @@ public class ArenaAction extends BaseAction {
 
     public void setArenaRankingDao(final ArenaRankingDao arenaRankingDao) {
         this.arenaRankingDao = arenaRankingDao;
+    }
+
+    public TaskScheduler getTaskScheduler() {
+        return taskScheduler;
+    }
+
+    public void setTaskScheduler(final TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
     }
 
 }

@@ -1,16 +1,5 @@
 <#include "/WEB-INF/templates/head.ftl" />
 
-<script type="text/javascript">
-<!--
-function confirmDelete(deleteUrl)
-{
-    if (confirm("真的要删除吗？")) {
-         document.location = deleteUrl;
-    }
-}
-
--->
-</script>
 
 <center>
 <br/><br/>

@@ -13,6 +13,17 @@
 
     <#assign sj=JspTaglibs["/struts-jquery-tags"]>
     <@sj.head locale="cn" />
+    <script type="text/javascript">
+        <!--
+        function confirmDelete(deleteUrl)
+        {
+            if (confirm("真的要删除吗？")) {
+                 document.location = deleteUrl;
+            }
+        }
+        
+        -->
+    </script>
   </head>
 <body>
 <h3>

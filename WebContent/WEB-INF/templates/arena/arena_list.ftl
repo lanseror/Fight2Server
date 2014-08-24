@@ -11,6 +11,7 @@
         <td>开始时间</td>
         <td>结束时间</td>
         <td>在线人数</td>
+        <td>状态</td>
         <td>操作</td>
     </tr>
     <#list datas as entry>
@@ -20,8 +21,11 @@
         <td>${entry.startDate}</td>
         <td>${entry.endDate}</td>
         <td>${entry.onlineNumber}</td>
+        <td>${entry.status.text}</td>
         <td align="center">
             <a href="<@s.url namespace="/arena" action="edit"><@s.param name="id" value="${entry.id}" /></@s.url>">修改</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="javascript:confirmDelete('<@s.url namespace="/arena" action="delete"><@s.param name="id" value="${entry.id}" /></@s.url>')">删除</a>
         </td>
     </tr>
      </#list>

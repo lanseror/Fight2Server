@@ -12,6 +12,7 @@ public class Arena extends BaseEntity {
     private Date startDate;
     private Date endDate;
     private int onlineNumber;
+    private ArenaStatus status;
 
     public String getName() {
         return name;
@@ -48,6 +49,14 @@ public class Arena extends BaseEntity {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    public ArenaStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(final ArenaStatus status) {
+        this.status = status;
     }
 
 }
