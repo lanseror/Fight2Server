@@ -21,7 +21,9 @@ import com.fight2.model.ArenaStatus;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
+import com.fight2.model.json.ArenaJson;
 import com.fight2.service.BattleService;
+import com.fight2.util.DateUtils;
 import com.fight2.util.HibernateUtils;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -91,8 +93,16 @@ public class ArenaAction extends BaseAction {
     @Action(value = "list-started", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String getStartedArenas() {
         final List<Arena> arenas = arenaDao.getStartedArenas();
+        final List<ArenaJson> arenaJsons = Lists.newArrayList();
+        for (final Arena arena : arenas) {
+            final ArenaJson arenaJson = new ArenaJson();
+            arenaJson.setName(arena.getName());
+            arenaJson.setOnlineNumber(arena.getOnlineNumber());
+            arenaJson.setRemainTime(DateUtils.getRemainTime(arena.getEndDate()));
+            arenaJsons.add(arenaJson);
+        }
         final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(arenas));
+        context.put("jsonMsg", new Gson().toJson(arenaJsons));
         return SUCCESS;
     }
 
