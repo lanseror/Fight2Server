@@ -88,6 +88,14 @@ public class ArenaAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "list-started", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String getStartedArenas() {
+        final List<Arena> arenas = arenaDao.getStartedArenas();
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(arenas));
+        return SUCCESS;
+    }
+
     @Action(value = "add", results = { @Result(name = SUCCESS, location = "arena_form.ftl") })
     public String add() {
         return SUCCESS;

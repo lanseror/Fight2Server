@@ -8,4 +8,6 @@ public interface ArenaDao extends BaseDao<Arena> {
 
     public List<Arena> getAliveArenas();
 
+    public List<Arena> getStartedArenas();
+
 }

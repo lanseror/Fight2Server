@@ -25,4 +25,13 @@ public class ArenaDaoImpl extends BaseDaoImpl<Arena> implements ArenaDao {
         final List<Arena> list = criteria.list();
         return list;
     }
+
+    @Override
+    public List<Arena> getStartedArenas() {
+        final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.add(Restrictions.eq("status", ArenaStatus.Started));
+        @SuppressWarnings("unchecked")
+        final List<Arena> list = criteria.list();
+        return list;
+    }
 }
