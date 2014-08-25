@@ -96,6 +96,7 @@ public class ArenaAction extends BaseAction {
         final List<ArenaJson> arenaJsons = Lists.newArrayList();
         for (final Arena arena : arenas) {
             final ArenaJson arenaJson = new ArenaJson();
+            arenaJson.setId(arena.getId());
             arenaJson.setName(arena.getName());
             arenaJson.setOnlineNumber(arena.getOnlineNumber());
             arenaJson.setRemainTime(DateUtils.getRemainTime(arena.getEndDate()));

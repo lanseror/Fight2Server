@@ -1,9 +1,18 @@
 package com.fight2.model.json;
 
 public class ArenaJson {
+    private int id;
     private String name;
     private String remainTime;
     private int onlineNumber;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(final int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
