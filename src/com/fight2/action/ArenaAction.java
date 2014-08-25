@@ -131,6 +131,14 @@ public class ArenaAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "cancel", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String cancel() {
+        arena = arenaDao.get(id);
+        arena.setStatus(ArenaStatus.Cancelled);
+        arenaDao.update(arena);
+        return SUCCESS;
+    }
+
     private Runnable createStartSchedule(final int id) {
         final Runnable runnable = new Runnable() {
             @Override

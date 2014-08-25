@@ -23,7 +23,7 @@
         <td>${entry.onlineNumber}</td>
         <td>${entry.status.text}</td>
         <td align="center">
-            <a href="<@s.url namespace="/arena" action="edit"><@s.param name="id" value="${entry.id}" /></@s.url>">修改</a>
+            <a href="<@s.url namespace="/arena" action="cancel"><@s.param name="id" value="${entry.id}" /></@s.url>">取消</a>
             &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="javascript:confirmDelete('<@s.url namespace="/arena" action="delete"><@s.param name="id" value="${entry.id}" /></@s.url>')">删除</a>
         </td>
