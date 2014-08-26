@@ -121,7 +121,7 @@ public class ArenaAction extends BaseAction {
         }
 
         // Get first position
-        // TODO: handle the situation when rank=1;
+        // TODO: handle the situation when rank = 1;
         final UserArenaRecord p1ArenaRecord = new UserArenaRecord();
         p1ArenaRecord.setStatus(UserArenaRecordStatus.NoAction);
         final int p1RankNum = random.nextInt(rank);
