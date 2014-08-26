@@ -1,7 +1,11 @@
 package com.fight2.action;
 
 import java.util.List;
+import java.util.Random;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -17,12 +21,18 @@ import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Arena;
+import com.fight2.model.ArenaRanking;
 import com.fight2.model.ArenaStatus;
 import com.fight2.model.BaseEntity;
+import com.fight2.model.BattleResult;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
+import com.fight2.model.UserArenaInfo;
+import com.fight2.model.UserArenaRecord;
+import com.fight2.model.UserArenaRecord.UserArenaRecordStatus;
 import com.fight2.model.json.ArenaJson;
 import com.fight2.service.BattleService;
+import com.fight2.util.ArenaUtils;
 import com.fight2.util.DateUtils;
 import com.fight2.util.HibernateUtils;
 import com.google.common.collect.Lists;
@@ -44,16 +54,38 @@ public class ArenaAction extends BaseAction {
     private PartyDao partyDao;
     @Autowired
     private PartyGridDao partyGridDao;
-
     @Autowired
     private TaskScheduler taskScheduler;
     private List<Arena> datas;
     private Arena arena;
     private int id;
 
-    @Action(value = "competitors", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String getArenaCompetitors() {
+    @Action(value = "enter", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String enter() {
         final User currentUser = (User) this.getSession().get(LOGIN_USER);
+        final Arena arena = arenaDao.load(id);
+        final int userId = currentUser.getId();
+        final HttpServletRequest request = ServletActionContext.getRequest();
+        ArenaUtils.enter(id, request.getSession(), userId);
+
+        ArenaRanking arenaRanking = arenaRankingDao.getByUserArena(currentUser, arena);
+        if (arenaRanking == null) {
+            arenaRanking = new ArenaRanking();
+            arenaRanking.setUser(currentUser);
+            arenaRanking.setArena(arena);
+            arenaRankingDao.add(arenaRanking);
+        }
+        final UserArenaInfo userArenaInfo = ArenaUtils.getUserArenaInfo(id, userId);
+        userArenaInfo.setLose(arenaRanking.getLose());
+        userArenaInfo.setMight(arenaRanking.getMight());
+        userArenaInfo.setWin(arenaRanking.getWin());
+        userArenaInfo.setRankNumber(arenaRanking.getRankNumber());
+        userArenaInfo.setRemainTime(DateUtils.getRemainTime(arena.getEndDate()));
+        final List<UserArenaRecord> arenaRecords = userArenaInfo.getArenaRecords();
+        if (arenaRecords.isEmpty()) {
+            refreshArenaRecords(arenaRanking, arenaRecords);
+        }
+
         final List<User> datas = userDao.list();
         final List<User> competitors = Lists.newArrayList();
         for (final User user : datas) {
@@ -70,6 +102,87 @@ public class ArenaAction extends BaseAction {
         return SUCCESS;
     }
 
+    private void refreshArenaRecords(final ArenaRanking arenaRanking, final List<UserArenaRecord> arenaRecords) {
+        final Random random = new Random();
+        arenaRecords.clear();
+        final Arena arena = arenaRanking.getArena();
+        final int rank = arenaRanking.getRankNumber();
+        final int maxRank = arenaRankingDao.getArenaMaxRank(arenaRanking.getArena());
+
+        // Rank == 0 means the user is the first time enter into the arena, give him all NPC.
+        if (rank == 0) {
+            for (int i = 0; i < 3; i++) {
+                final UserArenaRecord arenaRecord = new UserArenaRecord();
+                arenaRecord.setStatus(UserArenaRecordStatus.NoAction);
+                arenaRecord.setUser(toArenaJsonUser(randomNPC()));
+                arenaRecords.add(arenaRecord);
+            }
+            return;
+        }
+
+        // Get first position
+        // TODO: handle the situation when rank=1;
+        final UserArenaRecord p1ArenaRecord = new UserArenaRecord();
+        p1ArenaRecord.setStatus(UserArenaRecordStatus.NoAction);
+        final int p1RankNum = random.nextInt(rank);
+        final ArenaRanking p1Ranking = arenaRankingDao.getByArenaRank(arena, p1RankNum);
+        final User p1User = p1Ranking.getUser();
+        p1ArenaRecord.setUser(toArenaJsonUser(p1User));
+        arenaRecords.add(p1ArenaRecord);
+        // Get second position
+        final UserArenaRecord p2ArenaRecord = new UserArenaRecord();
+        p2ArenaRecord.setStatus(UserArenaRecordStatus.NoAction);
+        final int p2RankNumSeed = 5 - random.nextInt(11);
+        final int p2RankNum = rank + p2RankNumSeed;
+        if (p2RankNum == rank || p2RankNum == p1RankNum || p2RankNum > maxRank) {
+            p2ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
+        } else {
+            final ArenaRanking p2Ranking = arenaRankingDao.getByArenaRank(arena, p2RankNum);
+            final User p2User = p2Ranking.getUser();
+            p2ArenaRecord.setUser(toArenaJsonUser(p2User));
+        }
+        arenaRecords.add(p2ArenaRecord);
+        // Get third position
+        final UserArenaRecord p3ArenaRecord = new UserArenaRecord();
+        p3ArenaRecord.setStatus(UserArenaRecordStatus.NoAction);
+        if (rank == maxRank) {
+            p3ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
+        } else {
+            final int p3RankNum = random.nextInt(maxRank - rank) + 1;
+            if (p3RankNum == p2RankNum) {
+                p3ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
+            } else {
+                final ArenaRanking p3Ranking = arenaRankingDao.getByArenaRank(arena, p3RankNum);
+                final User p3User = p3Ranking.getUser();
+                p3ArenaRecord.setUser(toArenaJsonUser(p3User));
+            }
+        }
+        arenaRecords.add(p3ArenaRecord);
+
+    }
+
+    private User randomNPC() {
+        final User competitor = new User();
+        return competitor;
+    }
+
+    private User toArenaJsonUser(final User user) {
+        final User competitor = new User();
+        competitor.setId(user.getId());
+        competitor.setAvatar(user.getAvatar());
+        competitor.setName(user.getName());
+        return competitor;
+    }
+
+    @Action(value = "exit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String exit() {
+        final HttpServletRequest request = ServletActionContext.getRequest();
+        ArenaUtils.exit(id, request.getSession());
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson("ok"));
+        return SUCCESS;
+    }
+
     @Action(value = "attack", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String attack() {
         final User attacker = (User) this.getSession().get(LOGIN_USER);
@@ -79,8 +192,19 @@ public class ArenaAction extends BaseAction {
         final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
 
         final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo);
+        final BattleResult battleResult = battleService.fight();
+        final int arenaId = ArenaUtils.getEnteredArena(attacker.getId());
+        final Arena arena = arenaDao.load(arenaId);
+        final ArenaRanking arenaRanking = arenaRankingDao.getByUserArena(attacker, arena);
+        if (battleResult.isWinner()) {
+            arenaRanking.setWin(arenaRanking.getWin() + 1);
+        } else {
+            arenaRanking.setLose(arenaRanking.getLose() + 1);
+        }
+        arenaRankingDao.update(arenaRanking);
+
         final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(battleService.fight()));
+        context.put("jsonMsg", new Gson().toJson(battleResult));
         return SUCCESS;
     }
 
@@ -98,7 +222,7 @@ public class ArenaAction extends BaseAction {
             final ArenaJson arenaJson = new ArenaJson();
             arenaJson.setId(arena.getId());
             arenaJson.setName(arena.getName());
-            arenaJson.setOnlineNumber(arena.getOnlineNumber());
+            arenaJson.setOnlineNumber(ArenaUtils.getOnlineNumber(arena.getId()));
             arenaJson.setRemainTime(DateUtils.getRemainTime(arena.getEndDate()));
             arenaJsons.add(arenaJson);
         }
