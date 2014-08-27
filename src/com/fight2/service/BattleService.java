@@ -24,34 +24,33 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class BattleService {
-    private final User attacker;
-    private final User defender;
-    private final PartyInfo attackerPartyInfo;
-    private final PartyInfo defenderPartyInfo;
-    private final List<Party> attackerParties;
-    private final List<Party> defenderParties;
+    private final List<Party> attackerParties = Lists.newArrayList();
+    private final List<Party> defenderParties = Lists.newArrayList();
 
-    private final Map<String, String> effectMap = Maps.newHashMap();
+    private final static Map<String, String> EFFECT_MAP = Maps.newHashMap();
     private final Map<Card, Random> randomMap = Maps.newHashMap();
     private final Map<Card, int[]> randomGridMap = Maps.newHashMap();
+    static {
+        EFFECT_MAP.put("-1" + SkillType.HP, "对%s造成伤害");
+        EFFECT_MAP.put("1" + SkillType.HP, "为%s恢复生命值");
+        EFFECT_MAP.put("-1" + SkillType.ATK, "降低%s的攻击力");
+        EFFECT_MAP.put("1" + SkillType.ATK, "增加%s的攻击力");
+        EFFECT_MAP.put("-1" + SkillType.Defence, "为%s制造一个护盾");
+        EFFECT_MAP.put("1" + SkillType.Defence, "为%s制造一个护盾");
+        EFFECT_MAP.put("-1" + SkillType.Skip, "对%s造成眩晕");
+        EFFECT_MAP.put("1" + SkillType.Skip, "对%s造成眩晕");
+    }
 
     public BattleService(final User attacker, final User defender, final PartyInfo attackerPartyInfo, final PartyInfo defenderPartyInfo) {
         super();
-        this.attacker = attacker;
-        this.defender = defender;
-        this.attackerPartyInfo = attackerPartyInfo;
-        this.defenderPartyInfo = defenderPartyInfo;
-        this.attackerParties = attackerPartyInfo.getParties();
-        this.defenderParties = defenderPartyInfo.getParties();
-
-        effectMap.put("-1" + SkillType.HP, "对%s造成伤害");
-        effectMap.put("1" + SkillType.HP, "为%s恢复生命值");
-        effectMap.put("-1" + SkillType.ATK, "降低%s的攻击力");
-        effectMap.put("1" + SkillType.ATK, "增加%s的攻击力");
-        effectMap.put("-1" + SkillType.Defence, "为%s制造一个护盾");
-        effectMap.put("1" + SkillType.Defence, "为%s制造一个护盾");
-        effectMap.put("-1" + SkillType.Skip, "对%s造成眩晕");
-        effectMap.put("1" + SkillType.Skip, "对%s造成眩晕");
+        for (final Party partyPo : attackerPartyInfo.getParties()) {
+            final Party partyVo = new Party(partyPo);
+            attackerParties.add(partyVo);
+        }
+        for (final Party partyPo : defenderPartyInfo.getParties()) {
+            final Party partyVo = new Party(partyPo);
+            defenderParties.add(partyVo);
+        }
 
         for (final Party party : attackerParties) {
             for (final PartyGrid partyGrid : party.getPartyGrids()) {
@@ -248,7 +247,7 @@ public class BattleService {
                 final SkillPointAttribute pointAttribute = operation.getSkillPointAttribute();
                 final int changePoint = sign * point * getAttribute(pointAttribute, card) / 100;
 
-                final String effectStr = effectMap.get(String.valueOf(sign) + skillType);
+                final String effectStr = EFFECT_MAP.get(String.valueOf(sign) + skillType);
                 if (effectStrs.length() > 0) {
                     effectStrs.append("，");
                 }

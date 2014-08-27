@@ -29,6 +29,21 @@ public class Party extends BaseEntity {
 
     private PartyInfo partyInfo;
 
+    public Party() {
+
+    }
+
+    public Party(final Party party) {
+        super();
+        this.partyNumber = party.getPartyNumber();
+        this.hp = party.getHp();
+        this.fullHp = party.getFullHp();
+        this.atk = party.getAtk();
+        this.defence = party.getDefence();
+        this.cards = party.getCards();
+        this.partyGrids = party.getPartyGrids();
+    }
+
     public int getPartyNumber() {
         return partyNumber;
     }

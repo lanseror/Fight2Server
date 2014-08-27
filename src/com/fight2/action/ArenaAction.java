@@ -1,5 +1,7 @@
 package com.fight2.action;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -59,6 +61,9 @@ public class ArenaAction extends BaseAction {
     private List<Arena> datas;
     private Arena arena;
     private int id;
+    private int index;
+
+    private static final int[] MIGHTS = { 10, 8, 5, 2 };
 
     @Action(value = "enter", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String enter() {
@@ -86,19 +91,16 @@ public class ArenaAction extends BaseAction {
             refreshArenaRecords(arenaRanking, arenaRecords);
         }
 
-        final List<User> datas = userDao.list();
-        final List<User> competitors = Lists.newArrayList();
-        for (final User user : datas) {
-            if (user.getId() != currentUser.getId() && !user.isDisabled()) {
-                final User competitor = new User();
-                competitor.setId(user.getId());
-                competitor.setAvatar(user.getAvatar());
-                competitor.setName(user.getName());
-                competitors.add(competitor);
-            }
-        }
         final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(competitors));
+        context.put("jsonMsg", new Gson().toJson(userArenaInfo));
+        return SUCCESS;
+    }
+
+    @Action(value = "ranking", results = { @Result(name = SUCCESS, location = "arena_ranking.ftl") })
+    public String ranking() {
+        final List<ArenaRanking> rankings = arenaRankingDao.list();
+        final ActionContext context = ActionContext.getContext();
+        context.put("ranks", rankings);
         return SUCCESS;
     }
 
@@ -124,17 +126,26 @@ public class ArenaAction extends BaseAction {
         // TODO: handle the situation when rank = 1;
         final UserArenaRecord p1ArenaRecord = new UserArenaRecord();
         p1ArenaRecord.setStatus(UserArenaRecordStatus.NoAction);
-        final int p1RankNum = random.nextInt(rank);
-        final ArenaRanking p1Ranking = arenaRankingDao.getByArenaRank(arena, p1RankNum);
-        final User p1User = p1Ranking.getUser();
-        p1ArenaRecord.setUser(toArenaJsonUser(p1User));
+        int p1RankNum = 0;
+        if (rank == 1) {
+            p1RankNum = rank + random.nextInt(5) + 1;
+        } else {
+            p1RankNum = random.nextInt(rank);
+        }
+        if (p1RankNum > maxRank || p1RankNum <= 0) {
+            p1ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
+        } else {
+            final ArenaRanking p1Ranking = arenaRankingDao.getByArenaRank(arena, p1RankNum);
+            final User p1User = p1Ranking.getUser();
+            p1ArenaRecord.setUser(toArenaJsonUser(p1User));
+        }
         arenaRecords.add(p1ArenaRecord);
         // Get second position
         final UserArenaRecord p2ArenaRecord = new UserArenaRecord();
         p2ArenaRecord.setStatus(UserArenaRecordStatus.NoAction);
         final int p2RankNumSeed = 5 - random.nextInt(11);
         final int p2RankNum = rank + p2RankNumSeed;
-        if (p2RankNum == rank || p2RankNum == p1RankNum || p2RankNum > maxRank) {
+        if (p2RankNum == rank || p2RankNum == p1RankNum || p2RankNum > maxRank || p2RankNum <= 0) {
             p2ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
         } else {
             final ArenaRanking p2Ranking = arenaRankingDao.getByArenaRank(arena, p2RankNum);
@@ -148,7 +159,7 @@ public class ArenaAction extends BaseAction {
         if (rank == maxRank) {
             p3ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
         } else {
-            final int p3RankNum = random.nextInt(maxRank - rank) + 1;
+            final int p3RankNum = rank + random.nextInt(maxRank - rank) + 1;
             if (p3RankNum == p2RankNum) {
                 p3ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
             } else {
@@ -162,16 +173,18 @@ public class ArenaAction extends BaseAction {
     }
 
     private User randomNPC() {
-        final User competitor = new User();
-        return competitor;
+        final Random random = new Random();
+        final List<User> npcs = userDao.getAllNpc();
+        return npcs.get(random.nextInt(npcs.size()));
     }
 
     private User toArenaJsonUser(final User user) {
-        final User competitor = new User();
-        competitor.setId(user.getId());
-        competitor.setAvatar(user.getAvatar());
-        competitor.setName(user.getName());
-        return competitor;
+        final User jsonUser = new User();
+        jsonUser.setId(user.getId());
+        jsonUser.setAvatar(user.getAvatar());
+        jsonUser.setName(user.getName());
+        jsonUser.setNpc(user.isNpc());
+        return jsonUser;
     }
 
     @Action(value = "exit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
@@ -186,7 +199,13 @@ public class ArenaAction extends BaseAction {
     @Action(value = "attack", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String attack() {
         final User attacker = (User) this.getSession().get(LOGIN_USER);
-        final User defender = userDao.get(id);
+        final UserArenaInfo userArenaInfo = ArenaUtils.getUserArenaInfo(id, attacker.getId());
+        final List<UserArenaRecord> arenaRecords = userArenaInfo.getArenaRecords();
+        final UserArenaRecord arenaRecord = arenaRecords.get(index);
+        if (arenaRecord.getStatus() != UserArenaRecordStatus.NoAction) {
+            return INPUT;
+        }
+        final User defender = userDao.get(arenaRecord.getUser().getId());
 
         final PartyInfo attackerPartyInfo = partyInfoDao.getByUser(attacker);
         final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
@@ -198,10 +217,49 @@ public class ArenaAction extends BaseAction {
         final ArenaRanking arenaRanking = arenaRankingDao.getByUserArena(attacker, arena);
         if (battleResult.isWinner()) {
             arenaRanking.setWin(arenaRanking.getWin() + 1);
+            arenaRecord.setStatus(UserArenaRecordStatus.Win);
+            final int winMight = MIGHTS[index];
+            arenaRanking.setMight(arenaRanking.getMight() + winMight);
         } else {
             arenaRanking.setLose(arenaRanking.getLose() + 1);
+            final int loseMight = MIGHTS[3];
+            arenaRanking.setMight(arenaRanking.getMight() + loseMight);
+            arenaRecord.setStatus(UserArenaRecordStatus.Lose);
         }
         arenaRankingDao.update(arenaRanking);
+
+        int remainNoAction = 0;
+        for (final UserArenaRecord arenaRecordTmp : arenaRecords) {
+            if (arenaRecordTmp.getStatus() == UserArenaRecordStatus.NoAction) {
+                remainNoAction++;
+            }
+        }
+        if (remainNoAction == 0) {
+            refreshArenaRecords(arenaRanking, arenaRecords);
+        }
+
+        // Sort and update ranking, need to be re-factored
+        final List<ArenaRanking> arenaRankingsPo = arenaRankingDao.listByArena(arena);
+        final List<ArenaRanking> arenaRankings = Lists.newArrayList();
+        for (final ArenaRanking arenaRankingPo : arenaRankingsPo) {
+            final ArenaRanking arenaRankingVo = new ArenaRanking();
+            arenaRankingVo.setId(arenaRankingPo.getId());
+            arenaRankingVo.setMight(arenaRankingPo.getMight());
+            arenaRankings.add(arenaRankingVo);
+        }
+        Collections.sort(arenaRankings, new Comparator<ArenaRanking>() {
+            @Override
+            public int compare(final ArenaRanking o1, final ArenaRanking o2) {
+                return o2.getMight() - o1.getMight();
+            }
+
+        });
+        for (int i = 0; i < arenaRankings.size(); i++) {
+            final ArenaRanking arenaRankingSort = arenaRankings.get(i);
+            final ArenaRanking arenaRankingSortUpdate = arenaRankingDao.get(arenaRankingSort.getId());
+            arenaRankingSortUpdate.setRankNumber(i + 1);
+            arenaRankingDao.update(arenaRankingSortUpdate);
+        }
 
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(battleResult));
@@ -348,6 +406,14 @@ public class ArenaAction extends BaseAction {
 
     public void setId(final int id) {
         this.id = id;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(final int index) {
+        this.index = index;
     }
 
     public static long getSerialversionuid() {

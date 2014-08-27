@@ -19,6 +19,7 @@ public class User extends BaseEntity {
     private PartyInfo partyInfo;
     private List<Card> cards;
     private boolean isDisabled;
+    private boolean npc;
 
     public String getInstallUUID() {
         return installUUID;
@@ -104,6 +105,14 @@ public class User extends BaseEntity {
 
     public void setDisabled(final boolean isDisabled) {
         this.isDisabled = isDisabled;
+    }
+
+    public boolean isNpc() {
+        return npc;
+    }
+
+    public void setNpc(final boolean npc) {
+        this.npc = npc;
     }
 
 }

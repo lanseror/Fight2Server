@@ -7,6 +7,7 @@ import javax.persistence.OneToOne;
 
 @Entity
 public class PartyGrid extends BaseEntity {
+
     private static final long serialVersionUID = -3340617388225596602L;
 
     private int gridNumber;

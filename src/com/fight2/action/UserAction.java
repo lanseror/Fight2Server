@@ -8,11 +8,17 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.ArenaRankingDao;
+import com.fight2.dao.CardDao;
+import com.fight2.dao.CardImageDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
+import com.fight2.model.ArenaRanking;
 import com.fight2.model.BaseEntity;
+import com.fight2.model.Card;
+import com.fight2.model.CardImage;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
@@ -31,6 +37,12 @@ public class UserAction extends BaseAction {
     private PartyDao partyDao;
     @Autowired
     private PartyGridDao partyGridDao;
+    @Autowired
+    private CardImageDao cardImageDao;
+    @Autowired
+    private CardDao cardDao;
+    @Autowired
+    private ArenaRankingDao arenaRankingDao;
     private User user;
     private List<User> datas;
     private int id;
@@ -82,6 +94,26 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "parties", results = { @Result(name = SUCCESS, location = "user_parties.ftl") })
+    public String parties() {
+        final User user = userDao.get(id);
+        final PartyInfo partyInfo = partyInfoDao.getByUser(user);
+        final List<Party> parties = partyInfo.getParties();
+        for (final Party party : parties) {
+            for (final PartyGrid partyGrid : party.getPartyGrids()) {
+                final Card card = partyGrid.getCard();
+                if (card != null) {
+                    final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(),
+                            card.getCardTemplate());
+                    card.setAvatar(avatarObj.getUrl());
+                }
+            }
+        }
+        final ActionContext context = ActionContext.getContext();
+        context.put("partyInfo", partyInfo);
+        return SUCCESS;
+    }
+
     @Action(value = "login", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String login() {
         user = userDao.getByInstallUUID(installUUID);
@@ -111,6 +143,35 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "delete", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String delete() {
+        user = userDao.load(id);
+        final User user = userDao.get(id);
+        final PartyInfo partyInfo = partyInfoDao.getByUser(user);
+        if (partyInfo != null) {
+            final List<Party> parties = partyInfo.getParties();
+            for (final Party party : parties) {
+                for (final PartyGrid partyGrid : party.getPartyGrids()) {
+                    partyGridDao.delete(partyGrid);
+                }
+                partyDao.delete(party);
+            }
+            partyInfoDao.delete(partyInfo);
+        }
+        final List<Card> cards = cardDao.listByUser(user);
+        for (final Card card : cards) {
+            cardDao.delete(card);
+        }
+
+        final List<ArenaRanking> arenaRankings = arenaRankingDao.listByUser(user);
+        for (final ArenaRanking arenaRanking : arenaRankings) {
+            arenaRankingDao.delete(arenaRanking);
+        }
+
+        userDao.delete(user);
+        return SUCCESS;
+    }
+
     @Action(value = "disable", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
     public String disable() {
         user = userDao.get(id);
@@ -123,6 +184,23 @@ public class UserAction extends BaseAction {
     public String enable() {
         user = userDao.get(id);
         user.setDisabled(false);
+        userDao.update(user);
+        return SUCCESS;
+    }
+
+    @Action(value = "setnpc", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String setNpc() {
+        user = userDao.get(id);
+        user.setNpc(true);
+        user.setName("Arena Guard");
+        userDao.update(user);
+        return SUCCESS;
+    }
+
+    @Action(value = "notnpc", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String notNpc() {
+        user = userDao.get(id);
+        user.setNpc(false);
         userDao.update(user);
         return SUCCESS;
     }
@@ -213,6 +291,30 @@ public class UserAction extends BaseAction {
 
     public void setPartyGridDao(final PartyGridDao partyGridDao) {
         this.partyGridDao = partyGridDao;
+    }
+
+    public CardImageDao getCardImageDao() {
+        return cardImageDao;
+    }
+
+    public void setCardImageDao(final CardImageDao cardImageDao) {
+        this.cardImageDao = cardImageDao;
+    }
+
+    public CardDao getCardDao() {
+        return cardDao;
+    }
+
+    public void setCardDao(final CardDao cardDao) {
+        this.cardDao = cardDao;
+    }
+
+    public ArenaRankingDao getArenaRankingDao() {
+        return arenaRankingDao;
+    }
+
+    public void setArenaRankingDao(final ArenaRankingDao arenaRankingDao) {
+        this.arenaRankingDao = arenaRankingDao;
     }
 
 }

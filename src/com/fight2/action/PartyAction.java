@@ -7,11 +7,13 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.ArenaRankingDao;
 import com.fight2.dao.CardDao;
 import com.fight2.dao.CardImageDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
+import com.fight2.model.ArenaRanking;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
 import com.fight2.model.Party;
@@ -30,6 +32,8 @@ public class PartyAction extends BaseAction {
     private PartyDao partyDao;
     @Autowired
     private PartyInfoDao partyInfoDao;
+    @Autowired
+    private ArenaRankingDao arenaRankingDao;
     @Autowired
     private CardDao cardDao;
     @Autowired
@@ -125,6 +129,10 @@ public class PartyAction extends BaseAction {
         final List<Party> poParties = poPartyInfo.getParties();
         @SuppressWarnings("unchecked")
         final List<List<Double>> parties = new Gson().fromJson(jsonMsg, List.class);
+        if (parties.get(0).get(0).intValue() == -1) {
+            throw new RuntimeException("You must have a leader.");
+        }
+
         for (final Party poParty : poParties) {
             for (final PartyGrid partyGrid : poParty.getPartyGrids()) {
                 partyGrid.setCard(null);
@@ -171,6 +179,35 @@ public class PartyAction extends BaseAction {
         userUpdate.setAvatar(avatar);
         userDao.update(userUpdate);
         return myParties();
+    }
+
+    @Action(value = "fix", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String fixParties() {
+        final List<ArenaRanking> arenaRankings = arenaRankingDao.list();
+        for (final ArenaRanking arenaRanking : arenaRankings) {
+            arenaRankingDao.delete(arenaRanking);
+        }
+
+        final List<Party> parties = partyDao.list();
+        for (final Party party : parties) {
+            final List<PartyGrid> partyGrids = party.getPartyGrids();
+            int partyAtk = 0;
+            int partyHp = 0;
+            for (final PartyGrid partyGrid : partyGrids) {
+                final Card card = partyGrid.getCard();
+                if (card == null) {
+                    continue;
+                }
+                partyAtk += card.getAtk();
+                partyHp += card.getHp();
+            }
+            party.setAtk(partyAtk);
+            party.setHp(partyHp);
+            partyDao.update(party);
+        }
+
+        jsonMsg = new Gson().toJson("ok");
+        return SUCCESS;
     }
 
     public PartyDao getPartyDao() {
@@ -247,6 +284,14 @@ public class PartyAction extends BaseAction {
 
     public void setCardImageDao(final CardImageDao cardImageDao) {
         this.cardImageDao = cardImageDao;
+    }
+
+    public ArenaRankingDao getArenaRankingDao() {
+        return arenaRankingDao;
+    }
+
+    public void setArenaRankingDao(final ArenaRankingDao arenaRankingDao) {
+        this.arenaRankingDao = arenaRankingDao;
     }
 
 }

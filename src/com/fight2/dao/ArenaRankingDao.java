@@ -12,6 +12,10 @@ public interface ArenaRankingDao extends BaseDao<ArenaRanking> {
 
     public List<ArenaRanking> listByArenaRange(Arena arena, int min, int max);
 
+    public List<ArenaRanking> listByUser(User user);
+
+    public List<ArenaRanking> listByArena(Arena arena);
+
     public ArenaRanking getByArenaRank(Arena arena, int rank);
 
     public int getArenaMaxRank(Arena arena);

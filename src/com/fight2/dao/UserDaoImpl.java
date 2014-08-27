@@ -1,5 +1,7 @@
 package com.fight2.dao;
 
+import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -18,6 +20,15 @@ public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao {
         final Criteria criteria = getSession().createCriteria(getMyType());
         criteria.add(Restrictions.eq("installUUID", installUUID));
         return (User) criteria.uniqueResult();
+    }
+
+    @Override
+    public List<User> getAllNpc() {
+        final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.add(Restrictions.eq("npc", true));
+        @SuppressWarnings("unchecked")
+        final List<User> users = criteria.list();
+        return users;
     }
 
 }

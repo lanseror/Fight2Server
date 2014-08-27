@@ -52,11 +52,31 @@ public class ArenaRankingDaoImpl extends BaseDaoImpl<ArenaRanking> implements Ar
     @Override
     public int getArenaMaxRank(final Arena arena) {
         final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.add(Restrictions.eq("arena", arena));
         final Long count = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
         if (count != null) {
             return count.intValue();
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public List<ArenaRanking> listByUser(final User user) {
+        final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.add(Restrictions.eq("user", user));
+        @SuppressWarnings("unchecked")
+        final List<ArenaRanking> list = criteria.list();
+        return list;
+    }
+
+    @Override
+    public List<ArenaRanking> listByArena(final Arena arena) {
+        final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.add(Restrictions.eq("arena", arena));
+        criteria.addOrder(Order.asc("rankNumber"));
+        @SuppressWarnings("unchecked")
+        final List<ArenaRanking> list = criteria.list();
+        return list;
     }
 }
