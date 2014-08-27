@@ -3,7 +3,6 @@ package com.fight2.model;
 import java.util.Date;
 
 import javax.persistence.Entity;
-import javax.persistence.Transient;
 
 @Entity
 public class Arena extends BaseEntity {
@@ -38,7 +37,6 @@ public class Arena extends BaseEntity {
         this.endDate = endDate;
     }
 
-    @Transient
     public int getOnlineNumber() {
         return onlineNumber;
     }

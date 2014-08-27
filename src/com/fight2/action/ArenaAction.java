@@ -5,9 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -70,8 +67,7 @@ public class ArenaAction extends BaseAction {
         final User currentUser = (User) this.getSession().get(LOGIN_USER);
         final Arena arena = arenaDao.load(id);
         final int userId = currentUser.getId();
-        final HttpServletRequest request = ServletActionContext.getRequest();
-        ArenaUtils.enter(id, request.getSession(), userId);
+        ArenaUtils.enter(id, userId);
 
         ArenaRanking arenaRanking = arenaRankingDao.getByUserArena(currentUser, arena);
         if (arenaRanking == null) {
@@ -79,6 +75,9 @@ public class ArenaAction extends BaseAction {
             arenaRanking.setUser(currentUser);
             arenaRanking.setArena(arena);
             arenaRankingDao.add(arenaRanking);
+            // arena.setOnlineNumber(arena.getOnlineNumber() + 1);
+            arena.setOnlineNumber(arenaRankingDao.listByArena(arena).size());
+            arenaDao.update(arena);
         }
         final UserArenaInfo userArenaInfo = ArenaUtils.getUserArenaInfo(id, userId);
         userArenaInfo.setLose(arenaRanking.getLose());
@@ -187,15 +186,6 @@ public class ArenaAction extends BaseAction {
         return jsonUser;
     }
 
-    @Action(value = "exit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String exit() {
-        final HttpServletRequest request = ServletActionContext.getRequest();
-        ArenaUtils.exit(id, request.getSession());
-        final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson("ok"));
-        return SUCCESS;
-    }
-
     @Action(value = "attack", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String attack() {
         final User attacker = (User) this.getSession().get(LOGIN_USER);
@@ -280,7 +270,7 @@ public class ArenaAction extends BaseAction {
             final ArenaJson arenaJson = new ArenaJson();
             arenaJson.setId(arena.getId());
             arenaJson.setName(arena.getName());
-            arenaJson.setOnlineNumber(ArenaUtils.getOnlineNumber(arena.getId()));
+            arenaJson.setOnlineNumber(arena.getOnlineNumber());
             arenaJson.setRemainTime(DateUtils.getRemainTime(arena.getEndDate()));
             arenaJsons.add(arenaJson);
         }
