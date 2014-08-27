@@ -75,10 +75,10 @@ public class ArenaAction extends BaseAction {
             arenaRanking.setUser(currentUser);
             arenaRanking.setArena(arena);
             arenaRankingDao.add(arenaRanking);
-            // arena.setOnlineNumber(arena.getOnlineNumber() + 1);
-            arena.setOnlineNumber(arenaRankingDao.listByArena(arena).size());
+            arena.setOnlineNumber(arena.getOnlineNumber() + 1);
             arenaDao.update(arena);
         }
+
         final UserArenaInfo userArenaInfo = ArenaUtils.getUserArenaInfo(id, userId);
         userArenaInfo.setLose(arenaRanking.getLose());
         userArenaInfo.setMight(arenaRanking.getMight());
