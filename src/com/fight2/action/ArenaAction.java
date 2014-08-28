@@ -103,6 +103,20 @@ public class ArenaAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "refresh", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String refresh() {
+        final User currentUser = (User) this.getSession().get(LOGIN_USER);
+        final Arena arena = arenaDao.load(id);
+        final int userId = currentUser.getId();
+        final ArenaRanking arenaRanking = arenaRankingDao.getByUserArena(currentUser, arena);
+        final UserArenaInfo userArenaInfo = ArenaUtils.getUserArenaInfo(id, userId);
+        final List<UserArenaRecord> arenaRecords = userArenaInfo.getArenaRecords();
+        refreshArenaRecords(arenaRanking, arenaRecords);
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson("ok"));
+        return SUCCESS;
+    }
+
     private void refreshArenaRecords(final ArenaRanking arenaRanking, final List<UserArenaRecord> arenaRecords) {
         final Random random = new Random();
         arenaRecords.clear();
