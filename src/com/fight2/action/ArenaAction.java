@@ -1,7 +1,9 @@
 package com.fight2.action;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -13,6 +15,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
+import com.fight2.dao.ArenaContinuousWinDao;
 import com.fight2.dao.ArenaDao;
 import com.fight2.dao.ArenaRankingDao;
 import com.fight2.dao.PartyDao;
@@ -20,6 +23,7 @@ import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Arena;
+import com.fight2.model.ArenaContinuousWin;
 import com.fight2.model.ArenaRanking;
 import com.fight2.model.ArenaStatus;
 import com.fight2.model.BaseEntity;
@@ -53,6 +57,8 @@ public class ArenaAction extends BaseAction {
     private PartyDao partyDao;
     @Autowired
     private PartyGridDao partyGridDao;
+    @Autowired
+    private ArenaContinuousWinDao arenaContinuousWinDao;
     @Autowired
     private TaskScheduler taskScheduler;
     private List<Arena> datas;
@@ -114,6 +120,36 @@ public class ArenaAction extends BaseAction {
         refreshArenaRecords(arenaRanking, arenaRecords);
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson("ok"));
+        return SUCCESS;
+    }
+
+    @Action(value = "acw", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String addContinuousWin() {
+        final User currentUser = (User) this.getSession().get(LOGIN_USER);
+        ArenaContinuousWin arenaContinuousWin = arenaContinuousWinDao.getByUser(currentUser);
+        final Calendar calendar = Calendar.getInstance();
+        final Date now = calendar.getTime();
+        if (arenaContinuousWin == null) {
+            arenaContinuousWin = new ArenaContinuousWin();
+            arenaContinuousWin.setEnable(true);
+            arenaContinuousWin.setRate(ArenaContinuousWin.DEFAULT_RATE);
+            arenaContinuousWin.setUser(currentUser);
+            arenaContinuousWin.setStartDate(now);
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            arenaContinuousWin.setEndDate(calendar.getTime());
+            arenaContinuousWinDao.add(arenaContinuousWin);
+        } else {
+            final Date endDate = arenaContinuousWin.getEndDate();
+            if (endDate.after(now)) {
+                calendar.setTime(endDate);
+            }
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            arenaContinuousWin.setEndDate(calendar.getTime());
+            arenaContinuousWinDao.update(arenaContinuousWin);
+        }
+        final int[] remainTimeInSecond = { DateUtils.getRemainTimeInSecond(arenaContinuousWin.getEndDate()) };
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(remainTimeInSecond));
         return SUCCESS;
     }
 
@@ -470,6 +506,14 @@ public class ArenaAction extends BaseAction {
 
     public void setTaskScheduler(final TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
+    }
+
+    public ArenaContinuousWinDao getArenaContinuousWinDao() {
+        return arenaContinuousWinDao;
+    }
+
+    public void setArenaContinuousWinDao(final ArenaContinuousWinDao arenaContinuousWinDao) {
+        this.arenaContinuousWinDao = arenaContinuousWinDao;
     }
 
 }

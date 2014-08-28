@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 @Entity
 public class ArenaContinuousWin extends BaseEntity {
     private static final long serialVersionUID = -7298925985689022657L;
+    public static final int DEFAULT_RATE = 10;
     private Date startDate;
     private Date endDate;
     private int rate; // Continuous win reward rate.

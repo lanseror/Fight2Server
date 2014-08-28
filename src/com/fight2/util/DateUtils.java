@@ -17,4 +17,10 @@ public class DateUtils {
         final long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
         return String.format("%d天  %s:%s", days, DECIMAL_FORMAT.format(hours), DECIMAL_FORMAT.format(minutes));
     }
+
+    public static int getRemainTimeInSecond(final Date endDate) {
+        final long millis = endDate.getTime() - System.currentTimeMillis();
+        final int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis);
+        return seconds;
+    }
 }
