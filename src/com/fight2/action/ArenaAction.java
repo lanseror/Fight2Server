@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.struts2.convention.annotation.Action;
@@ -39,6 +40,7 @@ import com.fight2.util.ArenaUtils;
 import com.fight2.util.DateUtils;
 import com.fight2.util.HibernateUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -150,6 +152,24 @@ public class ArenaAction extends BaseAction {
         final int[] remainTimeInSecond = { DateUtils.getRemainTimeInSecond(arenaContinuousWin.getEndDate()) };
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(remainTimeInSecond));
+        return SUCCESS;
+    }
+
+    @Action(value = "gcw", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String getContinuousWin() {
+        final Map<String, Integer> data = Maps.newHashMap();
+        final User currentUser = (User) this.getSession().get(LOGIN_USER);
+        final ArenaContinuousWin arenaContinuousWin = arenaContinuousWinDao.getByUser(currentUser);
+        if (arenaContinuousWin == null) {
+            data.put("time", 0);
+            data.put("rate", ArenaContinuousWin.DEFAULT_RATE);
+        } else {
+            data.put("time", DateUtils.getRemainTimeInSecond(arenaContinuousWin.getEndDate()));
+            data.put("rate", arenaContinuousWin.getRate());
+        }
+
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(data));
         return SUCCESS;
     }
 
