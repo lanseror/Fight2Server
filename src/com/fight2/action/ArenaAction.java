@@ -80,6 +80,7 @@ public class ArenaAction extends BaseAction {
             arenaRanking = new ArenaRanking();
             arenaRanking.setUser(currentUser);
             arenaRanking.setArena(arena);
+            arenaRanking.setRankNumber(arena.getOnlineNumber() + 1);
             arenaRankingDao.add(arenaRanking);
             arena.setOnlineNumber(arena.getOnlineNumber() + 1);
             arenaDao.update(arena);
@@ -217,6 +218,7 @@ public class ArenaAction extends BaseAction {
             p2ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
         } else {
             final ArenaRanking p2Ranking = arenaRankingDao.getByArenaRank(arena, p2RankNum);
+//            System.out.println("p2RankNum:" + arena.getName() + "-" + p2RankNum);
             final User p2User = p2Ranking.getUser();
             p2ArenaRecord.setUser(toArenaJsonUser(p2User));
         }
@@ -232,6 +234,7 @@ public class ArenaAction extends BaseAction {
                 p3ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
             } else {
                 final ArenaRanking p3Ranking = arenaRankingDao.getByArenaRank(arena, p3RankNum);
+//                System.out.println("p3RankNum:" + arena.getName() + "-" + p3RankNum);
                 final User p3User = p3Ranking.getUser();
                 p3ArenaRecord.setUser(toArenaJsonUser(p3User));
             }
@@ -271,7 +274,7 @@ public class ArenaAction extends BaseAction {
 
         final ArenaContinuousWin continuousWin = arenaContinuousWinDao.getByUser(attacker);
         // Disable continuous win if expired.
-        if (continuousWin.isEnable()) {
+        if (continuousWin != null && continuousWin.isEnable()) {
             final Date now = new Date();
             if (now.after(continuousWin.getEndDate())) {
                 continuousWin.setEnable(false);
@@ -329,7 +332,7 @@ public class ArenaAction extends BaseAction {
         }
 
         // Update continuous win
-        if (continuousWin.isEnable()) {
+        if (continuousWin != null && continuousWin.isEnable()) {
             final int rate = continuousWin.getRate();
             final int backgroudRate = continuousWin.getBackgroudRate();
             if (battleResult.isWinner()) {

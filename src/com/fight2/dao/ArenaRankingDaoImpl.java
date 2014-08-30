@@ -3,8 +3,8 @@ package com.fight2.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -51,11 +51,11 @@ public class ArenaRankingDaoImpl extends BaseDaoImpl<ArenaRanking> implements Ar
 
     @Override
     public int getArenaMaxRank(final Arena arena) {
-        final Criteria criteria = getSession().createCriteria(getMyType());
-        criteria.add(Restrictions.eq("arena", arena));
-        final Long count = (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
-        if (count != null) {
-            return count.intValue();
+        final String hql = String.format("select max(rankNumber) from %s", getMyType().getSimpleName());
+        final Query query = getSession().createQuery(hql);
+        final Number id = (Number) query.uniqueResult();
+        if (id != null) {
+            return id.intValue();
         } else {
             return 0;
         }
