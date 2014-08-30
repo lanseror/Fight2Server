@@ -8,6 +8,7 @@ public class BattleResult {
     private int aliveMight;
     private int cwMight;
     private int totalMight;
+    private int cwRate;
     private List<BattleRecord> battleRecord;
 
     public boolean isWinner() {
@@ -48,6 +49,14 @@ public class BattleResult {
 
     public void setTotalMight(final int totalMight) {
         this.totalMight = totalMight;
+    }
+
+    public int getCwRate() {
+        return cwRate;
+    }
+
+    public void setCwRate(final int cwRate) {
+        this.cwRate = cwRate;
     }
 
     public List<BattleRecord> getBattleRecord() {

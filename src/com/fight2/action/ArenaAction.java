@@ -270,6 +270,7 @@ public class ArenaAction extends BaseAction {
         final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
 
         final ArenaContinuousWin continuousWin = arenaContinuousWinDao.getByUser(attacker);
+        // Disable continuous win if expired.
         if (continuousWin.isEnable()) {
             final Date now = new Date();
             if (now.after(continuousWin.getEndDate())) {
@@ -281,6 +282,7 @@ public class ArenaAction extends BaseAction {
         final BattleResult battleResult = battleService.fight(index);
         final int arenaId = ArenaUtils.getEnteredArena(attacker.getId());
         final Arena arena = arenaDao.load(arenaId);
+        // Update ArenaRanking.
         final ArenaRanking arenaRanking = arenaRankingDao.getByUserArena(attacker, arena);
         if (battleResult.isWinner()) {
             arenaRanking.setWin(arenaRanking.getWin() + 1);
@@ -292,6 +294,7 @@ public class ArenaAction extends BaseAction {
         arenaRanking.setMight(arenaRanking.getMight() + battleResult.getTotalMight());
         arenaRankingDao.update(arenaRanking);
 
+        // Update UserArenaRecords
         int remainNoAction = 0;
         for (final UserArenaRecord arenaRecordTmp : arenaRecords) {
             if (arenaRecordTmp.getStatus() == UserArenaRecordStatus.NoAction) {

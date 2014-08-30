@@ -190,9 +190,11 @@ public class BattleService {
         battleResult.setBaseMight(baseMight);
         battleResult.setAliveMight(aliveMight);
         if (continuousWin.isEnable()) {
-            final double rate = continuousWin.getRate() / 100.0;
-            final int cwMight = (int) Math.ceil((baseMight + aliveMight) * rate);
+            final int rate = continuousWin.getRate();
+            final double calculateRate = continuousWin.getRate() / 100.0;
+            final int cwMight = (int) Math.ceil((baseMight + aliveMight) * calculateRate);
             battleResult.setCwMight(cwMight);
+            battleResult.setCwRate(rate);
         }
         battleResult.setTotalMight(baseMight + aliveMight + battleResult.getCwMight());
         return battleResult;
