@@ -68,8 +68,6 @@ public class ArenaAction extends BaseAction {
     private int id;
     private int index;
 
-    private static final int[] MIGHTS = { 10, 8, 5, 2 };
-
     @Action(value = "enter", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String enter() {
         final User currentUser = (User) this.getSession().get(LOGIN_USER);
@@ -147,6 +145,7 @@ public class ArenaAction extends BaseAction {
             }
             calendar.add(Calendar.DAY_OF_MONTH, 1);
             arenaContinuousWin.setEndDate(calendar.getTime());
+            arenaContinuousWin.setEnable(true);
             arenaContinuousWinDao.update(arenaContinuousWin);
         }
         final int[] remainTimeInSecond = { DateUtils.getRemainTimeInSecond(arenaContinuousWin.getEndDate()) };
@@ -270,22 +269,27 @@ public class ArenaAction extends BaseAction {
         final PartyInfo attackerPartyInfo = partyInfoDao.getByUser(attacker);
         final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
 
-        final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo);
-        final BattleResult battleResult = battleService.fight();
+        final ArenaContinuousWin continuousWin = arenaContinuousWinDao.getByUser(attacker);
+        if (continuousWin.isEnable()) {
+            final Date now = new Date();
+            if (now.after(continuousWin.getEndDate())) {
+                continuousWin.setEnable(false);
+                arenaContinuousWinDao.update(continuousWin);
+            }
+        }
+        final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo, continuousWin);
+        final BattleResult battleResult = battleService.fight(index);
         final int arenaId = ArenaUtils.getEnteredArena(attacker.getId());
         final Arena arena = arenaDao.load(arenaId);
         final ArenaRanking arenaRanking = arenaRankingDao.getByUserArena(attacker, arena);
         if (battleResult.isWinner()) {
             arenaRanking.setWin(arenaRanking.getWin() + 1);
             arenaRecord.setStatus(UserArenaRecordStatus.Win);
-            final int winMight = MIGHTS[index];
-            arenaRanking.setMight(arenaRanking.getMight() + winMight);
         } else {
             arenaRanking.setLose(arenaRanking.getLose() + 1);
-            final int loseMight = MIGHTS[3];
-            arenaRanking.setMight(arenaRanking.getMight() + loseMight);
             arenaRecord.setStatus(UserArenaRecordStatus.Lose);
         }
+        arenaRanking.setMight(arenaRanking.getMight() + battleResult.getTotalMight());
         arenaRankingDao.update(arenaRanking);
 
         int remainNoAction = 0;
@@ -319,6 +323,30 @@ public class ArenaAction extends BaseAction {
             final ArenaRanking arenaRankingSortUpdate = arenaRankingDao.get(arenaRankingSort.getId());
             arenaRankingSortUpdate.setRankNumber(i + 1);
             arenaRankingDao.update(arenaRankingSortUpdate);
+        }
+
+        // Update continuous win
+        if (continuousWin.isEnable()) {
+            final int rate = continuousWin.getRate();
+            final int backgroudRate = continuousWin.getBackgroudRate();
+            if (battleResult.isWinner()) {
+                if (rate < ArenaContinuousWin.MAX_RATE) {
+                    continuousWin.setRate(rate + 1);
+                    continuousWin.setBackgroudRate(rate + 1);
+                } else if (backgroudRate < ArenaContinuousWin.MAX_BACKGROUD_RATE) {
+                    continuousWin.setBackgroudRate(backgroudRate + 1);
+                }
+            } else {
+                final int reduceRate = continuousWin.getBackgroudRate() / 2;
+                if (reduceRate > ArenaContinuousWin.DEFAULT_RATE) {
+                    continuousWin.setRate(reduceRate);
+                    continuousWin.setBackgroudRate(reduceRate);
+                } else {
+                    continuousWin.setRate(ArenaContinuousWin.DEFAULT_RATE);
+                    continuousWin.setBackgroudRate(ArenaContinuousWin.DEFAULT_RATE);
+                }
+            }
+            arenaContinuousWinDao.update(continuousWin);
         }
 
         final ActionContext context = ActionContext.getContext();

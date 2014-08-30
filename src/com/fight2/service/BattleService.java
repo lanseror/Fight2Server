@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.fight2.model.ArenaContinuousWin;
 import com.fight2.model.BattleRecord;
 import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
@@ -24,8 +25,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class BattleService {
+    private static final int[] MIGHTS = { 10, 8, 5, 2 };
     private final List<Party> attackerParties = Lists.newArrayList();
     private final List<Party> defenderParties = Lists.newArrayList();
+    private final ArenaContinuousWin continuousWin;
 
     private final static Map<String, String> EFFECT_MAP = Maps.newHashMap();
     private final Map<Card, Random> randomMap = Maps.newHashMap();
@@ -41,8 +44,10 @@ public class BattleService {
         EFFECT_MAP.put("1" + SkillType.Skip, "对%s造成眩晕");
     }
 
-    public BattleService(final User attacker, final User defender, final PartyInfo attackerPartyInfo, final PartyInfo defenderPartyInfo) {
+    public BattleService(final User attacker, final User defender, final PartyInfo attackerPartyInfo, final PartyInfo defenderPartyInfo,
+            final ArenaContinuousWin continuousWin) {
         super();
+        this.continuousWin = continuousWin;
         for (final Party partyPo : attackerPartyInfo.getParties()) {
             final Party partyVo = new Party(partyPo);
             attackerParties.add(partyVo);
@@ -90,7 +95,7 @@ public class BattleService {
         }
     }
 
-    public BattleResult fight() {
+    public BattleResult fight(final int index) {
 
         System.out.println("----初始数值----");
         for (int i = 0; i < attackerParties.size(); i++) {
@@ -174,10 +179,22 @@ public class BattleService {
         System.out.println("----战斗结束！----");
         final String winner = getPartiesRemainHp(attackerParties) > 0 ? "Player1" : "Player2";
         System.out.println("----" + winner + "赢了！----");
+
+        final boolean isWinner = getPartiesRemainHp(attackerParties) > 0;
+        final boolean isAllAlive = isPartiesAllAlive(attackerParties);
+        final int baseMight = isWinner ? MIGHTS[index] : MIGHTS[3];
+        final int aliveMight = isAllAlive ? 3 : 0;
         final BattleResult battleResult = new BattleResult();
         battleResult.setBattleRecord(battleRecords);
-        battleResult.setWinner(getPartiesRemainHp(attackerParties) > 0);
-
+        battleResult.setWinner(isWinner);
+        battleResult.setBaseMight(baseMight);
+        battleResult.setAliveMight(aliveMight);
+        if (continuousWin.isEnable()) {
+            final double rate = continuousWin.getRate() / 100.0;
+            final int cwMight = (int) Math.ceil((baseMight + aliveMight) * rate);
+            battleResult.setCwMight(cwMight);
+        }
+        battleResult.setTotalMight(baseMight + aliveMight + battleResult.getCwMight());
         return battleResult;
     }
 
@@ -403,4 +420,14 @@ public class BattleService {
         return hp;
     }
 
+    private boolean isPartiesAllAlive(final List<Party> parties) {
+        boolean isAllAlive = true;
+        for (final Party party : parties) {
+            if (party.getHp() <= 0) {
+                isAllAlive = false;
+                break;
+            }
+        }
+        return isAllAlive;
+    }
 }
