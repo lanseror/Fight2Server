@@ -3,6 +3,7 @@ package com.fight2.action;
 import java.util.List;
 
 import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -206,6 +207,14 @@ public class PartyAction extends BaseAction {
             partyDao.update(party);
         }
 
+        jsonMsg = new Gson().toJson("ok");
+        return SUCCESS;
+    }
+
+    @Action(value = "report", interceptorRefs = { @InterceptorRef(value = "fileUpload"), @InterceptorRef("basicStack") }, results = { @Result(
+            name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String report() {
+        System.out.println(jsonMsg);
         jsonMsg = new Gson().toJson("ok");
         return SUCCESS;
     }

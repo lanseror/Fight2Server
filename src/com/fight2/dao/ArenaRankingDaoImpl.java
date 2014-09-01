@@ -51,8 +51,9 @@ public class ArenaRankingDaoImpl extends BaseDaoImpl<ArenaRanking> implements Ar
 
     @Override
     public int getArenaMaxRank(final Arena arena) {
-        final String hql = String.format("select max(rankNumber) from %s", getMyType().getSimpleName());
+        final String hql = String.format("select max(rankNumber) from %s where arena=:arena", getMyType().getSimpleName());
         final Query query = getSession().createQuery(hql);
+        query.setParameter("arena", arena);
         final Number id = (Number) query.uniqueResult();
         if (id != null) {
             return id.intValue();
