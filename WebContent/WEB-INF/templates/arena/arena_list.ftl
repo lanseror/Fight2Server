@@ -26,6 +26,8 @@
             <a href="<@s.url namespace="/arena" action="cancel"><@s.param name="id" value="${entry.id}" /></@s.url>">取消</a>
             &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="javascript:confirmDelete('<@s.url namespace="/arena" action="delete"><@s.param name="id" value="${entry.id}" /></@s.url>')">删除</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="<@s.url namespace="/arena-reward" action="list-by-arena"><@s.param name="arenaId" value="${entry.id}" /></@s.url>">竞技场奖励</a>
         </td>
     </tr>
      </#list>

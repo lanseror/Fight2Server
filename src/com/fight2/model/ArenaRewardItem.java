@@ -38,6 +38,8 @@ public class ArenaRewardItem extends BaseEntity {
         this.amount = amount;
     }
 
+    @ManyToOne
+    @JoinColumn(name = "cardTemplate_id")
     public CardTemplate getCardTemplate() {
         return cardTemplate;
     }

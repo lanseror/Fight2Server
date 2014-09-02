@@ -3,7 +3,6 @@ package com.fight2.action;
 import java.util.List;
 
 import org.apache.struts2.convention.annotation.Action;
-import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import com.fight2.dao.CardImageDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
-import com.fight2.model.ArenaRanking;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
 import com.fight2.model.Party;
@@ -182,42 +180,34 @@ public class PartyAction extends BaseAction {
         return myParties();
     }
 
-    @Action(value = "fix", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String fixParties() {
-        final List<ArenaRanking> arenaRankings = arenaRankingDao.list();
-        for (final ArenaRanking arenaRanking : arenaRankings) {
-            arenaRankingDao.delete(arenaRanking);
-        }
-
-        final List<Party> parties = partyDao.list();
-        for (final Party party : parties) {
-            final List<PartyGrid> partyGrids = party.getPartyGrids();
-            int partyAtk = 0;
-            int partyHp = 0;
-            for (final PartyGrid partyGrid : partyGrids) {
-                final Card card = partyGrid.getCard();
-                if (card == null) {
-                    continue;
-                }
-                partyAtk += card.getAtk();
-                partyHp += card.getHp();
-            }
-            party.setAtk(partyAtk);
-            party.setHp(partyHp);
-            partyDao.update(party);
-        }
-
-        jsonMsg = new Gson().toJson("ok");
-        return SUCCESS;
-    }
-
-    @Action(value = "report", interceptorRefs = { @InterceptorRef(value = "fileUpload"), @InterceptorRef("basicStack") }, results = { @Result(
-            name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String report() {
-        System.out.println(jsonMsg);
-        jsonMsg = new Gson().toJson("ok");
-        return SUCCESS;
-    }
+    // @Action(value = "fix", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    // public String fixParties() {
+    // final List<ArenaRanking> arenaRankings = arenaRankingDao.list();
+    // for (final ArenaRanking arenaRanking : arenaRankings) {
+    // arenaRankingDao.delete(arenaRanking);
+    // }
+    //
+    // final List<Party> parties = partyDao.list();
+    // for (final Party party : parties) {
+    // final List<PartyGrid> partyGrids = party.getPartyGrids();
+    // int partyAtk = 0;
+    // int partyHp = 0;
+    // for (final PartyGrid partyGrid : partyGrids) {
+    // final Card card = partyGrid.getCard();
+    // if (card == null) {
+    // continue;
+    // }
+    // partyAtk += card.getAtk();
+    // partyHp += card.getHp();
+    // }
+    // party.setAtk(partyAtk);
+    // party.setHp(partyHp);
+    // partyDao.update(party);
+    // }
+    //
+    // jsonMsg = new Gson().toJson("ok");
+    // return SUCCESS;
+    // }
 
     public PartyDao getPartyDao() {
         return partyDao;
