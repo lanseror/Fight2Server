@@ -1,8 +1,11 @@
 package com.fight2.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class ArenaReward extends BaseEntity {
@@ -11,6 +14,7 @@ public class ArenaReward extends BaseEntity {
     private ArenaRewardType type;
     private int min;
     private int max;
+    private List<ArenaRewardItem> rewardItems;
 
     @ManyToOne
     @JoinColumn(name = "arena_id")
@@ -44,6 +48,15 @@ public class ArenaReward extends BaseEntity {
 
     public void setMax(final int max) {
         this.max = max;
+    }
+
+    @OneToMany(mappedBy = "arenaReward")
+    public List<ArenaRewardItem> getRewardItems() {
+        return rewardItems;
+    }
+
+    public void setRewardItems(final List<ArenaRewardItem> rewardItems) {
+        this.rewardItems = rewardItems;
     }
 
     public static long getSerialversionuid() {

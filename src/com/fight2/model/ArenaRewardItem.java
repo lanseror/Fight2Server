@@ -53,9 +53,9 @@ public class ArenaRewardItem extends BaseEntity {
     }
 
     public static enum ArenaRewardItemType {
-        Card,
         ArenaTicket,
-        Stamina
+        Stamina,
+        Card
     }
 
 }
