@@ -10,10 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.ArenaDao;
 import com.fight2.dao.ArenaRewardDao;
+import com.fight2.dao.ArenaRewardItemDao;
 import com.fight2.dao.CardImageDao;
 import com.fight2.dao.CardTemplateDao;
 import com.fight2.model.Arena;
 import com.fight2.model.ArenaReward;
+import com.fight2.model.ArenaRewardItem;
+import com.fight2.model.ArenaRewardItem.ArenaRewardItemType;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
@@ -26,6 +29,8 @@ public class ArenaRewardAction extends BaseAction {
     @Autowired
     private ArenaRewardDao arenaRewardDao;
     @Autowired
+    private ArenaRewardItemDao arenaRewardItemDao;
+    @Autowired
     private ArenaDao arenaDao;
     @Autowired
     private CardImageDao cardImageDao;
@@ -37,6 +42,9 @@ public class ArenaRewardAction extends BaseAction {
     private Arena arena;
     private int id;
     private int arenaId;
+    private ArenaRewardItemType[] rewardItemTypes;
+    private int[] rewardItemAmounts;
+    private int[] cardIds;
 
     @Action(value = "add", results = { @Result(name = SUCCESS, location = "arena_reward_form.ftl") })
     public String add() {
@@ -88,7 +96,26 @@ public class ArenaRewardAction extends BaseAction {
         final Arena arena = arenaDao.load(arenaId);
         arenaReward.setArena(arena);
         arenaRewardDao.add(arenaReward);
+        saveRewardItems(arenaReward);
         return SUCCESS;
+    }
+
+    private void saveRewardItems(final ArenaReward arenaReward) {
+        int cardIdIndex = 0;
+        for (int i = 0; i < rewardItemTypes.length; i++) {
+            final ArenaRewardItemType rewardItemType = rewardItemTypes[i];
+            final int amount = rewardItemAmounts[i];
+            final ArenaRewardItem arenaRewardItem = new ArenaRewardItem();
+            arenaRewardItem.setArenaReward(arenaReward);
+            arenaRewardItem.setAmount(amount);
+            arenaRewardItem.setType(rewardItemType);
+            if (rewardItemType == ArenaRewardItemType.Card) {
+                final int cardId = cardIds[cardIdIndex++];
+                final CardTemplate cardTemplate = cardTemplateDao.load(cardId);
+                arenaRewardItem.setCardTemplate(cardTemplate);
+            }
+            arenaRewardItemDao.add(arenaRewardItem);
+        }
     }
 
     private String editSave() {
@@ -97,6 +124,13 @@ public class ArenaRewardAction extends BaseAction {
         arenaRewardPo.setMin(arenaReward.getMin());
         arenaRewardPo.setType(arenaReward.getType());
         arenaRewardDao.update(arenaRewardPo);
+        // Delete all items first.
+        final List<ArenaRewardItem> rewardItems = arenaRewardPo.getRewardItems();
+        for (final ArenaRewardItem rewardItem : rewardItems) {
+            arenaRewardItemDao.delete(rewardItem);
+        }
+        // Then save new items.
+        saveRewardItems(arenaReward);
         return SUCCESS;
     }
 
@@ -189,6 +223,38 @@ public class ArenaRewardAction extends BaseAction {
 
     public void setCardTemplateDao(final CardTemplateDao cardTemplateDao) {
         this.cardTemplateDao = cardTemplateDao;
+    }
+
+    public ArenaRewardItemType[] getRewardItemTypes() {
+        return rewardItemTypes;
+    }
+
+    public void setRewardItemTypes(final ArenaRewardItemType[] rewardItemTypes) {
+        this.rewardItemTypes = rewardItemTypes;
+    }
+
+    public int[] getRewardItemAmounts() {
+        return rewardItemAmounts;
+    }
+
+    public void setRewardItemAmounts(final int[] rewardItemAmounts) {
+        this.rewardItemAmounts = rewardItemAmounts;
+    }
+
+    public int[] getCardIds() {
+        return cardIds;
+    }
+
+    public void setCardIds(final int[] cardIds) {
+        this.cardIds = cardIds;
+    }
+
+    public ArenaRewardItemDao getArenaRewardItemDao() {
+        return arenaRewardItemDao;
+    }
+
+    public void setArenaRewardItemDao(final ArenaRewardItemDao arenaRewardItemDao) {
+        this.arenaRewardItemDao = arenaRewardItemDao;
     }
 
 }
