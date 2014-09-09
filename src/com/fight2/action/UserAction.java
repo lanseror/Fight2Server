@@ -192,7 +192,7 @@ public class UserAction extends BaseAction {
     public String setNpc() {
         user = userDao.get(id);
         user.setNpc(true);
-        user.setName("Arena Guard");
+        user.setName("Arena Guardian");
         userDao.update(user);
         return SUCCESS;
     }

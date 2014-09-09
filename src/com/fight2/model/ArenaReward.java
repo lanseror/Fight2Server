@@ -2,6 +2,7 @@ package com.fight2.model;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -50,7 +51,7 @@ public class ArenaReward extends BaseEntity {
         this.max = max;
     }
 
-    @OneToMany(mappedBy = "arenaReward")
+    @OneToMany(mappedBy = "arenaReward", cascade = { CascadeType.REMOVE })
     public List<ArenaRewardItem> getRewardItems() {
         return rewardItems;
     }

@@ -22,6 +22,8 @@ import com.fight2.model.Card;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.opensymphony.xwork2.ActionContext;
 
 @Namespace("/arena-reward")
 public class ArenaRewardAction extends BaseAction {
@@ -138,6 +140,45 @@ public class ArenaRewardAction extends BaseAction {
     public String listByArena() {
         arena = arenaDao.load(arenaId);
         datas = arenaRewardDao.listByArena(arena);
+        return SUCCESS;
+    }
+
+    @Action(value = "list-json", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String listJson() {
+        arena = arenaDao.load(arenaId);
+        datas = arenaRewardDao.listByArena(arena);
+        final List<ArenaReward> rewards = Lists.newArrayList();
+        for (final ArenaReward data : datas) {
+            final ArenaReward arenaReward = new ArenaReward();
+            arenaReward.setId(data.getId());
+            arenaReward.setMax(data.getMax());
+            arenaReward.setMin(data.getMin());
+            arenaReward.setType(data.getType());
+            final List<ArenaRewardItem> rewardItems = Lists.newArrayList();
+            for (final ArenaRewardItem rewardItemTemp : data.getRewardItems()) {
+                final ArenaRewardItem rewardItem = new ArenaRewardItem();
+                rewardItem.setId(rewardItemTemp.getId());
+                rewardItem.setAmount(rewardItemTemp.getAmount());
+                rewardItem.setType(rewardItemTemp.getType());
+                final CardTemplate cardTemplate = rewardItemTemp.getCardTemplate();
+                if (cardTemplate != null) {
+                    final CardImage thumbObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, 1, cardTemplate);
+                    final Card card = new Card();
+                    card.setAtk(cardTemplate.getAtk());
+                    card.setHp(cardTemplate.getHp());
+                    card.setName(cardTemplate.getName());
+                    card.setStar(cardTemplate.getStar());
+                    card.setImage(thumbObj.getUrl());
+                    rewardItem.setCard(card);
+                }
+                rewardItems.add(rewardItem);
+            }
+            arenaReward.setRewardItems(rewardItems);
+            rewards.add(arenaReward);
+        }
+
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(rewards));
         return SUCCESS;
     }
 

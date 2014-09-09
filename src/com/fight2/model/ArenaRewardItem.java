@@ -3,6 +3,7 @@ package com.fight2.model;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 @Entity
 public class ArenaRewardItem extends BaseEntity {
@@ -11,6 +12,7 @@ public class ArenaRewardItem extends BaseEntity {
     private ArenaRewardItemType type;
     private int amount;
     private CardTemplate cardTemplate;
+    private Card card; // Use for JSON
 
     @ManyToOne
     @JoinColumn(name = "arena_reward_id")
@@ -42,6 +44,15 @@ public class ArenaRewardItem extends BaseEntity {
     @JoinColumn(name = "cardTemplate_id")
     public CardTemplate getCardTemplate() {
         return cardTemplate;
+    }
+
+    @Transient
+    public Card getCard() {
+        return card;
+    }
+
+    public void setCard(final Card card) {
+        this.card = card;
     }
 
     public void setCardTemplate(final CardTemplate cardTemplate) {
