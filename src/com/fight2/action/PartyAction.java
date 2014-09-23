@@ -102,10 +102,13 @@ public class PartyAction extends BaseAction {
                 if (card != null) {
                     final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(),
                             card.getCardTemplate());
+                    final CardImage imageObj = cardImageDao
+                            .getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), card.getCardTemplate());
                     final Card voCard = new Card();
                     voCard.setId(card.getId());
                     voCard.setAtk(card.getAtk());
                     voCard.setAvatar(avatarObj.getUrl());
+                    voCard.setImage(imageObj.getUrl());
                     voCard.setHp(card.getHp());
                     voCard.setStar(card.getStar());
                     voCard.setTier(card.getTier());
