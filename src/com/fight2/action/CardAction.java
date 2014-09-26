@@ -71,6 +71,9 @@ public class CardAction extends BaseAction {
         cardVo.setName(card.getName());
         cardVo.setSkill(card.getSkill());
         cardVo.setStar(card.getStar());
+        final CardTemplate cardTemplateVo = new CardTemplate();
+        cardTemplateVo.setId(cardTemplate.getId());
+        cardVo.setCardTemplate(cardTemplateVo);
         jsonMap.put("status", 0);
         jsonMap.put("card", cardVo);
         context.put("jsonMsg", new Gson().toJson(jsonMap));
@@ -101,6 +104,10 @@ public class CardAction extends BaseAction {
             voCard.setImage(image);
             voCard.setName(card.getName());
             voCard.setSkill(card.getSkill());
+            final CardTemplate cardTemplate = card.getCardTemplate();
+            final CardTemplate cardTemplateVo = new CardTemplate();
+            cardTemplateVo.setId(cardTemplate.getId());
+            voCard.setCardTemplate(cardTemplateVo);
             voCards.add(voCard);
         }
 

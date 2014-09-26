@@ -110,6 +110,28 @@ public class ArenaAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "get-ranking", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String rankingByArena() {
+        final Arena arena = arenaDao.load(id);
+        final List<ArenaRanking> rankingPos = arenaRankingDao.listByArenaRange(arena, 1, 100);
+        final List<ArenaRanking> rankings = Lists.newArrayList();
+        for (final ArenaRanking rankingPo : rankingPos) {
+            final ArenaRanking ranking = new ArenaRanking();
+            ranking.setId(rankingPo.getId());
+            ranking.setMight(rankingPo.getMight());
+            ranking.setRankNumber(rankingPo.getRankNumber());
+            final User userPo = rankingPo.getUser();
+            final User user = new User();
+            user.setId(userPo.getId());
+            user.setName(userPo.getName());
+            ranking.setUser(user);
+            rankings.add(ranking);
+        }
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(rankings));
+        return SUCCESS;
+    }
+
     @Action(value = "refresh", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String refresh() {
         final User currentUser = (User) this.getSession().get(LOGIN_USER);
@@ -219,7 +241,7 @@ public class ArenaAction extends BaseAction {
             p2ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
         } else {
             final ArenaRanking p2Ranking = arenaRankingDao.getByArenaRank(arena, p2RankNum);
-            System.out.println("p2RankNum:" + arena.getId() + "-" + p2RankNum);
+            // System.out.println("p2RankNum:" + arena.getId() + "-" + p2RankNum);
             final User p2User = p2Ranking.getUser();
             p2ArenaRecord.setUser(toArenaJsonUser(p2User));
         }
