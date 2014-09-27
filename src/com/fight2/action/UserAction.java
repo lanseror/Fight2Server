@@ -1,6 +1,9 @@
 package com.fight2.action;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
@@ -23,6 +26,7 @@ import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -47,6 +51,7 @@ public class UserAction extends BaseAction {
     private List<User> datas;
     private int id;
     private String installUUID;
+    private String jsonMsg;
 
     @Action(value = "list", results = { @Result(name = SUCCESS, location = "user_list.ftl") })
     public String list() {
@@ -129,6 +134,23 @@ public class UserAction extends BaseAction {
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(voUser));
         this.getSession().put(LOGIN_USER, user);
+        return SUCCESS;
+    }
+
+    @Action(value = "save-user-info", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String saveUserInfo() {
+        final User loginUser = this.getLoginUser();
+        final User updateUser = userDao.get(loginUser.getId());
+        final User user = new Gson().fromJson(jsonMsg, User.class);
+        try {
+            updateUser.setName(URLDecoder.decode(user.getName(), "UTF-8"));
+        } catch (final UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        userDao.update(updateUser);
+        final Map<String, Integer> response = Maps.newHashMap();
+        response.put("status", 0);
+        jsonMsg = new Gson().toJson(response);
         return SUCCESS;
     }
 
@@ -315,6 +337,14 @@ public class UserAction extends BaseAction {
 
     public void setArenaRankingDao(final ArenaRankingDao arenaRankingDao) {
         this.arenaRankingDao = arenaRankingDao;
+    }
+
+    public String getJsonMsg() {
+        return jsonMsg;
+    }
+
+    public void setJsonMsg(final String jsonMsg) {
+        this.jsonMsg = jsonMsg;
     }
 
 }
