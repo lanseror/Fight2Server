@@ -3,6 +3,8 @@ package com.fight2.model;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
@@ -20,6 +22,7 @@ public class User extends BaseEntity {
     private List<Card> cards;
     private boolean isDisabled;
     private boolean npc;
+    private Guild guild;
 
     public String getInstallUUID() {
         return installUUID;
@@ -113,6 +116,16 @@ public class User extends BaseEntity {
 
     public void setNpc(final boolean npc) {
         this.npc = npc;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "guild_id")
+    public Guild getGuild() {
+        return guild;
+    }
+
+    public void setGuild(final Guild guild) {
+        this.guild = guild;
     }
 
 }
