@@ -17,6 +17,8 @@ public interface BaseDao<T> {
 
     public List<T> list();
 
+    public List<T> listByLimit(final int maxResults);
+
     public SessionFactory getSessionFactory();
 
 }

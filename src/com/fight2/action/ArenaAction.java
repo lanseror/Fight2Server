@@ -29,6 +29,7 @@ import com.fight2.model.ArenaRanking;
 import com.fight2.model.ArenaStatus;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.BattleResult;
+import com.fight2.model.Guild;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.model.UserArenaInfo;
@@ -124,6 +125,13 @@ public class ArenaAction extends BaseAction {
             final User user = new User();
             user.setId(userPo.getId());
             user.setName(userPo.getName());
+            final Guild guildPo = userPo.getGuild();
+            if (guildPo != null) {
+                final Guild guild = new Guild();
+                guild.setId(guildPo.getId());
+                guild.setName(guildPo.getName());
+                user.setGuild(guild);
+            }
             ranking.setUser(user);
             rankings.add(ranking);
         }

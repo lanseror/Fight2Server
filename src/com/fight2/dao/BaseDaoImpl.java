@@ -2,6 +2,7 @@ package com.fight2.dao;
 
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -68,5 +69,13 @@ public abstract class BaseDaoImpl<T> implements BaseDao<T> {
     @SuppressWarnings("unchecked")
     public List<T> list() {
         return getSession().createCriteria(type).list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<T> listByLimit(final int maxResults) {
+        final Criteria criteria = getSession().createCriteria(type);
+        criteria.setMaxResults(maxResults);
+        return criteria.list();
     }
 }

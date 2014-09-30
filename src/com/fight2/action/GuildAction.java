@@ -15,6 +15,7 @@ import com.fight2.dao.GuildDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Guild;
 import com.fight2.model.User;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 
@@ -35,14 +36,40 @@ public class GuildAction extends BaseAction {
     // datas = guildDao.list();
     // return SUCCESS;
     // }
-    //
-    // @Action(value = "list-json", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    // public String listJson() {
-    // final ActionContext context = ActionContext.getContext();
-    // final List<User> list = userDao.list();
-    // context.put("jsonMsg", new Gson().toJson(list));
-    // return SUCCESS;
-    // }
+
+    @Action(value = "list-tops", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String listTopGuilds() {
+        final List<Guild> list = guildDao.listTopGuilds(100);
+        datas = Lists.newArrayList();
+        for (final Guild guildPo : list) {
+            final User president = guildPo.getPresident();
+            final Guild guildVo = new Guild();
+            guildVo.setId(guildPo.getId());
+            guildVo.setName(guildPo.getName());
+            final User presidentVo = new User();
+            presidentVo.setId(president.getId());
+            presidentVo.setName(president.getName());
+            guildVo.setPresident(presidentVo);
+            datas.add(guildVo);
+        }
+        jsonMsg = new Gson().toJson(datas);
+        return SUCCESS;
+    }
+
+    @Action(value = "members", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String members() {
+        final Guild guild = guildDao.load(id);
+        final List<User> usersPos = userDao.listByGuild(guild);
+        final List<User> users = Lists.newArrayList();
+        for (final User userPo : usersPos) {
+            final User user = new User();
+            user.setId(userPo.getId());
+            user.setName(userPo.getName());
+            users.add(user);
+        }
+        jsonMsg = new Gson().toJson(users);
+        return SUCCESS;
+    }
 
     @Action(value = "apply", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String applyGuild() {
@@ -64,6 +91,24 @@ public class GuildAction extends BaseAction {
         userDao.update(loginUserPo);
         final Map<String, Integer> response = Maps.newHashMap();
         response.put("status", 0);
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "join", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String joinGuild() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User loginUserPo = userDao.get(loginUser.getId());
+        final Guild guild = guildDao.load(id);
+        if (loginUserPo.getGuild() == null) {
+            loginUserPo.setGuild(guild);
+            userDao.update(loginUserPo);
+            response.put("status", 0);
+        } else {
+            response.put("status", 1);
+        }
+
         jsonMsg = new Gson().toJson(response);
         return SUCCESS;
     }

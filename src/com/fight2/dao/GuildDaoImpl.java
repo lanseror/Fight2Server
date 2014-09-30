@@ -1,5 +1,7 @@
 package com.fight2.dao;
 
+import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -19,6 +21,15 @@ public class GuildDaoImpl extends BaseDaoImpl<Guild> implements GuildDao {
         final Criteria criteria = getSession().createCriteria(getMyType());
         criteria.add(Restrictions.eq("president", user));
         return (Guild) criteria.uniqueResult();
+    }
+
+    @Override
+    public List<Guild> listTopGuilds(final int maxResults) {
+        final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.setMaxResults(maxResults);
+        @SuppressWarnings("unchecked")
+        final List<Guild> guilds = criteria.list();
+        return guilds;
     }
 
 }
