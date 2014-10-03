@@ -12,12 +12,15 @@ import org.springframework.stereotype.Component;
 import com.fight2.dao.ArenaDao;
 import com.fight2.model.Arena;
 import com.fight2.model.ArenaStatus;
+import com.fight2.util.ArenaUtils;
 import com.fight2.util.HibernateUtils;
 
 @Component
 public class JobInitializer implements ApplicationListener<ContextRefreshedEvent> {
     @Autowired
     private ArenaDao arenaDao;
+    @Autowired
+    private ArenaService arenaService;
     @Autowired
     private TaskScheduler taskScheduler;
 
@@ -27,9 +30,9 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
         HibernateUtils.openSession(sessionFactory);
         final List<Arena> arenas = arenaDao.getAliveArenas();
         for (final Arena arena : arenas) {
-            final Runnable stopSchedule = createStopSchedule(arena.getId());
+            final Runnable stopSchedule = ArenaUtils.createStopSchedule(arena.getId(), arenaService);
             if (arena.getStatus() == ArenaStatus.Scheduled) {
-                final Runnable startSchedule = createStartSchedule(arena.getId());
+                final Runnable startSchedule = ArenaUtils.createStartSchedule(arena.getId(), arenaDao);
                 taskScheduler.schedule(startSchedule, arena.getStartDate());
                 taskScheduler.schedule(stopSchedule, arena.getEndDate());
             } else if (arena.getStatus() == ArenaStatus.Started) {
@@ -37,42 +40,6 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
             }
         }
         HibernateUtils.closeSession(sessionFactory);
-    }
-
-    private Runnable createStartSchedule(final int id) {
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                final SessionFactory sessionFactory = arenaDao.getSessionFactory();
-                HibernateUtils.openSession(sessionFactory);
-                final Arena arena = arenaDao.get(id);
-                if (arena != null && arena.getStatus() == ArenaStatus.Scheduled) {
-                    arena.setStatus(ArenaStatus.Started);
-                    arenaDao.update(arena);
-                }
-                HibernateUtils.closeSession(sessionFactory);
-            }
-
-        };
-        return runnable;
-    }
-
-    private Runnable createStopSchedule(final int id) {
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                final SessionFactory sessionFactory = arenaDao.getSessionFactory();
-                HibernateUtils.openSession(sessionFactory);
-                final Arena arena = arenaDao.get(id);
-                if (arena != null && arena.getStatus() == ArenaStatus.Started) {
-                    arena.setStatus(ArenaStatus.Stopped);
-                    arenaDao.update(arena);
-                }
-                HibernateUtils.closeSession(sessionFactory);
-            }
-
-        };
-        return runnable;
     }
 
     public ArenaDao getArenaDao() {
@@ -89,6 +56,14 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
 
     public void setTaskScheduler(final TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
+    }
+
+    public ArenaService getArenaService() {
+        return arenaService;
+    }
+
+    public void setArenaService(final ArenaService arenaService) {
+        this.arenaService = arenaService;
     }
 
 }

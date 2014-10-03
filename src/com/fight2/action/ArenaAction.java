@@ -12,7 +12,6 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
@@ -36,10 +35,10 @@ import com.fight2.model.UserArenaInfo;
 import com.fight2.model.UserArenaRecord;
 import com.fight2.model.UserArenaRecord.UserArenaRecordStatus;
 import com.fight2.model.json.ArenaJson;
+import com.fight2.service.ArenaService;
 import com.fight2.service.BattleService;
 import com.fight2.util.ArenaUtils;
 import com.fight2.util.DateUtils;
-import com.fight2.util.HibernateUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -50,6 +49,8 @@ public class ArenaAction extends BaseAction {
     private static final long serialVersionUID = -4473064014262040889L;
     @Autowired
     private ArenaDao arenaDao;
+    @Autowired
+    private ArenaService arenaService;
     @Autowired
     private ArenaRankingDao arenaRankingDao;
     @Autowired
@@ -204,9 +205,12 @@ public class ArenaAction extends BaseAction {
     }
 
     private void refreshArenaRecords(final ArenaRanking arenaRanking, final List<UserArenaRecord> arenaRecords) {
+        final Arena arena = arenaRanking.getArena();
+        if (arena.getStatus() != ArenaStatus.Started) {
+            return;
+        }
         final Random random = new Random();
         arenaRecords.clear();
-        final Arena arena = arenaRanking.getArena();
         final int rank = arenaRanking.getRankNumber();
         final int maxRank = arenaRankingDao.getArenaMaxRank(arenaRanking.getArena());
 
@@ -438,9 +442,9 @@ public class ArenaAction extends BaseAction {
     private String createSave() {
         arena.setStatus(ArenaStatus.Scheduled);
         arenaDao.add(arena);
-        final Runnable startSchedule = createStartSchedule(arena.getId());
+        final Runnable startSchedule = ArenaUtils.createStartSchedule(arena.getId(), arenaDao);
         taskScheduler.schedule(startSchedule, arena.getStartDate());
-        final Runnable stopSchedule = createStopSchedule(arena.getId());
+        final Runnable stopSchedule = ArenaUtils.createStopSchedule(arena.getId(), arenaService);
         taskScheduler.schedule(stopSchedule, arena.getEndDate());
         return SUCCESS;
     }
@@ -463,42 +467,6 @@ public class ArenaAction extends BaseAction {
         arena.setStatus(ArenaStatus.Cancelled);
         arenaDao.update(arena);
         return SUCCESS;
-    }
-
-    private Runnable createStartSchedule(final int id) {
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                final SessionFactory sessionFactory = arenaDao.getSessionFactory();
-                HibernateUtils.openSession(sessionFactory);
-                final Arena arena = arenaDao.get(id);
-                if (arena != null && arena.getStatus() == ArenaStatus.Scheduled) {
-                    arena.setStatus(ArenaStatus.Started);
-                    arenaDao.update(arena);
-                }
-                HibernateUtils.closeSession(sessionFactory);
-            }
-
-        };
-        return runnable;
-    }
-
-    private Runnable createStopSchedule(final int id) {
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                final SessionFactory sessionFactory = arenaDao.getSessionFactory();
-                HibernateUtils.openSession(sessionFactory);
-                final Arena arena = arenaDao.get(id);
-                if (arena != null && arena.getStatus() == ArenaStatus.Started) {
-                    arena.setStatus(ArenaStatus.Stopped);
-                    arenaDao.update(arena);
-                }
-                HibernateUtils.closeSession(sessionFactory);
-            }
-
-        };
-        return runnable;
     }
 
     public Arena getArena() {
@@ -599,6 +567,14 @@ public class ArenaAction extends BaseAction {
 
     public void setArenaContinuousWinDao(final ArenaContinuousWinDao arenaContinuousWinDao) {
         this.arenaContinuousWinDao = arenaContinuousWinDao;
+    }
+
+    public ArenaService getArenaService() {
+        return arenaService;
+    }
+
+    public void setArenaService(final ArenaService arenaService) {
+        this.arenaService = arenaService;
     }
 
 }

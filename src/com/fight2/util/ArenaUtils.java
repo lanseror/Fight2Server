@@ -2,7 +2,13 @@ package com.fight2.util;
 
 import java.util.Map;
 
+import org.hibernate.SessionFactory;
+
+import com.fight2.dao.ArenaDao;
+import com.fight2.model.Arena;
+import com.fight2.model.ArenaStatus;
 import com.fight2.model.UserArenaInfo;
+import com.fight2.service.ArenaService;
 import com.google.common.collect.Maps;
 
 public class ArenaUtils {
@@ -29,5 +35,34 @@ public class ArenaUtils {
         }
 
         return userArenaInfoMap.get(userId);
+    }
+
+    public static Runnable createStartSchedule(final int id, final ArenaDao arenaDao) {
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                final SessionFactory sessionFactory = arenaDao.getSessionFactory();
+                HibernateUtils.openSession(sessionFactory);
+                final Arena arena = arenaDao.get(id);
+                if (arena != null && arena.getStatus() == ArenaStatus.Scheduled) {
+                    arena.setStatus(ArenaStatus.Started);
+                    arenaDao.update(arena);
+                }
+                HibernateUtils.closeSession(sessionFactory);
+            }
+
+        };
+        return runnable;
+    }
+
+    public static Runnable createStopSchedule(final int id, final ArenaService arenaService) {
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                arenaService.stopArena(id);
+            }
+
+        };
+        return runnable;
     }
 }

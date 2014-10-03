@@ -12,6 +12,7 @@ import com.fight2.dao.CardDao;
 import com.fight2.dao.CardImageDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Card;
+import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.User;
@@ -47,10 +48,12 @@ public class CardAction extends BaseAction {
             context.put("jsonMsg", new Gson().toJson(jsonMap));
             return SUCCESS;
         }
-
+        final List<Card> cardpackCards = cardDao.listByUserAndStatus(user, CardStatus.InCardPack);
+        final int cardpackSize = cardpackCards.size();
         final CardTemplate cardTemplate = summonHelper.summon();
         final String avatar = cardTemplate.getAvatars().get(0).getUrl();
         final String image = cardTemplate.getThumbImages().get(0).getUrl();
+
         final Card card = new Card();
         card.setAtk(cardTemplate.getAtk());
         card.setAvatar(avatar);
@@ -59,6 +62,11 @@ public class CardAction extends BaseAction {
         card.setName(cardTemplate.getName());
         card.setStar(cardTemplate.getStar());
         card.setCardTemplate(cardTemplate);
+        if (cardpackSize < User.USER_CARDPACK_SIZE) {
+            card.setStatus(CardStatus.InCardPack);
+        } else {
+            card.setStatus(CardStatus.InStoreroom);
+        }
         card.setUser(user);
         cardDao.add(card);
 
@@ -89,7 +97,7 @@ public class CardAction extends BaseAction {
     @Action(value = "my-cards", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String myCards() {
         final User user = (User) this.getSession().get(LOGIN_USER);
-        final List<Card> cards = cardDao.listByUser(user);
+        final List<Card> cards = cardDao.listByUserAndStatus(user, CardStatus.InCardPack);
         final List<Card> voCards = Lists.newArrayList();
         for (final Card card : cards) {
             final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), card.getCardTemplate());

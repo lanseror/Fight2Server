@@ -18,6 +18,7 @@ public class Card extends BaseEntity {
     private int atk;// Attack value;
     private String skill;
     private int cardVersion;
+    private CardStatus status = CardStatus.InCardPack;
     private User user;
     private CardTemplate cardTemplate;
 
@@ -103,6 +104,14 @@ public class Card extends BaseEntity {
         this.cardVersion = cardVersion;
     }
 
+    public CardStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(final CardStatus status) {
+        this.status = status;
+    }
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     public User getUser() {
@@ -127,4 +136,8 @@ public class Card extends BaseEntity {
         return serialVersionUID;
     }
 
+    public static enum CardStatus {
+        InCardPack,
+        InStoreroom;
+    }
 }

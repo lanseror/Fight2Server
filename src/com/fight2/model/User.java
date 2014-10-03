@@ -10,6 +10,7 @@ import javax.persistence.OneToOne;
 
 @Entity
 public class User extends BaseEntity {
+    public static final int USER_CARDPACK_SIZE = 80;
     private static final long serialVersionUID = -4914598284011248917L;
     private String installUUID;
     private String name;
@@ -19,6 +20,7 @@ public class User extends BaseEntity {
     private int cardCount;
     private int level = 1;
     private PartyInfo partyInfo;
+    private UserStoreroom storeroom;
     private List<Card> cards;
     private boolean isDisabled;
     private boolean npc;
@@ -91,6 +93,15 @@ public class User extends BaseEntity {
 
     public void setPartyInfo(final PartyInfo partyInfo) {
         this.partyInfo = partyInfo;
+    }
+
+    @OneToOne(mappedBy = "user")
+    public UserStoreroom getStoreroom() {
+        return storeroom;
+    }
+
+    public void setStoreroom(final UserStoreroom storeroom) {
+        this.storeroom = storeroom;
     }
 
     @OneToMany(mappedBy = "user")

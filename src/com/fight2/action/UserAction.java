@@ -18,6 +18,7 @@ import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.ArenaRanking;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.Card;
@@ -26,6 +27,7 @@ import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
+import com.fight2.model.UserStoreroom;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
@@ -41,6 +43,8 @@ public class UserAction extends BaseAction {
     private PartyDao partyDao;
     @Autowired
     private PartyGridDao partyGridDao;
+    @Autowired
+    private UserStoreroomDao userStoreroomDao;
     @Autowired
     private CardImageDao cardImageDao;
     @Autowired
@@ -92,7 +96,9 @@ public class UserAction extends BaseAction {
                     partyGridDao.add(partyGrid);
                 }
             }
-
+            final UserStoreroom userStoreroom = new UserStoreroom();
+            userStoreroom.setUser(user);
+            userStoreroomDao.add(userStoreroom);
         }
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(user));
@@ -345,6 +351,14 @@ public class UserAction extends BaseAction {
 
     public void setJsonMsg(final String jsonMsg) {
         this.jsonMsg = jsonMsg;
+    }
+
+    public UserStoreroomDao getUserStoreroomDao() {
+        return userStoreroomDao;
+    }
+
+    public void setUserStoreroomDao(final UserStoreroomDao userStoreroomDao) {
+        this.userStoreroomDao = userStoreroomDao;
     }
 
 }

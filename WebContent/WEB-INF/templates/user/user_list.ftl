@@ -38,6 +38,8 @@
          &nbsp;&nbsp;|&nbsp;&nbsp;
          <a href="<@s.url namespace="/user" action="parties"><@s.param name="id" value="${entry.id}" /></@s.url>">玩家队伍</a>
          &nbsp;&nbsp;|&nbsp;&nbsp;
+         <a href="<@s.url namespace="/user-storeroom" action="view"><@s.param name="id" value="${entry.storeroom.id}" /></@s.url>">玩家仓库</a>
+         &nbsp;&nbsp;|&nbsp;&nbsp;
          <a href="<@s.url namespace="/user" action="delete"><@s.param name="id" value="${entry.id}" /></@s.url>">删除</a>
         </td>
     </tr>
