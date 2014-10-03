@@ -21,6 +21,7 @@ public class Card extends BaseEntity {
     private CardStatus status = CardStatus.InCardPack;
     private User user;
     private CardTemplate cardTemplate;
+    private int amount; // Use to count cards in same card template.
 
     public String getName() {
         return name;
@@ -130,6 +131,15 @@ public class Card extends BaseEntity {
 
     public void setCardTemplate(final CardTemplate cardTemplate) {
         this.cardTemplate = cardTemplate;
+    }
+
+    @Transient
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(final int amount) {
+        this.amount = amount;
     }
 
     public static long getSerialversionuid() {

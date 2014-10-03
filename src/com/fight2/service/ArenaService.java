@@ -71,8 +71,6 @@ public class ArenaService {
                         storeroom.setStamina(storeroom.getStamina() + amount);
                         userStoreroomDao.update(storeroom);
                     } else if (rewardItemType == ArenaRewardItemType.Card) {
-                        final List<Card> cardpackCards = cardDao.listByUserAndStatus(user, CardStatus.InCardPack);
-                        final int cardpackSize = cardpackCards.size();
                         final CardTemplate cardTemplate = rewardItem.getCardTemplate();
                         for (int i = 1; i <= amount; i++) {
                             final Card card = new Card();
@@ -82,11 +80,7 @@ public class ArenaService {
                             card.setStar(cardTemplate.getStar());
                             card.setCardTemplate(cardTemplate);
                             card.setUser(user);
-                            if (cardpackSize + i <= User.USER_CARDPACK_SIZE) {
-                                card.setStatus(CardStatus.InCardPack);
-                            } else {
-                                card.setStatus(CardStatus.InStoreroom);
-                            }
+                            card.setStatus(CardStatus.InStoreroom);
                             cardDao.add(card);
                         }
                         final List<Card> cards = cardDao.listByUser(user);
