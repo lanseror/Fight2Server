@@ -94,6 +94,17 @@ public class CardAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "delete", results = { @Result(name = SUCCESS, location = "../user/list.action", type = "redirect") })
+    public String delete() {
+        card = cardDao.load(id);
+        final User user = card.getUser();
+        cardDao.delete(card);
+        final List<Card> cards = cardDao.listByUser(user);
+        user.setCardCount(cards.size());
+        userDao.update(user);
+        return SUCCESS;
+    }
+
     @Action(value = "my-cards", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String myCards() {
         final User user = (User) this.getSession().get(LOGIN_USER);

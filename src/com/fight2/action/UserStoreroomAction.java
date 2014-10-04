@@ -57,7 +57,7 @@ public class UserStoreroomAction extends BaseAction {
         final User userPo = userDao.get(loginUser.getId());
         final UserStoreroom userStoreroomPo = userPo.getStoreroom();
         final List<Card> cards = cardDao.listByUserAndStatus(userPo, CardStatus.InStoreroom);
-        final Map<CardTemplate, Integer> cardTemplates = Maps.newHashMap();
+        final Map<CardTemplate, Integer> cardTemplates = Maps.newLinkedHashMap();
         for (final Card card : cards) {
             final CardTemplate cardTemplate = card.getCardTemplate();
             if (cardTemplates.containsKey(cardTemplate)) {
@@ -73,6 +73,7 @@ public class UserStoreroomAction extends BaseAction {
             final CardTemplate template = entry.getKey();
             final int count = entry.getValue();
             final Card cardVo = new Card();
+            cardVo.setId(template.getId());
             cardVo.setHp(template.getHp());
             cardVo.setAtk(template.getAtk());
             cardVo.setName(template.getName());
@@ -92,6 +93,31 @@ public class UserStoreroomAction extends BaseAction {
 
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(userStoreroomVo));
+        return SUCCESS;
+    }
+
+    @Action(value = "receive-card", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String receiveCard() {
+        final User loginUser = this.getLoginUser();
+        final User userPo = userDao.get(loginUser.getId());
+        final List<Card> cardpackCards = cardDao.listByUserAndStatus(userPo, CardStatus.InCardPack);
+        final int cardpackSize = cardpackCards.size();
+        final List<Card> cards = cardDao.listByUserAndStatus(userPo, CardStatus.InStoreroom);
+        final int templateId = id;
+        int receiveSize = 0;
+        for (final Card card : cards) {
+            final CardTemplate cardTemplate = card.getCardTemplate();
+            if (cardTemplate.getId() == templateId && cardpackSize + receiveSize < User.USER_CARDPACK_SIZE) {
+                receiveSize++;
+                card.setStatus(CardStatus.InCardPack);
+                cardDao.update(card);
+            }
+        }
+
+        final Map<String, Integer> response = Maps.newHashMap();
+        response.put("size", receiveSize);
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(response));
         return SUCCESS;
     }
 

@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
@@ -22,13 +23,16 @@ import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.ArenaRanking;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.Card;
+import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardImage;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.model.UserStoreroom;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -107,7 +111,8 @@ public class UserAction extends BaseAction {
 
     @Action(value = "parties", results = { @Result(name = SUCCESS, location = "user_parties.ftl") })
     public String parties() {
-        final User user = userDao.get(id);
+        user = userDao.get(id);
+        final Set<Card> partyCards = Sets.newHashSet();
         final PartyInfo partyInfo = partyInfoDao.getByUser(user);
         final List<Party> parties = partyInfo.getParties();
         for (final Party party : parties) {
@@ -117,9 +122,21 @@ public class UserAction extends BaseAction {
                     final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(),
                             card.getCardTemplate());
                     card.setAvatar(avatarObj.getUrl());
+                    partyCards.add(card);
                 }
             }
         }
+        final List<Card> cardpackCards = cardDao.listByUserAndStatus(user, CardStatus.InCardPack);
+        final List<Card> nonPartyCards = Lists.newArrayList();
+        for (final Card cardpackCard : cardpackCards) {
+            if (!partyCards.contains(cardpackCard)) {
+                final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, cardpackCard.getTier(),
+                        cardpackCard.getCardTemplate());
+                cardpackCard.setImage(imageObj.getUrl());
+                nonPartyCards.add(cardpackCard);
+            }
+        }
+        user.setCards(nonPartyCards);
         final ActionContext context = ActionContext.getContext();
         context.put("partyInfo", partyInfo);
         return SUCCESS;

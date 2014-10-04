@@ -24,6 +24,23 @@
     </tr>
      </#list>
 </table>
+<br/><br/>
+    <span><h2>卡组卡牌</h2></span>
+            <table border="1">
+            <tr>
+             <@s.iterator value="user.cards" status="status">
+                    <td>
+                         ${name}<br/><span>HP：${hp}，攻击：${atk}</span><br/>
+                         <img src="<@s.url value="${image}" />" height="150" width="100" />
+                         <br/>
+                         <a href="<@s.url namespace="/card" action="delete"><@s.param name="id" value="${id}" /></@s.url>">删除</a>
+                    </td>
+                    <@s.if test="#status.getCount()%8==0&&#status.last==false">
+                        </tr><tr>
+                    </@s.if>
+             </@s.iterator>
+             </tr>
+             </table>
 <br/>
     <a href="<@s.url namespace="/user" action="list-json" />">List as Json</a>
 </center>
