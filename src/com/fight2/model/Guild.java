@@ -14,6 +14,7 @@ public class Guild extends BaseEntity {
     private User president;
     private String notice;
     private Date createDate;
+    private boolean pollEnabled;
 
     public String getName() {
         return name;
@@ -55,6 +56,14 @@ public class Guild extends BaseEntity {
 
     public void setCreateDate(final Date createDate) {
         this.createDate = createDate;
+    }
+
+    public boolean isPollEnabled() {
+        return pollEnabled;
+    }
+
+    public void setPollEnabled(final boolean pollEnabled) {
+        this.pollEnabled = pollEnabled;
     }
 
     public static long getSerialversionuid() {
