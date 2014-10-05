@@ -94,7 +94,7 @@ public class CardAction extends BaseAction {
         return SUCCESS;
     }
 
-    @Action(value = "delete", results = { @Result(name = SUCCESS, location = "../user/list.action", type = "redirect") })
+    @Action(value = "delete", results = { @Result(name = SUCCESS, location = "../user/parties.action", type = "redirect", params = { "id", "${id}" }) })
     public String delete() {
         card = cardDao.load(id);
         final User user = card.getUser();
@@ -102,6 +102,7 @@ public class CardAction extends BaseAction {
         final List<Card> cards = cardDao.listByUser(user);
         user.setCardCount(cards.size());
         userDao.update(user);
+        id = user.getId();
         return SUCCESS;
     }
 

@@ -113,6 +113,24 @@ public class GuildAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "quit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String quitGuild() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User loginUserPo = userDao.get(loginUser.getId());
+        final Guild userGuild = loginUserPo.getGuild();
+        if (userGuild != null && userGuild.getPresident().getId() != loginUserPo.getId()) {
+            loginUserPo.setGuild(null);
+            userDao.update(loginUserPo);
+            response.put("status", 0);
+        } else {
+            response.put("status", 1);
+        }
+
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
     @Action(value = "president-edit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String presidentEdit() {
         final User loginUser = this.getLoginUser();
