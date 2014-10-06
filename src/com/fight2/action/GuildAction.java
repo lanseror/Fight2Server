@@ -12,12 +12,17 @@ import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.GuildDao;
+import com.fight2.dao.GuildPollDao;
+import com.fight2.dao.GuildVoterDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Guild;
+import com.fight2.model.GuildPoll;
+import com.fight2.model.GuildVoter;
 import com.fight2.model.User;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.opensymphony.xwork2.ActionContext;
 
 @Namespace("/guild")
 public class GuildAction extends BaseAction {
@@ -26,6 +31,10 @@ public class GuildAction extends BaseAction {
     private UserDao userDao;
     @Autowired
     private GuildDao guildDao;
+    @Autowired
+    private GuildPollDao guildPollDao;
+    @Autowired
+    private GuildVoterDao guildVoterDao;
     private Guild guild;
     private List<Guild> datas;
     private int id;
@@ -53,6 +62,12 @@ public class GuildAction extends BaseAction {
             datas.add(guildVo);
         }
         jsonMsg = new Gson().toJson(datas);
+        return SUCCESS;
+    }
+
+    @Action(value = "list", results = { @Result(name = SUCCESS, location = "guild_list.ftl") })
+    public String list() {
+        datas = guildDao.list();
         return SUCCESS;
     }
 
@@ -113,6 +128,40 @@ public class GuildAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "view", results = { @Result(name = SUCCESS, location = "guild_form.ftl") })
+    public String viewGuild() {
+        final Guild guild = guildDao.load(id);
+        final List<GuildPoll> polls = guildPollDao.listByGuild(guild);
+        final ActionContext context = ActionContext.getContext();
+        context.put("polls", polls);
+        return SUCCESS;
+    }
+
+    @Action(value = "enable-poll", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String enablePoll() {
+        final Guild guild = guildDao.load(id);
+        guild.setPollEnabled(true);
+        guildDao.update(guild);
+        final List<GuildPoll> polls = guildPollDao.list();
+        for (final GuildPoll poll : polls) {
+            guildPollDao.delete(poll);
+        }
+        final List<GuildVoter> voters = guildVoterDao.list();
+        for (final GuildVoter voter : voters) {
+            guildVoterDao.delete(voter);
+        }
+        return SUCCESS;
+
+    }
+
+    @Action(value = "disable-poll", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String disablePoll() {
+        final Guild guild = guildDao.load(id);
+        guild.setPollEnabled(false);
+        guildDao.update(guild);
+        return SUCCESS;
+    }
+
     @Action(value = "quit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String quitGuild() {
         final Map<String, Integer> response = Maps.newHashMap();
@@ -147,6 +196,52 @@ public class GuildAction extends BaseAction {
         }
         final Map<String, Integer> response = Maps.newHashMap();
         response.put("status", 0);
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "vote", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String vote() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User voter = userDao.load(loginUser.getId());
+        final User candidate = userDao.load(id);
+        final Guild guild = voter.getGuild();
+
+        if (guild != candidate.getGuild()) {
+            response.put("status", 2);
+        } else if (guildVoterDao.hasVoted(guild, voter)) {
+            response.put("status", 1);
+        } else {
+            response.put("status", 0);
+            final GuildPoll guildPoll = guildPollDao.getByGuildAndCandidate(guild, candidate);
+            if (guildPoll == null) {
+                final GuildPoll guildPollNew = new GuildPoll();
+                guildPollNew.setCandidate(candidate);
+                guildPollNew.setGuild(guild);
+                guildPollNew.setVotes(1);
+                guildPollDao.add(guildPollNew);
+            } else {
+                guildPoll.setVotes(guildPoll.getVotes() + 1);
+                guildPollDao.update(guildPoll);
+            }
+            final GuildVoter guildVoter = new GuildVoter();
+            guildVoter.setGuild(guild);
+            guildVoter.setVoter(voter);
+            guildVoterDao.add(guildVoter);
+        }
+
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "has-voted", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String hasVoted() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User voter = userDao.load(loginUser.getId());
+        final Guild guild = voter.getGuild();
+        response.put("status", guildVoterDao.hasVoted(guild, voter) ? 1 : 0);
         jsonMsg = new Gson().toJson(response);
         return SUCCESS;
     }
@@ -229,6 +324,22 @@ public class GuildAction extends BaseAction {
 
     public void setJsonMsg(final String jsonMsg) {
         this.jsonMsg = jsonMsg;
+    }
+
+    public GuildPollDao getGuildPollDao() {
+        return guildPollDao;
+    }
+
+    public void setGuildPollDao(final GuildPollDao guildPollDao) {
+        this.guildPollDao = guildPollDao;
+    }
+
+    public GuildVoterDao getGuildVoterDao() {
+        return guildVoterDao;
+    }
+
+    public void setGuildVoterDao(final GuildVoterDao guildVoterDao) {
+        this.guildVoterDao = guildVoterDao;
     }
 
 }
