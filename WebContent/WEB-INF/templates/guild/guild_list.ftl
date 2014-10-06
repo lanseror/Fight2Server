@@ -24,9 +24,9 @@
         <td><#if entry.isPollEnabled()>是<#else>否</#if></td>
         <td>
             <#if entry.isPollEnabled()>
-            <a href="<@s.url namespace="/guild" action="disable-poll"><@s.param name="id" value="${entry.id}" /></@s.url>">结束投票</a>
+            <a href="<@s.url namespace="/guild" action="close-poll"><@s.param name="id" value="${entry.id}" /></@s.url>">结束投票</a>
         <#else>
-            <a href="<@s.url namespace="/guild" action="enable-poll"><@s.param name="id" value="${entry.id}" /></@s.url>">开启投票</a>
+            <a href="<@s.url namespace="/guild" action="open-poll"><@s.param name="id" value="${entry.id}" /></@s.url>">开启投票</a>
         </#if>
         </td>
     </tr>

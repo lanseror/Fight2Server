@@ -128,40 +128,6 @@ public class GuildAction extends BaseAction {
         return SUCCESS;
     }
 
-    @Action(value = "view", results = { @Result(name = SUCCESS, location = "guild_form.ftl") })
-    public String viewGuild() {
-        final Guild guild = guildDao.load(id);
-        final List<GuildPoll> polls = guildPollDao.listByGuild(guild);
-        final ActionContext context = ActionContext.getContext();
-        context.put("polls", polls);
-        return SUCCESS;
-    }
-
-    @Action(value = "enable-poll", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
-    public String enablePoll() {
-        final Guild guild = guildDao.load(id);
-        guild.setPollEnabled(true);
-        guildDao.update(guild);
-        final List<GuildPoll> polls = guildPollDao.list();
-        for (final GuildPoll poll : polls) {
-            guildPollDao.delete(poll);
-        }
-        final List<GuildVoter> voters = guildVoterDao.list();
-        for (final GuildVoter voter : voters) {
-            guildVoterDao.delete(voter);
-        }
-        return SUCCESS;
-
-    }
-
-    @Action(value = "disable-poll", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
-    public String disablePoll() {
-        final Guild guild = guildDao.load(id);
-        guild.setPollEnabled(false);
-        guildDao.update(guild);
-        return SUCCESS;
-    }
-
     @Action(value = "quit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String quitGuild() {
         final Map<String, Integer> response = Maps.newHashMap();
@@ -235,6 +201,60 @@ public class GuildAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "view", results = { @Result(name = SUCCESS, location = "guild_form.ftl") })
+    public String viewGuild() {
+        final Guild guild = guildDao.load(id);
+        final List<GuildPoll> polls = guildPollDao.listByGuild(guild);
+        final ActionContext context = ActionContext.getContext();
+        context.put("polls", polls);
+        return SUCCESS;
+    }
+
+    @Action(value = "open-poll", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String openPoll() {
+        final Guild guild = guildDao.load(id);
+        guild.setPollEnabled(true);
+        guildDao.update(guild);
+        final List<GuildPoll> polls = guildPollDao.list();
+        for (final GuildPoll poll : polls) {
+            guildPollDao.delete(poll);
+        }
+        final List<GuildVoter> voters = guildVoterDao.list();
+        for (final GuildVoter voter : voters) {
+            guildVoterDao.delete(voter);
+        }
+        return SUCCESS;
+
+    }
+
+    @Action(value = "close-poll", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String closePoll() {
+        final Guild guild = guildDao.load(id);
+        guild.setPollEnabled(false);
+        guildDao.update(guild);
+        final List<GuildPoll> polls = guildPollDao.list();
+        int maxVotes = 0;
+        int presidentVotes = 0;
+        User maxPollCandidate = guild.getPresident();
+        for (final GuildPoll poll : polls) {
+            final int votes = poll.getVotes();
+            final User candidate = poll.getCandidate();
+            if (votes > maxVotes) {
+                maxVotes = votes;
+                maxPollCandidate = candidate;
+            }
+            if (candidate == guild.getPresident()) {
+                presidentVotes = votes;
+            }
+        }
+
+        if (maxVotes > presidentVotes) {
+            guild.setPresident(maxPollCandidate);
+            guildDao.update(guild);
+        }
+        return SUCCESS;
+    }
+
     @Action(value = "has-voted", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String hasVoted() {
         final Map<String, Integer> response = Maps.newHashMap();
@@ -263,6 +283,7 @@ public class GuildAction extends BaseAction {
             guildVo.setName(guild.getName());
             guildVo.setNotice(guild.getNotice());
             guildVo.setQq(guild.getQq());
+            guildVo.setPollEnabled(guild.isPollEnabled());
             final User presidentVo = new User();
             presidentVo.setId(president.getId());
             presidentVo.setName(president.getName());
