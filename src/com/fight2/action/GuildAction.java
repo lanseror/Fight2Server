@@ -5,22 +5,26 @@ import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.GuildArenaUserDao;
 import com.fight2.dao.GuildDao;
 import com.fight2.dao.GuildPollDao;
 import com.fight2.dao.GuildVoterDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Guild;
+import com.fight2.model.GuildArenaUser;
 import com.fight2.model.GuildPoll;
 import com.fight2.model.GuildVoter;
 import com.fight2.model.User;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -35,6 +39,8 @@ public class GuildAction extends BaseAction {
     private GuildPollDao guildPollDao;
     @Autowired
     private GuildVoterDao guildVoterDao;
+    @Autowired
+    private GuildArenaUserDao guildArenaUserDao;
     private Guild guild;
     private List<Guild> datas;
     private int id;
@@ -288,7 +294,55 @@ public class GuildAction extends BaseAction {
             presidentVo.setId(president.getId());
             presidentVo.setName(president.getName());
             guildVo.setPresident(presidentVo);
+            final List<GuildArenaUser> guildArenaUsers = guildArenaUserDao.listByGuild(guild);
+            final Set<Integer> arenaUsers = Sets.newHashSet();
+            for (final GuildArenaUser guildArenaUser : guildArenaUsers) {
+                final User arenaUser = guildArenaUser.getUser();
+                arenaUsers.add(arenaUser.getId());
+            }
+            guildVo.setArenaUsers(arenaUsers);
+
             response.put("guild", guildVo);
+        }
+
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "add-arena-user", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String addArenaUser() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User loginUserPo = userDao.load(loginUser.getId());
+        final Guild guild = loginUserPo.getGuild();
+        if (guild.getPresident() == loginUserPo) {
+            final User arenaUser = userDao.load(id);
+            final GuildArenaUser guildArenaUser = new GuildArenaUser();
+            guildArenaUser.setGuild(guild);
+            guildArenaUser.setUser(arenaUser);
+            guildArenaUserDao.add(guildArenaUser);
+            response.put("status", 0);
+        } else {
+            response.put("status", 1);
+        }
+
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "remove-arena-user", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String removeArenaUser() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User loginUserPo = userDao.load(loginUser.getId());
+        final Guild guild = loginUserPo.getGuild();
+        if (guild.getPresident() == loginUserPo) {
+            final User arenaUser = userDao.load(id);
+            final GuildArenaUser guildArenaUser = guildArenaUserDao.getByUser(arenaUser);
+            guildArenaUserDao.delete(guildArenaUser);
+            response.put("status", 0);
+        } else {
+            response.put("status", 1);
         }
 
         jsonMsg = new Gson().toJson(response);
@@ -361,6 +415,14 @@ public class GuildAction extends BaseAction {
 
     public void setGuildVoterDao(final GuildVoterDao guildVoterDao) {
         this.guildVoterDao = guildVoterDao;
+    }
+
+    public GuildArenaUserDao getGuildArenaUserDao() {
+        return guildArenaUserDao;
+    }
+
+    public void setGuildArenaUserDao(final GuildArenaUserDao guildArenaUserDao) {
+        this.guildArenaUserDao = guildArenaUserDao;
     }
 
 }

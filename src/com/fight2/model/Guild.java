@@ -1,10 +1,12 @@
 package com.fight2.model;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 @Entity
 public class Guild extends BaseEntity {
@@ -15,6 +17,7 @@ public class Guild extends BaseEntity {
     private String notice;
     private Date createDate;
     private boolean pollEnabled;
+    private Set<Integer> arenaUsers;
 
     public String getName() {
         return name;
@@ -64,6 +67,15 @@ public class Guild extends BaseEntity {
 
     public void setPollEnabled(final boolean pollEnabled) {
         this.pollEnabled = pollEnabled;
+    }
+
+    @Transient
+    public Set<Integer> getArenaUsers() {
+        return arenaUsers;
+    }
+
+    public void setArenaUsers(final Set<Integer> arenaUsers) {
+        this.arenaUsers = arenaUsers;
     }
 
     public static long getSerialversionuid() {
