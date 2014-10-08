@@ -18,6 +18,7 @@ import org.springframework.scheduling.TaskScheduler;
 import com.fight2.dao.ArenaContinuousWinDao;
 import com.fight2.dao.ArenaDao;
 import com.fight2.dao.ArenaRankingDao;
+import com.fight2.dao.GuildArenaUserDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
@@ -29,6 +30,7 @@ import com.fight2.model.ArenaStatus;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.BattleResult;
 import com.fight2.model.Guild;
+import com.fight2.model.GuildArenaUser;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.model.UserArenaInfo;
@@ -63,6 +65,8 @@ public class ArenaAction extends BaseAction {
     private PartyGridDao partyGridDao;
     @Autowired
     private ArenaContinuousWinDao arenaContinuousWinDao;
+    @Autowired
+    private GuildArenaUserDao guildArenaUserDao;
     @Autowired
     private TaskScheduler taskScheduler;
     private List<Arena> datas;
@@ -293,6 +297,28 @@ public class ArenaAction extends BaseAction {
         return jsonUser;
     }
 
+    @Action(value = "check-attack", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String checkAttack() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User loginUserPo = userDao.load(loginUser.getId());
+        final Guild guild = loginUserPo.getGuild();
+        final GuildArenaUser guildArenaUser = guildArenaUserDao.getByUser(loginUserPo);
+        if (guildArenaUser != null && guildArenaUser.getGuild() == guild) {
+            if (!guildArenaUser.isLocked()) {
+                guildArenaUser.setLocked(true);
+                guildArenaUserDao.update(guildArenaUser);
+            }
+            response.put("status", 0);
+        } else {
+            response.put("status", 1);
+        }
+
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(response));
+        return SUCCESS;
+    }
+
     @Action(value = "attack", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String attack() {
         final User attacker = (User) this.getSession().get(LOGIN_USER);
@@ -411,6 +437,7 @@ public class ArenaAction extends BaseAction {
             arenaJson.setName(arena.getName());
             arenaJson.setOnlineNumber(arena.getOnlineNumber());
             arenaJson.setRemainTime(DateUtils.getRemainTime(arena.getEndDate()));
+            arenaJson.setGuildArena(arena.isGuildArena());
             arenaJsons.add(arenaJson);
         }
         final ActionContext context = ActionContext.getContext();
@@ -575,6 +602,14 @@ public class ArenaAction extends BaseAction {
 
     public void setArenaService(final ArenaService arenaService) {
         this.arenaService = arenaService;
+    }
+
+    public GuildArenaUserDao getGuildArenaUserDao() {
+        return guildArenaUserDao;
+    }
+
+    public void setGuildArenaUserDao(final GuildArenaUserDao guildArenaUserDao) {
+        this.guildArenaUserDao = guildArenaUserDao;
     }
 
 }

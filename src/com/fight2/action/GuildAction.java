@@ -5,7 +5,6 @@ import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -24,7 +23,6 @@ import com.fight2.model.GuildVoter;
 import com.fight2.model.User;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
@@ -295,12 +293,15 @@ public class GuildAction extends BaseAction {
             presidentVo.setName(president.getName());
             guildVo.setPresident(presidentVo);
             final List<GuildArenaUser> guildArenaUsers = guildArenaUserDao.listByGuild(guild);
-            final Set<Integer> arenaUsers = Sets.newHashSet();
+            final List<GuildArenaUser> arenaUserVos = Lists.newArrayList();
             for (final GuildArenaUser guildArenaUser : guildArenaUsers) {
+                final GuildArenaUser guildArenaUserVo = new GuildArenaUser();
                 final User arenaUser = guildArenaUser.getUser();
-                arenaUsers.add(arenaUser.getId());
+                guildArenaUserVo.setId(arenaUser.getId());
+                guildArenaUserVo.setLocked(guildArenaUser.isLocked());
+                arenaUserVos.add(guildArenaUserVo);
             }
-            guildVo.setArenaUsers(arenaUsers);
+            guildVo.setArenaUsers(arenaUserVos);
 
             response.put("guild", guildVo);
         }
@@ -339,8 +340,13 @@ public class GuildAction extends BaseAction {
         if (guild.getPresident() == loginUserPo) {
             final User arenaUser = userDao.load(id);
             final GuildArenaUser guildArenaUser = guildArenaUserDao.getByUser(arenaUser);
-            guildArenaUserDao.delete(guildArenaUser);
-            response.put("status", 0);
+            if (guildArenaUser.isLocked()) {
+                response.put("status", 2);
+            } else {
+                guildArenaUserDao.delete(guildArenaUser);
+                response.put("status", 0);
+            }
+
         } else {
             response.put("status", 1);
         }

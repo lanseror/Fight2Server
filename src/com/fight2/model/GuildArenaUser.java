@@ -9,6 +9,7 @@ public class GuildArenaUser extends BaseEntity {
     private static final long serialVersionUID = -3126675224775633848L;
     private Guild guild;
     private User user;
+    private boolean locked;
 
     @ManyToOne
     @JoinColumn(name = "guild_id")
@@ -28,6 +29,14 @@ public class GuildArenaUser extends BaseEntity {
 
     public void setUser(final User user) {
         this.user = user;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(final boolean locked) {
+        this.locked = locked;
     }
 
     public static long getSerialversionuid() {

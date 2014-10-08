@@ -5,6 +5,7 @@ public class ArenaJson {
     private String name;
     private String remainTime;
     private int onlineNumber;
+    private boolean guildArena;
 
     public int getId() {
         return id;
@@ -36,6 +37,14 @@ public class ArenaJson {
 
     public void setOnlineNumber(final int onlineNumber) {
         this.onlineNumber = onlineNumber;
+    }
+
+    public boolean isGuildArena() {
+        return guildArena;
+    }
+
+    public void setGuildArena(final boolean guildArena) {
+        this.guildArena = guildArena;
     }
 
 }

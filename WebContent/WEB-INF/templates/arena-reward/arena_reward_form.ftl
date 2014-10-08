@@ -44,7 +44,7 @@
                 <@s.if test="arenaReward==null">
                 <tr>
                     <td align="center">
-                        <@s.select  name="rewardItemTypes" list=r"#{'ArenaTicket':'竞技场门票', 'Stamina':'精力药水', 'Card':'卡牌'}" value="'ArenaTicket'" onchange="selectItemType(this)" />
+                        <@s.select  name="rewardItemTypes" list=r"#{'ArenaTicket':'竞技场门票', 'Stamina':'精力药水', 'Card':'卡牌', 'GuildContribution':'公会贡献值'}" value="'ArenaTicket'" onchange="selectItemType(this)" />
                     </td>
                     <td align="center"><@s.textfield size="5" name="rewardItemAmounts" cssClass="required int-range-1-300" /></td>
                     <td align="center"></td>
@@ -54,7 +54,7 @@
                 <@s.else>
                     <@s.iterator value="arenaReward.rewardItems" status="status">
                      <tr>
-                        <td align="center"><@s.select  name="rewardItemTypes" list=r"#{'ArenaTicket':'竞技场门票', 'Stamina':'精力药水', 'Card':'卡牌'}" value="type" onchange="selectItemType(this)" /></td>
+                        <td align="center"><@s.select  name="rewardItemTypes" list=r"#{'ArenaTicket':'竞技场门票', 'Stamina':'精力药水', 'Card':'卡牌', 'GuildContribution':'公会贡献值'}" value="type" onchange="selectItemType(this)" /></td>
                         <td align="center">
                             <@s.textfield size="5" name="rewardItemAmounts" cssClass="required int-range-1-300" value="${amount}" />
                         </td>
@@ -115,7 +115,7 @@
     <tbody>
     <tr>
         <td align="center">
-           <@s.select  name="rewardItemTypes" list=r"#{'ArenaTicket':'竞技场门票', 'Stamina':'精力药水', 'Card':'卡牌'}" value="'ArenaTicket'" onchange="selectItemType(this)" />
+           <@s.select  name="rewardItemTypes" list=r"#{'ArenaTicket':'竞技场门票', 'Stamina':'精力药水', 'Card':'卡牌', 'GuildContribution':'公会贡献值'}" value="'ArenaTicket'" onchange="selectItemType(this)" />
         </td>
         <td align="center"><@s.textfield size="5" name="rewardItemAmounts" cssClass="required int-range-1-300" /></td>
         <td align="center"></td>

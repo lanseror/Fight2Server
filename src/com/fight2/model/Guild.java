@@ -1,7 +1,7 @@
 package com.fight2.model;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -17,7 +17,7 @@ public class Guild extends BaseEntity {
     private String notice;
     private Date createDate;
     private boolean pollEnabled;
-    private Set<Integer> arenaUsers;
+    private List<GuildArenaUser> arenaUsers;
 
     public String getName() {
         return name;
@@ -70,11 +70,11 @@ public class Guild extends BaseEntity {
     }
 
     @Transient
-    public Set<Integer> getArenaUsers() {
+    public List<GuildArenaUser> getArenaUsers() {
         return arenaUsers;
     }
 
-    public void setArenaUsers(final Set<Integer> arenaUsers) {
+    public void setArenaUsers(final List<GuildArenaUser> arenaUsers) {
         this.arenaUsers = arenaUsers;
     }
 

@@ -12,6 +12,7 @@ public class Arena extends BaseEntity {
     private Date endDate;
     private int onlineNumber;
     private ArenaStatus status;
+    private boolean guildArena;
 
     public String getName() {
         return name;
@@ -55,6 +56,14 @@ public class Arena extends BaseEntity {
 
     public void setStatus(final ArenaStatus status) {
         this.status = status;
+    }
+
+    public boolean isGuildArena() {
+        return guildArena;
+    }
+
+    public void setGuildArena(final boolean guildArena) {
+        this.guildArena = guildArena;
     }
 
 }

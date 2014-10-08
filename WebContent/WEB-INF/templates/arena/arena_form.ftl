@@ -27,6 +27,11 @@
         <td>结束时间</td>
         <td><@sj.datepicker name="arena.endDate" timepicker="true"  displayFormat="m/d/yy" timepickerAmPm="true" timepickerFormat="hh:mm tt" /></td>
     </tr>
+     <tr>
+        <td>是否公会竞技场</td>
+        <td><@s.checkbox name="arena.guildArena" />
+         </td>
+    </tr>
 
     <tr>
         <td>&nbsp;</td>
