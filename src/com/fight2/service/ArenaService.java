@@ -10,6 +10,8 @@ import com.fight2.dao.ArenaDao;
 import com.fight2.dao.ArenaRankingDao;
 import com.fight2.dao.ArenaRewardDao;
 import com.fight2.dao.CardDao;
+import com.fight2.dao.GuildCardDao;
+import com.fight2.dao.GuildStoreroomDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.Arena;
@@ -22,6 +24,9 @@ import com.fight2.model.ArenaStatus;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardTemplate;
+import com.fight2.model.Guild;
+import com.fight2.model.GuildCard;
+import com.fight2.model.GuildStoreroom;
 import com.fight2.model.User;
 import com.fight2.model.UserStoreroom;
 import com.fight2.util.HibernateUtils;
@@ -40,6 +45,10 @@ public class ArenaService {
     private UserDao userDao;
     @Autowired
     private UserStoreroomDao userStoreroomDao;
+    @Autowired
+    private GuildStoreroomDao guildStoreroomDao;
+    @Autowired
+    private GuildCardDao guildCardDao;
 
     public void stopArena(final int id) {
         final SessionFactory sessionFactory = arenaDao.getSessionFactory();
@@ -54,22 +63,36 @@ public class ArenaService {
     }
 
     private void issueArenaRewards(final Arena arena) {
+        final boolean isGuildArena = arena.isGuildArena();
         final List<ArenaReward> arenaRewards = arenaRewardDao.listByArenaAndType(arena, ArenaRewardType.Ranking);
         for (final ArenaReward arenaReward : arenaRewards) {
             final List<ArenaRanking> arenaRankings = arenaRankingDao.listByArenaRange(arena, arenaReward.getMin(), arenaReward.getMax());
             for (final ArenaRanking arenaRanking : arenaRankings) {
                 final User user = arenaRanking.getUser();
-                final UserStoreroom storeroom = user.getStoreroom();
+                final UserStoreroom userStoreroom = user.getStoreroom();
+                final Guild guild = user.getGuild();
+                final GuildStoreroom guildStoreroom = (isGuildArena && guild != null) ? guild.getStoreroom() : null;
                 final List<ArenaRewardItem> rewardItems = arenaReward.getRewardItems();
                 for (final ArenaRewardItem rewardItem : rewardItems) {
                     final ArenaRewardItemType rewardItemType = rewardItem.getType();
                     final int amount = rewardItem.getAmount();
                     if (rewardItemType == ArenaRewardItemType.ArenaTicket) {
-                        storeroom.setTicket(storeroom.getTicket() + amount);
-                        userStoreroomDao.update(storeroom);
+                        if (isGuildArena && guildStoreroom != null) {
+                            guildStoreroom.setTicket(guildStoreroom.getTicket() + amount);
+                            guildStoreroomDao.update(guildStoreroom);
+                        } else {
+                            userStoreroom.setTicket(userStoreroom.getTicket() + amount);
+                            userStoreroomDao.update(userStoreroom);
+                        }
                     } else if (rewardItemType == ArenaRewardItemType.Stamina) {
-                        storeroom.setStamina(storeroom.getStamina() + amount);
-                        userStoreroomDao.update(storeroom);
+                        if (isGuildArena && guildStoreroom != null) {
+                            guildStoreroom.setStamina(guildStoreroom.getStamina() + amount);
+                            guildStoreroomDao.update(guildStoreroom);
+                        } else {
+                            userStoreroom.setStamina(userStoreroom.getStamina() + amount);
+                            userStoreroomDao.update(userStoreroom);
+                        }
+
                     } else if (rewardItemType == ArenaRewardItemType.Card) {
                         final CardTemplate cardTemplate = rewardItem.getCardTemplate();
                         for (int i = 1; i <= amount; i++) {
@@ -79,13 +102,28 @@ public class ArenaService {
                             card.setName(cardTemplate.getName());
                             card.setStar(cardTemplate.getStar());
                             card.setCardTemplate(cardTemplate);
-                            card.setUser(user);
+                            if (!isGuildArena) {
+                                card.setUser(user);
+                            }
                             card.setStatus(CardStatus.InStoreroom);
-                            cardDao.add(card);
+                            if (isGuildArena && guildStoreroom != null) {
+                                cardDao.add(card);
+                                final GuildCard guildCard = new GuildCard();
+                                guildCard.setCard(card);
+                                guildCard.setGuildStoreroom(guildStoreroom);
+                                guildCardDao.add(guildCard);
+                            } else if (!isGuildArena) {
+                                cardDao.add(card);
+                            }
                         }
                         final List<Card> cards = cardDao.listByUser(user);
                         user.setCardCount(cards.size());
                         userDao.update(user);
+                    } else if (rewardItemType == ArenaRewardItemType.GuildContribution) {
+                        if (isGuildArena && guildStoreroom != null) {
+                            user.setGuildContribution(user.getGuildContribution() + amount);
+                            userDao.update(user);
+                        }
                     }
                 }
             }
@@ -139,6 +177,22 @@ public class ArenaService {
 
     public void setUserStoreroomDao(final UserStoreroomDao userStoreroomDao) {
         this.userStoreroomDao = userStoreroomDao;
+    }
+
+    public GuildStoreroomDao getGuildStoreroomDao() {
+        return guildStoreroomDao;
+    }
+
+    public void setGuildStoreroomDao(final GuildStoreroomDao guildStoreroomDao) {
+        this.guildStoreroomDao = guildStoreroomDao;
+    }
+
+    public GuildCardDao getGuildCardDao() {
+        return guildCardDao;
+    }
+
+    public void setGuildCardDao(final GuildCardDao guildCardDao) {
+        this.guildCardDao = guildCardDao;
     }
 
 }

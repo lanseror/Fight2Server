@@ -383,6 +383,7 @@ public class GuildAction extends BaseAction {
             guildVo.setArenaUsers(arenaUserVos);
 
             response.put("guild", guildVo);
+            response.put("guildContribution", loginUserPo.getGuildContribution());
         }
 
         jsonMsg = new Gson().toJson(response);
