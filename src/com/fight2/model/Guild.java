@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 @Entity
@@ -18,6 +19,7 @@ public class Guild extends BaseEntity {
     private Date createDate;
     private boolean pollEnabled;
     private List<GuildArenaUser> arenaUsers;
+    private GuildStoreroom storeroom;
 
     public String getName() {
         return name;
@@ -76,6 +78,15 @@ public class Guild extends BaseEntity {
 
     public void setArenaUsers(final List<GuildArenaUser> arenaUsers) {
         this.arenaUsers = arenaUsers;
+    }
+
+    @OneToOne(mappedBy = "guild")
+    public GuildStoreroom getStoreroom() {
+        return storeroom;
+    }
+
+    public void setStoreroom(final GuildStoreroom storeroom) {
+        this.storeroom = storeroom;
     }
 
     public static long getSerialversionuid() {

@@ -5,20 +5,28 @@ import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.CardImageDao;
 import com.fight2.dao.GuildArenaUserDao;
 import com.fight2.dao.GuildDao;
 import com.fight2.dao.GuildPollDao;
+import com.fight2.dao.GuildStoreroomDao;
 import com.fight2.dao.GuildVoterDao;
 import com.fight2.dao.UserDao;
+import com.fight2.model.Card;
+import com.fight2.model.CardImage;
+import com.fight2.model.CardTemplate;
 import com.fight2.model.Guild;
 import com.fight2.model.GuildArenaUser;
+import com.fight2.model.GuildCard;
 import com.fight2.model.GuildPoll;
+import com.fight2.model.GuildStoreroom;
 import com.fight2.model.GuildVoter;
 import com.fight2.model.User;
 import com.google.common.collect.Lists;
@@ -39,6 +47,11 @@ public class GuildAction extends BaseAction {
     private GuildVoterDao guildVoterDao;
     @Autowired
     private GuildArenaUserDao guildArenaUserDao;
+    @Autowired
+    private GuildStoreroomDao guildStoreroomDao;
+    @Autowired
+    private CardImageDao cardImageDao;
+
     private Guild guild;
     private List<Guild> datas;
     private int id;
@@ -96,11 +109,14 @@ public class GuildAction extends BaseAction {
         final User loginUserPo = userDao.get(loginUser.getId());
         final Guild guild = new Gson().fromJson(jsonMsg, Guild.class);
         try {
-            if (guildDao.getByPresident(loginUserPo) == null) {
+            if (guildDao.getByPresident(loginUserPo) == null && loginUserPo.getGuild() == null) {
                 guild.setName(URLDecoder.decode(guild.getName(), "UTF-8"));
                 guild.setPresident(loginUserPo);
                 guild.setCreateDate(new Date());
                 guildDao.add(guild);
+                final GuildStoreroom guildStoreroom = new GuildStoreroom();
+                guildStoreroom.setGuild(guild);
+                guildStoreroomDao.add(guildStoreroom);
             }
 
         } catch (final UnsupportedEncodingException e) {
@@ -108,6 +124,21 @@ public class GuildAction extends BaseAction {
         }
         loginUserPo.setGuild(guild);
         userDao.update(loginUserPo);
+        final Map<String, Integer> response = Maps.newHashMap();
+        response.put("status", 0);
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "upgrade", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String upgrade() {
+        final List<Guild> guilds = guildDao.list();
+        for (final Guild guild : guilds) {
+            final GuildStoreroom guildStoreroom = new GuildStoreroom();
+            guildStoreroom.setGuild(guild);
+            guildStoreroomDao.add(guildStoreroom);
+        }
+
         final Map<String, Integer> response = Maps.newHashMap();
         response.put("status", 0);
         jsonMsg = new Gson().toJson(response);
@@ -147,6 +178,54 @@ public class GuildAction extends BaseAction {
         }
 
         jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "get-storeroom", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String getStoreroom() {
+        final User loginUser = this.getLoginUser();
+        final User userPo = userDao.get(loginUser.getId());
+        final Guild guild = userPo.getGuild();
+        final GuildStoreroom storeroom = guild.getStoreroom();
+
+        final List<GuildCard> guildCards = storeroom.getGuildCards();
+        final Map<CardTemplate, Integer> cardTemplates = Maps.newLinkedHashMap();
+        for (final GuildCard guildCard : guildCards) {
+            final Card card = guildCard.getCard();
+            final CardTemplate cardTemplate = card.getCardTemplate();
+            if (cardTemplates.containsKey(cardTemplate)) {
+                final Integer count = cardTemplates.get(cardTemplate);
+                cardTemplates.put(cardTemplate, count + 1);
+            } else {
+                cardTemplates.put(cardTemplate, 1);
+            }
+        }
+
+        final List<Card> cardVos = Lists.newArrayList();
+        for (final Entry<CardTemplate, Integer> entry : cardTemplates.entrySet()) {
+            final CardTemplate template = entry.getKey();
+            final int count = entry.getValue();
+            final Card cardVo = new Card();
+            cardVo.setId(template.getId());
+            cardVo.setHp(template.getHp());
+            cardVo.setAtk(template.getAtk());
+            cardVo.setName(template.getName());
+            cardVo.setStar(template.getStar());
+            final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, 1, template);
+            cardVo.setImage(imageObj.getUrl());
+            cardVo.setAmount(count);
+            cardVos.add(cardVo);
+        }
+
+        final GuildStoreroom storeroomVo = new GuildStoreroom();
+        storeroomVo.setId(storeroom.getId());
+        storeroomVo.setCoin(storeroom.getCoin());
+        storeroomVo.setStamina(storeroom.getStamina());
+        storeroomVo.setTicket(storeroom.getTicket());
+        storeroomVo.setCards(cardVos);
+
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(storeroomVo));
         return SUCCESS;
     }
 
@@ -429,6 +508,22 @@ public class GuildAction extends BaseAction {
 
     public void setGuildArenaUserDao(final GuildArenaUserDao guildArenaUserDao) {
         this.guildArenaUserDao = guildArenaUserDao;
+    }
+
+    public GuildStoreroomDao getGuildStoreroomDao() {
+        return guildStoreroomDao;
+    }
+
+    public void setGuildStoreroomDao(final GuildStoreroomDao guildStoreroomDao) {
+        this.guildStoreroomDao = guildStoreroomDao;
+    }
+
+    public CardImageDao getCardImageDao() {
+        return cardImageDao;
+    }
+
+    public void setCardImageDao(final CardImageDao cardImageDao) {
+        this.cardImageDao = cardImageDao;
     }
 
 }

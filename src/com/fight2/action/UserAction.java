@@ -212,7 +212,7 @@ public class UserAction extends BaseAction {
         for (final ArenaRanking arenaRanking : arenaRankings) {
             arenaRankingDao.delete(arenaRanking);
         }
-
+        userStoreroomDao.delete(user.getStoreroom());
         userDao.delete(user);
         return SUCCESS;
     }

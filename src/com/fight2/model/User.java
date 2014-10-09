@@ -25,6 +25,7 @@ public class User extends BaseEntity {
     private boolean isDisabled;
     private boolean npc;
     private Guild guild;
+    private int guildContribution;
 
     public String getInstallUUID() {
         return installUUID;
@@ -137,6 +138,14 @@ public class User extends BaseEntity {
 
     public void setGuild(final Guild guild) {
         this.guild = guild;
+    }
+
+    public int getGuildContribution() {
+        return guildContribution;
+    }
+
+    public void setGuildContribution(final int guildContribution) {
+        this.guildContribution = guildContribution;
     }
 
 }
