@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
@@ -20,6 +21,7 @@ public class Guild extends BaseEntity {
     private boolean pollEnabled;
     private List<GuildArenaUser> arenaUsers;
     private GuildStoreroom storeroom;
+    private List<Bid> bids;
 
     public String getName() {
         return name;
@@ -87,6 +89,15 @@ public class Guild extends BaseEntity {
 
     public void setStoreroom(final GuildStoreroom storeroom) {
         this.storeroom = storeroom;
+    }
+
+    @OneToMany(mappedBy = "guild")
+    public List<Bid> getBids() {
+        return bids;
+    }
+
+    public void setBids(final List<Bid> bids) {
+        this.bids = bids;
     }
 
     public static long getSerialversionuid() {
