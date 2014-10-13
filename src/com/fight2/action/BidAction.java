@@ -57,10 +57,6 @@ public class BidAction extends BaseAction {
         return SUCCESS;
     }
 
-    public String retrieveCardFromGuildStoreroom() {
-        return null;
-    }
-
     public UserDao getUserDao() {
         return userDao;
     }

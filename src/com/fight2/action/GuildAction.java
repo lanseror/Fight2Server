@@ -12,13 +12,18 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.BidDao;
 import com.fight2.dao.CardImageDao;
 import com.fight2.dao.GuildArenaUserDao;
+import com.fight2.dao.GuildCardDao;
 import com.fight2.dao.GuildDao;
 import com.fight2.dao.GuildPollDao;
 import com.fight2.dao.GuildStoreroomDao;
 import com.fight2.dao.GuildVoterDao;
 import com.fight2.dao.UserDao;
+import com.fight2.model.Bid;
+import com.fight2.model.Bid.BidItemType;
+import com.fight2.model.Bid.BidStatus;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
@@ -51,10 +56,15 @@ public class GuildAction extends BaseAction {
     private GuildStoreroomDao guildStoreroomDao;
     @Autowired
     private CardImageDao cardImageDao;
+    @Autowired
+    private GuildCardDao guildCardDao;
+    @Autowired
+    private BidDao bidDao;
 
     private Guild guild;
     private List<Guild> datas;
     private int id;
+    private BidItemType itemType;
     private String jsonMsg;
 
     // @Action(value = "list", results = { @Result(name = SUCCESS, location = "user_list.ftl") })
@@ -435,6 +445,77 @@ public class GuildAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "sent-card-to-bid", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String sentCardToBid() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User loginUserPo = userDao.load(loginUser.getId());
+        final Guild guild = loginUserPo.getGuild();
+        final GuildStoreroom storeroom = guild.getStoreroom();
+
+        if (guild.getPresident() != loginUserPo) {
+            response.put("status", 3);
+        } else if (guild.getBids().size() >= 3) {
+            response.put("status", 2);
+        } else {
+            response.put("status", 1);
+            final List<GuildCard> guildCards = storeroom.getGuildCards();
+            for (final GuildCard guildCard : guildCards) {
+                if (guildCard.getCard().getCardTemplate().getId() == id) {
+                    guildCard.setGuildStoreroom(null);
+                    final Bid bid = new Bid();
+                    bid.setAmount(1);
+                    bid.setGuild(guild);
+                    bid.setGuildCard(guildCard);
+                    bid.setPrice(1);
+                    bid.setStatus(BidStatus.Open);
+                    bid.setType(BidItemType.Card);
+                    bidDao.add(bid);
+                    guildCardDao.update(guildCard);
+                    response.put("status", 0);
+                    break;
+                }
+            }
+        }
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "sent-item-to-bid", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String sentItemToBid() {
+        final Map<String, Integer> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User loginUserPo = userDao.load(loginUser.getId());
+        final Guild guild = loginUserPo.getGuild();
+
+        if (guild.getPresident() != loginUserPo) {
+            response.put("status", 1);
+        } else {
+            final Bid bid = new Bid();
+            bid.setAmount(5);
+            bid.setGuild(guild);
+            bid.setPrice(1);
+            bid.setStatus(BidStatus.Open);
+            bid.setType(itemType);
+            final GuildStoreroom storeroom = guild.getStoreroom();
+            if (itemType == BidItemType.ArenaTicket && storeroom.getTicket() >= 5) {
+                bidDao.add(bid);
+                response.put("status", 0);
+                storeroom.setTicket(storeroom.getTicket() - 5);
+                guildStoreroomDao.update(storeroom);
+            } else if (itemType == BidItemType.Stamina && storeroom.getStamina() >= 5) {
+                bidDao.add(bid);
+                response.put("status", 0);
+                storeroom.setStamina(storeroom.getStamina() - 5);
+                guildStoreroomDao.update(storeroom);
+            } else {
+                response.put("status", 2);
+            }
+        }
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
     public UserDao getUserDao() {
         return userDao;
     }
@@ -525,6 +606,30 @@ public class GuildAction extends BaseAction {
 
     public void setCardImageDao(final CardImageDao cardImageDao) {
         this.cardImageDao = cardImageDao;
+    }
+
+    public GuildCardDao getGuildCardDao() {
+        return guildCardDao;
+    }
+
+    public void setGuildCardDao(final GuildCardDao guildCardDao) {
+        this.guildCardDao = guildCardDao;
+    }
+
+    public BidDao getBidDao() {
+        return bidDao;
+    }
+
+    public void setBidDao(final BidDao bidDao) {
+        this.bidDao = bidDao;
+    }
+
+    public BidItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(final BidItemType itemType) {
+        this.itemType = itemType;
     }
 
 }
