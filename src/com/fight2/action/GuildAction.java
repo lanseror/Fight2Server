@@ -489,8 +489,11 @@ public class GuildAction extends BaseAction {
         final Guild guild = loginUserPo.getGuild();
 
         if (guild.getPresident() != loginUserPo) {
-            response.put("status", 1);
+            response.put("status", 3);
+        } else if (guild.getBids().size() >= 3) {
+            response.put("status", 2);
         } else {
+            response.put("status", 1);
             final Bid bid = new Bid();
             bid.setAmount(5);
             bid.setGuild(guild);
@@ -508,8 +511,6 @@ public class GuildAction extends BaseAction {
                 response.put("status", 0);
                 storeroom.setStamina(storeroom.getStamina() - 5);
                 guildStoreroomDao.update(storeroom);
-            } else {
-                response.put("status", 2);
             }
         }
         jsonMsg = new Gson().toJson(response);

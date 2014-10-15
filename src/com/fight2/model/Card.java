@@ -23,6 +23,26 @@ public class Card extends BaseEntity {
     private CardTemplate cardTemplate;
     private int amount; // Use to count cards in same card template.
 
+    public Card() {
+        super();
+    }
+
+    public Card(final Card card) {
+        super();
+        this.name = card.getName();
+        this.avatar = card.getAvatar();
+        this.image = card.getImage();
+        this.star = card.getStar();
+        this.level = card.getLevel();
+        this.tier = card.getTier();
+        this.hp = card.getHp();
+        this.atk = card.getAtk();
+        this.skill = card.getSkill();
+        this.cardVersion = card.getCardVersion();
+        this.status = card.getStatus();
+        this.amount = card.getAmount();
+    }
+
     public String getName() {
         return name;
     }

@@ -1,6 +1,7 @@
 package com.fight2.action;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -13,9 +14,13 @@ import com.fight2.dao.GuildDao;
 import com.fight2.dao.GuildStoreroomDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Bid;
+import com.fight2.model.Bid.BidItemType;
+import com.fight2.model.Card;
+import com.fight2.model.CardImage;
 import com.fight2.model.Guild;
 import com.fight2.model.User;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 
 @Namespace("/bid")
@@ -35,6 +40,7 @@ public class BidAction extends BaseAction {
     private Bid bid;
     private List<Bid> datas;
     private int id;
+    private int version;
     private String jsonMsg;
 
     @Action(value = "list-by-guild", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
@@ -50,11 +56,67 @@ public class BidAction extends BaseAction {
             bidVo.setAmount(bid.getAmount());
             bidVo.setPrice(bid.getPrice());
             bidVo.setStatus(bid.getStatus());
-            bidVo.setType(bid.getType());
+            final BidItemType itemType = bid.getType();
+            if (itemType == BidItemType.Card) {
+                final Card card = bid.getGuildCard().getCard();
+                final Card cardVo = new Card(card);
+                final CardImage thumbObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), card.getCardTemplate());
+                cardVo.setImage(thumbObj.getUrl());
+                bidVo.setCard(cardVo);
+            }
+            bidVo.setType(itemType);
+            final User bidUser = bid.getUser();
+            if (bidUser != null && bidUser.getId() == userPo.getId()) {
+                bidVo.setMyBid(true);
+            }
+            bidVo.setVersion(bid.getVersion());
+
             bidVos.add(bidVo);
         }
         jsonMsg = new Gson().toJson(bidVos);
         return SUCCESS;
+    }
+
+    @Action(value = "bid", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String bid() {
+        final Map<String, Object> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User userPo = userDao.get(loginUser.getId());
+        final Guild guild = userPo.getGuild();
+        final Bid bid = bidDao.get(id);
+
+        if (guild != bid.getGuild()) {
+            response.put("status", 3);
+        } else {
+            performBid(response, userPo, bidDao, id, version);
+        }
+
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    private static synchronized void performBid(final Map<String, Object> response, final User user, final BidDao bidDao, final int id, final int version) {
+        final Bid bid = bidDao.get(id);
+        if (version != bid.getVersion()) {
+            response.put("status", 2);
+            final Bid bidVo = new Bid();
+            bidVo.setId(bid.getId());
+            bidVo.setPrice(bid.getPrice());
+            bidVo.setVersion(bid.getVersion());
+            response.put("bid", bidVo);
+        } else {
+            bid.setPrice(bid.getPrice() + 5);
+            bid.setVersion(bid.getVersion() + 1);
+            bid.setUser(user);
+            bidDao.update(bid);
+            final Bid bidVo = new Bid();
+            bidVo.setId(bid.getId());
+            bidVo.setPrice(bid.getPrice());
+            bidVo.setVersion(bid.getVersion());
+            bidVo.setMyBid(true);
+            response.put("bid", bidVo);
+            response.put("status", 0);
+        }
     }
 
     public UserDao getUserDao() {
@@ -119,6 +181,14 @@ public class BidAction extends BaseAction {
 
     public void setId(final int id) {
         this.id = id;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(final int version) {
+        this.version = version;
     }
 
     public String getJsonMsg() {
