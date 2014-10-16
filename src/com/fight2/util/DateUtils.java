@@ -1,6 +1,7 @@
 package com.fight2.util;
 
 import java.text.DecimalFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -22,5 +23,12 @@ public class DateUtils {
         final long millis = endDate.getTime() - System.currentTimeMillis();
         final int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis);
         return seconds;
+    }
+
+    public static Date addDate(final int field, final int amount) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(field, amount);
+        return calendar.getTime();
+
     }
 }

@@ -1,5 +1,6 @@
 package com.fight2.action;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +16,12 @@ import com.fight2.dao.GuildStoreroomDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Bid;
 import com.fight2.model.Bid.BidItemType;
+import com.fight2.model.Bid.BidStatus;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
 import com.fight2.model.Guild;
 import com.fight2.model.User;
+import com.fight2.util.DateUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -70,10 +73,53 @@ public class BidAction extends BaseAction {
                 bidVo.setMyBid(true);
             }
             bidVo.setVersion(bid.getVersion());
+            final Date endDate = bid.getEndDate();
+            if (endDate != null) {
+                bidVo.setRemainTime(DateUtils.getRemainTimeInSecond(endDate));
+            }
 
             bidVos.add(bidVo);
         }
         jsonMsg = new Gson().toJson(bidVos);
+        return SUCCESS;
+    }
+
+    @Action(value = "check-my-bid", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String checkMyBid() {
+        final Map<String, Object> response = Maps.newHashMap();
+        final User loginUser = this.getLoginUser();
+        final User userPo = userDao.get(loginUser.getId());
+        final Guild guild = userPo.getGuild();
+        final Bid bid = bidDao.get(id);
+
+        if (guild != bid.getGuild()) {
+            response.put("status", 3);
+        } else {
+            final User bidUser = bid.getUser();
+            if (bidUser != null && bidUser.getId() == userPo.getId() && bid.getStatus() == BidStatus.Closed) {
+                response.put("status", 0);
+            } else {
+                response.put("status", 1);
+            }
+        }
+
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "upgrade", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String upgrade() {
+        final List<Bid> bids = bidDao.list();
+        for (final Bid bid : bids) {
+            final Date now = new Date();
+            bid.setStartDate(now);
+            bid.setEndDate(org.apache.commons.lang3.time.DateUtils.addMinutes(now, 5));
+            bidDao.update(bid);
+        }
+
+        final Map<String, Integer> response = Maps.newHashMap();
+        response.put("status", 0);
+        jsonMsg = new Gson().toJson(response);
         return SUCCESS;
     }
 
@@ -95,28 +141,29 @@ public class BidAction extends BaseAction {
         return SUCCESS;
     }
 
-    private static synchronized void performBid(final Map<String, Object> response, final User user, final BidDao bidDao, final int id, final int version) {
+    private static synchronized void performBid(final Map<String, Object> response, final User user, final BidDao bidDao, final int id,
+            final int version) {
         final Bid bid = bidDao.get(id);
+        final Bid bidVo = new Bid();
+        final Date endDate = bid.getEndDate();
+        if (endDate != null) {
+            bidVo.setRemainTime(DateUtils.getRemainTimeInSecond(endDate));
+        }
         if (version != bid.getVersion()) {
             response.put("status", 2);
-            final Bid bidVo = new Bid();
-            bidVo.setId(bid.getId());
-            bidVo.setPrice(bid.getPrice());
-            bidVo.setVersion(bid.getVersion());
-            response.put("bid", bidVo);
         } else {
             bid.setPrice(bid.getPrice() + 5);
             bid.setVersion(bid.getVersion() + 1);
             bid.setUser(user);
             bidDao.update(bid);
-            final Bid bidVo = new Bid();
-            bidVo.setId(bid.getId());
-            bidVo.setPrice(bid.getPrice());
-            bidVo.setVersion(bid.getVersion());
             bidVo.setMyBid(true);
-            response.put("bid", bidVo);
             response.put("status", 0);
         }
+        bidVo.setId(bid.getId());
+        bidVo.setPrice(bid.getPrice());
+        bidVo.setVersion(bid.getVersion());
+        bidVo.setStatus(bid.getStatus());
+        response.put("bid", bidVo);
     }
 
     public UserDao getUserDao() {

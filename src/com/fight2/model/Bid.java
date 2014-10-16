@@ -1,5 +1,7 @@
 package com.fight2.model;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -18,7 +20,10 @@ public class Bid extends BaseEntity {
     private Card card;
     private BidStatus status;
     private int version = 1;
+    private Date startDate;
+    private Date endDate;
     private boolean isMyBid = false;
+    private int remainTime;
 
     public int getPrice() {
         return price;
@@ -103,6 +108,22 @@ public class Bid extends BaseEntity {
         this.version = version;
     }
 
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(final Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(final Date endDate) {
+        this.endDate = endDate;
+    }
+
     @Transient
     public boolean isMyBid() {
         return isMyBid;
@@ -112,6 +133,15 @@ public class Bid extends BaseEntity {
         this.isMyBid = isMyBid;
     }
 
+    @Transient
+    public int getRemainTime() {
+        return remainTime;
+    }
+
+    public void setRemainTime(final int remainTime) {
+        this.remainTime = remainTime;
+    }
+
     public enum BidItemType {
         ArenaTicket,
         Stamina,
@@ -119,7 +149,7 @@ public class Bid extends BaseEntity {
     }
 
     public enum BidStatus {
-        Open,
-        closed
+        Started,
+        Closed
     }
 }

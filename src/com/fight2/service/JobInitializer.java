@@ -10,15 +10,20 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.fight2.dao.ArenaDao;
+import com.fight2.dao.BidDao;
 import com.fight2.model.Arena;
 import com.fight2.model.ArenaStatus;
+import com.fight2.model.Bid;
 import com.fight2.util.ArenaUtils;
+import com.fight2.util.BidUtils;
 import com.fight2.util.HibernateUtils;
 
 @Component
 public class JobInitializer implements ApplicationListener<ContextRefreshedEvent> {
     @Autowired
     private ArenaDao arenaDao;
+    @Autowired
+    private BidDao bidDao;
     @Autowired
     private ArenaService arenaService;
     @Autowired
@@ -39,6 +44,14 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
                 taskScheduler.schedule(stopSchedule, arena.getEndDate());
             }
         }
+        final List<Bid> bids = bidDao.listOpenBids();
+        for (final Bid bid : bids) {
+            if (bid.getEndDate() != null) {
+                final Runnable stopSchedule = BidUtils.createCloseSchedule(bid.getId(), bidDao);
+                taskScheduler.schedule(stopSchedule, bid.getEndDate());
+            }
+        }
+
         HibernateUtils.closeSession(sessionFactory);
     }
 
@@ -48,6 +61,14 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
 
     public void setArenaDao(final ArenaDao arenaDao) {
         this.arenaDao = arenaDao;
+    }
+
+    public BidDao getBidDao() {
+        return bidDao;
+    }
+
+    public void setBidDao(final BidDao bidDao) {
+        this.bidDao = bidDao;
     }
 
     public TaskScheduler getTaskScheduler() {

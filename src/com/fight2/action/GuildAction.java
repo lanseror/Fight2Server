@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.fight2.dao.BidDao;
 import com.fight2.dao.CardImageDao;
@@ -34,6 +36,7 @@ import com.fight2.model.GuildPoll;
 import com.fight2.model.GuildStoreroom;
 import com.fight2.model.GuildVoter;
 import com.fight2.model.User;
+import com.fight2.util.BidUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -60,6 +63,8 @@ public class GuildAction extends BaseAction {
     private GuildCardDao guildCardDao;
     @Autowired
     private BidDao bidDao;
+    @Autowired
+    private TaskScheduler taskScheduler;
 
     private Guild guild;
     private List<Guild> datas;
@@ -134,21 +139,6 @@ public class GuildAction extends BaseAction {
         }
         loginUserPo.setGuild(guild);
         userDao.update(loginUserPo);
-        final Map<String, Integer> response = Maps.newHashMap();
-        response.put("status", 0);
-        jsonMsg = new Gson().toJson(response);
-        return SUCCESS;
-    }
-
-    @Action(value = "upgrade", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String upgrade() {
-        final List<Guild> guilds = guildDao.list();
-        for (final Guild guild : guilds) {
-            final GuildStoreroom guildStoreroom = new GuildStoreroom();
-            guildStoreroom.setGuild(guild);
-            guildStoreroomDao.add(guildStoreroom);
-        }
-
         final Map<String, Integer> response = Maps.newHashMap();
         response.put("status", 0);
         jsonMsg = new Gson().toJson(response);
@@ -452,10 +442,11 @@ public class GuildAction extends BaseAction {
         final User loginUserPo = userDao.load(loginUser.getId());
         final Guild guild = loginUserPo.getGuild();
         final GuildStoreroom storeroom = guild.getStoreroom();
+        final List<Bid> bids = bidDao.listGuildOpenBids(guild);
 
         if (guild.getPresident() != loginUserPo) {
             response.put("status", 3);
-        } else if (guild.getBids().size() >= 3) {
+        } else if (bids.size() >= 3) {
             response.put("status", 2);
         } else {
             response.put("status", 1);
@@ -468,9 +459,13 @@ public class GuildAction extends BaseAction {
                     bid.setGuild(guild);
                     bid.setGuildCard(guildCard);
                     bid.setPrice(1);
-                    bid.setStatus(BidStatus.Open);
+                    bid.setStatus(BidStatus.Started);
                     bid.setType(BidItemType.Card);
+                    final Date now = new Date();
+                    bid.setStartDate(now);
+                    bid.setEndDate(DateUtils.addMinutes(now, 5));
                     bidDao.add(bid);
+                    scheduleStopTask(bid);
                     guildCardDao.update(guildCard);
                     response.put("status", 0);
                     break;
@@ -487,10 +482,11 @@ public class GuildAction extends BaseAction {
         final User loginUser = this.getLoginUser();
         final User loginUserPo = userDao.load(loginUser.getId());
         final Guild guild = loginUserPo.getGuild();
+        final List<Bid> bids = bidDao.listGuildOpenBids(guild);
 
         if (guild.getPresident() != loginUserPo) {
             response.put("status", 3);
-        } else if (guild.getBids().size() >= 3) {
+        } else if (bids.size() >= 3) {
             response.put("status", 2);
         } else {
             response.put("status", 1);
@@ -498,16 +494,21 @@ public class GuildAction extends BaseAction {
             bid.setAmount(5);
             bid.setGuild(guild);
             bid.setPrice(1);
-            bid.setStatus(BidStatus.Open);
+            bid.setStatus(BidStatus.Started);
             bid.setType(itemType);
+            final Date now = new Date();
+            bid.setStartDate(now);
+            bid.setEndDate(DateUtils.addMinutes(now, 5));
             final GuildStoreroom storeroom = guild.getStoreroom();
             if (itemType == BidItemType.ArenaTicket && storeroom.getTicket() >= 5) {
                 bidDao.add(bid);
+                scheduleStopTask(bid);
                 response.put("status", 0);
                 storeroom.setTicket(storeroom.getTicket() - 5);
                 guildStoreroomDao.update(storeroom);
             } else if (itemType == BidItemType.Stamina && storeroom.getStamina() >= 5) {
                 bidDao.add(bid);
+                scheduleStopTask(bid);
                 response.put("status", 0);
                 storeroom.setStamina(storeroom.getStamina() - 5);
                 guildStoreroomDao.update(storeroom);
@@ -515,6 +516,11 @@ public class GuildAction extends BaseAction {
         }
         jsonMsg = new Gson().toJson(response);
         return SUCCESS;
+    }
+
+    private void scheduleStopTask(final Bid bid) {
+        final Runnable stopSchedule = BidUtils.createCloseSchedule(bid.getId(), bidDao);
+        taskScheduler.schedule(stopSchedule, bid.getEndDate());
     }
 
     public UserDao getUserDao() {
@@ -631,6 +637,14 @@ public class GuildAction extends BaseAction {
 
     public void setItemType(final BidItemType itemType) {
         this.itemType = itemType;
+    }
+
+    public TaskScheduler getTaskScheduler() {
+        return taskScheduler;
+    }
+
+    public void setTaskScheduler(final TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
     }
 
 }
