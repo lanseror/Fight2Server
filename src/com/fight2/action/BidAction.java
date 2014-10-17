@@ -94,9 +94,11 @@ public class BidAction extends BaseAction {
 
         if (guild != bid.getGuild()) {
             response.put("status", 3);
+        } else if (bid.getStatus() != BidStatus.Closed) {
+            response.put("status", 2);
         } else {
             final User bidUser = bid.getUser();
-            if (bidUser != null && bidUser.getId() == userPo.getId() && bid.getStatus() == BidStatus.Closed) {
+            if (bidUser != null && bidUser.getId() == userPo.getId()) {
                 response.put("status", 0);
             } else {
                 response.put("status", 1);
@@ -133,6 +135,8 @@ public class BidAction extends BaseAction {
 
         if (guild != bid.getGuild()) {
             response.put("status", 3);
+        } else if (bid.getStatus() != BidStatus.Started) {
+            response.put("status", 4);
         } else {
             performBid(response, userPo, bidDao, id, version);
         }

@@ -23,9 +23,11 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
     @Autowired
     private ArenaDao arenaDao;
     @Autowired
+    private ArenaService arenaService;
+    @Autowired
     private BidDao bidDao;
     @Autowired
-    private ArenaService arenaService;
+    private BidService bidService;
     @Autowired
     private TaskScheduler taskScheduler;
 
@@ -47,7 +49,7 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
         final List<Bid> bids = bidDao.listOpenBids();
         for (final Bid bid : bids) {
             if (bid.getEndDate() != null) {
-                final Runnable stopSchedule = BidUtils.createCloseSchedule(bid.getId(), bidDao);
+                final Runnable stopSchedule = BidUtils.createCloseSchedule(bid.getId(), bidService);
                 taskScheduler.schedule(stopSchedule, bid.getEndDate());
             }
         }

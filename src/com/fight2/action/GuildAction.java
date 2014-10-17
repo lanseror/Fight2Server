@@ -36,6 +36,7 @@ import com.fight2.model.GuildPoll;
 import com.fight2.model.GuildStoreroom;
 import com.fight2.model.GuildVoter;
 import com.fight2.model.User;
+import com.fight2.service.BidService;
 import com.fight2.util.BidUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -63,6 +64,8 @@ public class GuildAction extends BaseAction {
     private GuildCardDao guildCardDao;
     @Autowired
     private BidDao bidDao;
+    @Autowired
+    private BidService bidService;
     @Autowired
     private TaskScheduler taskScheduler;
 
@@ -519,7 +522,7 @@ public class GuildAction extends BaseAction {
     }
 
     private void scheduleStopTask(final Bid bid) {
-        final Runnable stopSchedule = BidUtils.createCloseSchedule(bid.getId(), bidDao);
+        final Runnable stopSchedule = BidUtils.createCloseSchedule(bid.getId(), bidService);
         taskScheduler.schedule(stopSchedule, bid.getEndDate());
     }
 
@@ -645,6 +648,14 @@ public class GuildAction extends BaseAction {
 
     public void setTaskScheduler(final TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
+    }
+
+    public BidService getBidService() {
+        return bidService;
+    }
+
+    public void setBidService(final BidService bidService) {
+        this.bidService = bidService;
     }
 
 }
