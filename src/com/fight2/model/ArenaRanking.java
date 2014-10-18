@@ -13,6 +13,7 @@ public class ArenaRanking extends BaseEntity {
     private int might;
     private int win;
     private int lose;
+    private int issuedReward;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -64,6 +65,14 @@ public class ArenaRanking extends BaseEntity {
 
     public void setLose(final int lose) {
         this.lose = lose;
+    }
+
+    public int getIssuedReward() {
+        return issuedReward;
+    }
+
+    public void setIssuedReward(final int issuedReward) {
+        this.issuedReward = issuedReward;
     }
 
     public static long getSerialversionuid() {

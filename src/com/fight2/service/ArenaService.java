@@ -131,6 +131,51 @@ public class ArenaService {
 
     }
 
+    public void issueMightRewardsIfApplicable(final Arena arena, final ArenaRanking arenaRanking) {
+        final List<ArenaReward> arenaRewards = arenaRewardDao.listByArenaAndType(arena, ArenaRewardType.Might);
+        final int issuedReward = arenaRanking.getIssuedReward();
+        if (arenaRewards.size() == issuedReward) {
+            return;
+        }
+        final ArenaReward arenaReward = arenaRewards.get(issuedReward);
+        if (arenaRanking.getMight() < arenaReward.getMin()) {
+            return;
+        }
+
+        final User user = arenaRanking.getUser();
+        final UserStoreroom userStoreroom = user.getStoreroom();
+        final List<ArenaRewardItem> rewardItems = arenaReward.getRewardItems();
+        for (final ArenaRewardItem rewardItem : rewardItems) {
+            final ArenaRewardItemType rewardItemType = rewardItem.getType();
+            final int amount = rewardItem.getAmount();
+            if (rewardItemType == ArenaRewardItemType.ArenaTicket) {
+                userStoreroom.setTicket(userStoreroom.getTicket() + amount);
+                userStoreroomDao.update(userStoreroom);
+            } else if (rewardItemType == ArenaRewardItemType.Stamina) {
+                userStoreroom.setStamina(userStoreroom.getStamina() + amount);
+                userStoreroomDao.update(userStoreroom);
+            } else if (rewardItemType == ArenaRewardItemType.Card) {
+                final CardTemplate cardTemplate = rewardItem.getCardTemplate();
+                for (int i = 1; i <= amount; i++) {
+                    final Card card = new Card();
+                    card.setAtk(cardTemplate.getAtk());
+                    card.setHp(cardTemplate.getHp());
+                    card.setName(cardTemplate.getName());
+                    card.setStar(cardTemplate.getStar());
+                    card.setCardTemplate(cardTemplate);
+                    card.setUser(user);
+                    card.setStatus(CardStatus.InStoreroom);
+                    cardDao.add(card);
+                }
+                final List<Card> cards = cardDao.listByUser(user);
+                user.setCardCount(cards.size());
+                userDao.update(user);
+            }
+        }
+
+        arenaRanking.setIssuedReward(issuedReward + 1);
+    }
+
     public ArenaDao getArenaDao() {
         return arenaDao;
     }

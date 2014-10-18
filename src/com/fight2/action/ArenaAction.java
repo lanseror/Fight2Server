@@ -98,6 +98,7 @@ public class ArenaAction extends BaseAction {
         userArenaInfo.setWin(arenaRanking.getWin());
         userArenaInfo.setRankNumber(arenaRanking.getRankNumber());
         userArenaInfo.setRemainTime(DateUtils.getRemainTime(arena.getEndDate()));
+        userArenaInfo.setIssuedReward(arenaRanking.getIssuedReward());
         final List<UserArenaRecord> arenaRecords = userArenaInfo.getArenaRecords();
         if (arenaRecords.isEmpty()) {
             refreshArenaRecords(arenaRanking, arenaRecords);
@@ -356,6 +357,7 @@ public class ArenaAction extends BaseAction {
             arenaRecord.setStatus(UserArenaRecordStatus.Lose);
         }
         arenaRanking.setMight(arenaRanking.getMight() + battleResult.getTotalMight());
+        arenaService.issueMightRewardsIfApplicable(arena, arenaRanking);
         arenaRankingDao.update(arenaRanking);
 
         // Update UserArenaRecords

@@ -3,6 +3,7 @@ package com.fight2.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -31,6 +32,7 @@ public class ArenaRewardDaoImpl extends BaseDaoImpl<ArenaReward> implements Aren
         final Criteria criteria = getSession().createCriteria(getMyType());
         criteria.add(Restrictions.eq("arena", arena));
         criteria.add(Restrictions.eq("type", type));
+        criteria.addOrder(Order.asc("min"));
         @SuppressWarnings("unchecked")
         final List<ArenaReward> list = criteria.list();
         return list;
