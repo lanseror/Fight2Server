@@ -21,6 +21,7 @@ public class User extends BaseEntity {
     private int level = 1;
     private PartyInfo partyInfo;
     private UserStoreroom storeroom;
+    private UserQuestInfo questInfo;
     private List<Card> cards;
     private boolean isDisabled;
     private boolean npc;
@@ -103,6 +104,15 @@ public class User extends BaseEntity {
 
     public void setStoreroom(final UserStoreroom storeroom) {
         this.storeroom = storeroom;
+    }
+
+    @OneToOne(mappedBy = "user")
+    public UserQuestInfo getQuestInfo() {
+        return questInfo;
+    }
+
+    public void setQuestInfo(final UserQuestInfo questInfo) {
+        this.questInfo = questInfo;
     }
 
     @OneToMany(mappedBy = "user")

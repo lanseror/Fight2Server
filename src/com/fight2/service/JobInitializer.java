@@ -17,6 +17,7 @@ import com.fight2.model.Bid;
 import com.fight2.util.ArenaUtils;
 import com.fight2.util.BidUtils;
 import com.fight2.util.HibernateUtils;
+import com.fight2.util.QuestUtils;
 
 @Component
 public class JobInitializer implements ApplicationListener<ContextRefreshedEvent> {
@@ -33,6 +34,7 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
 
     @Override
     public void onApplicationEvent(final ContextRefreshedEvent event) {
+        QuestUtils.init();
         final SessionFactory sessionFactory = arenaDao.getSessionFactory();
         HibernateUtils.openSession(sessionFactory);
         final List<Arena> arenas = arenaDao.getAliveArenas();
