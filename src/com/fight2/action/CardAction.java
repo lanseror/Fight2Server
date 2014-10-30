@@ -50,7 +50,7 @@ public class CardAction extends BaseAction {
         }
         final List<Card> cardpackCards = cardDao.listByUserAndStatus(user, CardStatus.InCardPack);
         final int cardpackSize = cardpackCards.size();
-        final CardTemplate cardTemplate = summonHelper.summon();
+        final CardTemplate cardTemplate = summonHelper.summon(4, 6);
         final String avatar = cardTemplate.getAvatars().get(0).getUrl();
         final String image = cardTemplate.getThumbImages().get(0).getUrl();
 
@@ -94,7 +94,8 @@ public class CardAction extends BaseAction {
         return SUCCESS;
     }
 
-    @Action(value = "delete", results = { @Result(name = SUCCESS, location = "../user/parties.action", type = "redirect", params = { "id", "${id}" }) })
+    @Action(value = "delete",
+            results = { @Result(name = SUCCESS, location = "../user/parties.action", type = "redirect", params = { "id", "${id}" }) })
     public String delete() {
         card = cardDao.load(id);
         final User user = card.getUser();

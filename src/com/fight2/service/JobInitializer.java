@@ -1,6 +1,7 @@
 package com.fight2.service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
     @Override
     public void onApplicationEvent(final ContextRefreshedEvent event) {
         QuestUtils.init();
+        final Runnable refreshTreasureSchedule = createRefreshTreasureSchedule();
+        taskScheduler.scheduleAtFixedRate(refreshTreasureSchedule, TimeUnit.MINUTES.toMillis(1));
         final SessionFactory sessionFactory = arenaDao.getSessionFactory();
         HibernateUtils.openSession(sessionFactory);
         final List<Arena> arenas = arenaDao.getAliveArenas();
@@ -57,6 +60,17 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
         }
 
         HibernateUtils.closeSession(sessionFactory);
+    }
+
+    public static Runnable createRefreshTreasureSchedule() {
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                QuestUtils.refreshUserDatas();
+            }
+
+        };
+        return runnable;
     }
 
     public ArenaDao getArenaDao() {

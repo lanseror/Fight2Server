@@ -8,6 +8,7 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.fight2.dao.CardDao;
 import com.fight2.dao.UserDao;
@@ -19,6 +20,7 @@ import com.fight2.model.User;
 import com.fight2.model.UserQuestInfo;
 import com.fight2.model.quest.QuestTile;
 import com.fight2.model.quest.QuestTile.TileItem;
+import com.fight2.model.quest.QuestTreasureData;
 import com.fight2.util.QuestUtils;
 import com.fight2.util.SummonHelper;
 import com.google.common.collect.Maps;
@@ -36,9 +38,12 @@ public class QuestAction extends BaseAction {
     private UserDao userDao;
     @Autowired
     private SummonHelper summonHelper;
+    @Autowired
+    private TaskScheduler taskScheduler;
     private int id;
     private int row;
     private int col;
+    private long version;
 
     @Action(value = "go", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String go() {
@@ -56,7 +61,15 @@ public class QuestAction extends BaseAction {
         userQuestInfoDao.update(userQuestInfo);
 
         response.put("status", 0);
-        final List<QuestTile> treasures = QuestUtils.getUserData(currentUser.getId());
+        final QuestTreasureData questTreasureData = QuestUtils.getUserData(currentUser.getId());
+        if (questTreasureData.getVersion() > version) {
+            response.put("treasureUpdate", true);
+            response.put("treasure", questTreasureData);
+        } else {
+            response.put("treasureUpdate", false);
+        }
+
+        final List<QuestTile> treasures = questTreasureData.getQuestTiles();
         final Iterator<QuestTile> it = treasures.iterator();
         int treasureIndex = 0;
         while (it.hasNext()) {
@@ -81,7 +94,7 @@ public class QuestAction extends BaseAction {
     }
 
     public void summonTreasure(final Map<String, Object> response, final User user) {
-        final CardTemplate cardTemplate = summonHelper.summon();
+        final CardTemplate cardTemplate = summonHelper.summon(1, 3);
         final String avatar = cardTemplate.getAvatars().get(0).getUrl();
         final String image = cardTemplate.getThumbImages().get(0).getUrl();
 
@@ -118,9 +131,16 @@ public class QuestAction extends BaseAction {
     @Action(value = "treasure", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String getUserQuestTreasure() {
         final User currentUser = (User) this.getSession().get(LOGIN_USER);
-        final List<QuestTile> treasures = QuestUtils.getUserData(currentUser.getId());
+        final QuestTreasureData questTreasureData = QuestUtils.getUserData(currentUser.getId());
         final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(treasures));
+        if (questTreasureData.getVersion() > version) {
+            context.put("jsonMsg", new Gson().toJson(questTreasureData));
+        } else {
+            final QuestTreasureData oldData = new QuestTreasureData();
+            oldData.setVersion(version);
+            context.put("jsonMsg", new Gson().toJson(oldData));
+        }
+
         return SUCCESS;
     }
 
@@ -164,6 +184,14 @@ public class QuestAction extends BaseAction {
         this.col = col;
     }
 
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(final long version) {
+        this.version = version;
+    }
+
     public SummonHelper getSummonHelper() {
         return summonHelper;
     }
@@ -178,6 +206,14 @@ public class QuestAction extends BaseAction {
 
     public void setCardDao(final CardDao cardDao) {
         this.cardDao = cardDao;
+    }
+
+    public TaskScheduler getTaskScheduler() {
+        return taskScheduler;
+    }
+
+    public void setTaskScheduler(final TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
     }
 
     public static long getSerialversionuid() {

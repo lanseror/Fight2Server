@@ -10,13 +10,14 @@ import tiled.core.TileLayer;
 
 import com.fight2.model.quest.QuestTile;
 import com.fight2.model.quest.QuestTile.TileItem;
+import com.fight2.model.quest.QuestTreasureData;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public class QuestUtils {
     private static final List<QuestTile> ROAD_TILES = Lists.newArrayList();
-    private static final Map<Integer, List<QuestTile>> USER_QUEST_DATA = Maps.newHashMap();
+    private static final Map<Integer, QuestTreasureData> USER_QUEST_DATA = Maps.newHashMap();
     private static final Random RANDOM = new Random();
 
     public static void init() {
@@ -36,24 +37,27 @@ public class QuestUtils {
     }
 
     public static synchronized void refreshUserDatas() {
-        for (final List<QuestTile> questTiles : USER_QUEST_DATA.values()) {
-            randomUserData(questTiles);
+        for (final QuestTreasureData questTreasureData : USER_QUEST_DATA.values()) {
+            randomUserData(questTreasureData);
         }
     }
 
-    public static List<QuestTile> getUserData(final int id) {
-        List<QuestTile> userData = USER_QUEST_DATA.get(id);
-        if (userData == null) {
-            userData = Lists.newArrayList();
-            randomUserData(userData);
-            USER_QUEST_DATA.put(id, userData);
+    public static QuestTreasureData getUserData(final int id) {
+        QuestTreasureData questTreasureData = USER_QUEST_DATA.get(id);
+        if (questTreasureData == null) {
+            questTreasureData = new QuestTreasureData();
+            final List<QuestTile> questTiles = Lists.newArrayList();
+            questTreasureData.setQuestTiles(questTiles);
+            randomUserData(questTreasureData);
+            USER_QUEST_DATA.put(id, questTreasureData);
         }
 
-        return userData;
+        return questTreasureData;
     }
 
-    private static synchronized void randomUserData(final List<QuestTile> userData) {
-        userData.clear();
+    private static synchronized void randomUserData(final QuestTreasureData questTreasureData) {
+        final List<QuestTile> questTiles = questTreasureData.getQuestTiles();
+        questTiles.clear();
         final Set<Integer> randomNumbers = Sets.newHashSet();
         while (randomNumbers.size() < 5) {
             final int randomNumber = RANDOM.nextInt(ROAD_TILES.size());
@@ -67,11 +71,9 @@ public class QuestUtils {
             final TileItem[] tileItems = TileItem.values();
             final int randomItem = RANDOM.nextInt(tileItems.length);
             treasureTile.setItem(tileItems[randomItem]);
-            userData.add(treasureTile);
+            questTiles.add(treasureTile);
         }
+        questTreasureData.setVersion(System.currentTimeMillis());
     }
 
-    public static void main(final String[] args) {
-        init();
-    }
 }
