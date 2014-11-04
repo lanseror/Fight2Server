@@ -12,33 +12,31 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fight2.dao.ArenaRankingDao;
 import com.fight2.dao.CardDao;
 import com.fight2.dao.CardImageDao;
+import com.fight2.dao.CardTemplateDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserStoreroomDao;
-import com.fight2.model.ArenaRanking;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardImage;
+import com.fight2.model.CardTemplate;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
-import com.fight2.model.User.UserType;
-import com.fight2.model.UserStoreroom;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
-@Namespace("/user")
-public class UserAction extends BaseAction {
+@Namespace("/npc")
+public class NpcAction extends BaseAction {
     private static final long serialVersionUID = -4473064014262040889L;
     @Autowired
     private UserDao userDao;
@@ -55,16 +53,16 @@ public class UserAction extends BaseAction {
     @Autowired
     private CardDao cardDao;
     @Autowired
-    private ArenaRankingDao arenaRankingDao;
+    private CardTemplateDao cardTemplateDao;
+    private List<Card> cards;
     private User user;
     private List<User> datas;
     private int id;
-    private String installUUID;
     private String jsonMsg;
 
-    @Action(value = "list", results = { @Result(name = SUCCESS, location = "user_list.ftl") })
+    @Action(value = "list", results = { @Result(name = SUCCESS, location = "npc_list.ftl") })
     public String list() {
-        datas = userDao.list();
+        datas = userDao.getAllQuestNpc();
         return SUCCESS;
     }
 
@@ -73,40 +71,6 @@ public class UserAction extends BaseAction {
         final ActionContext context = ActionContext.getContext();
         final List<User> list = userDao.list();
         context.put("jsonMsg", new Gson().toJson(list));
-        return SUCCESS;
-    }
-
-    @Action(value = "register", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String register() {
-        final User checkUser = userDao.getByInstallUUID(installUUID);
-        if (checkUser == null) {
-            user = new User();
-            user.setInstallUUID(installUUID);
-            user.setName("User" + System.currentTimeMillis());
-            userDao.add(user);
-            user.setName("User" + user.getId());
-            userDao.update(user);
-            final PartyInfo partyInfo = new PartyInfo();
-            partyInfo.setUser(user);
-            partyInfoDao.add(partyInfo);
-            for (int i = 1; i < 4; i++) {
-                final Party party = new Party();
-                party.setPartyNumber(i);
-                party.setPartyInfo(partyInfo);
-                partyDao.add(party);
-                for (int gridIndex = 1; gridIndex < 5; gridIndex++) {
-                    final PartyGrid partyGrid = new PartyGrid();
-                    partyGrid.setGridNumber(gridIndex);
-                    partyGrid.setParty(party);
-                    partyGridDao.add(partyGrid);
-                }
-            }
-            final UserStoreroom userStoreroom = new UserStoreroom();
-            userStoreroom.setUser(user);
-            userStoreroomDao.add(userStoreroom);
-        }
-        final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(user));
         return SUCCESS;
     }
 
@@ -143,24 +107,6 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
-    @Action(value = "login", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String login() {
-        user = userDao.getByInstallUUID(installUUID);
-        final User voUser = new User();
-        voUser.setId(user.getId());
-        voUser.setAvatar(user.getAvatar());
-        voUser.setCardCount(user.getCardCount());
-        voUser.setLevel(user.getLevel());
-        voUser.setName(user.getName());
-        voUser.setInstallUUID(user.getInstallUUID());
-        voUser.setUsername(user.getUsername());
-
-        final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(voUser));
-        this.getSession().put(LOGIN_USER, user);
-        return SUCCESS;
-    }
-
     @Action(value = "save-user-info", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String saveUserInfo() {
         final User loginUser = this.getLoginUser();
@@ -178,43 +124,34 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
-    @Action(value = "add", results = { @Result(name = SUCCESS, location = "user_form.ftl") })
+    @Action(value = "add", results = { @Result(name = SUCCESS, location = "npc_form.ftl") })
     public String add() {
+        loadCardData();
         return SUCCESS;
     }
 
-    @Action(value = "edit", results = { @Result(name = SUCCESS, location = "user_form.ftl") })
+    @Action(value = "edit", results = { @Result(name = SUCCESS, location = "npc_form.ftl") })
     public String edit() {
         user = userDao.get(id);
+        loadCardData();
         return SUCCESS;
+    }
+
+    private void loadCardData() {
+        final List<CardTemplate> cardTemplates = cardTemplateDao.list();
+        cards = Lists.newArrayList();
+        for (final CardTemplate cardTemplate : cardTemplates) {
+            final Card card = new Card();
+            card.setId(cardTemplate.getId());
+            card.setName(cardTemplate.getName());
+            final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, 1, cardTemplate);
+            card.setAvatar(avatarObj.getUrl());
+            cards.add(card);
+        }
     }
 
     @Action(value = "delete", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
     public String delete() {
-        user = userDao.load(id);
-        final User user = userDao.get(id);
-        final PartyInfo partyInfo = partyInfoDao.getByUser(user);
-        if (partyInfo != null) {
-            final List<Party> parties = partyInfo.getParties();
-            for (final Party party : parties) {
-                for (final PartyGrid partyGrid : party.getPartyGrids()) {
-                    partyGridDao.delete(partyGrid);
-                }
-                partyDao.delete(party);
-            }
-            partyInfoDao.delete(partyInfo);
-        }
-        final List<Card> cards = cardDao.listByUser(user);
-        for (final Card card : cards) {
-            cardDao.delete(card);
-        }
-
-        final List<ArenaRanking> arenaRankings = arenaRankingDao.listByUser(user);
-        for (final ArenaRanking arenaRanking : arenaRankings) {
-            arenaRankingDao.delete(arenaRanking);
-        }
-        userStoreroomDao.delete(user.getStoreroom());
-        userDao.delete(user);
         return SUCCESS;
     }
 
@@ -230,23 +167,6 @@ public class UserAction extends BaseAction {
     public String enable() {
         user = userDao.get(id);
         user.setDisabled(false);
-        userDao.update(user);
-        return SUCCESS;
-    }
-
-    @Action(value = "setnpc", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
-    public String setNpc() {
-        user = userDao.get(id);
-        user.setType(UserType.ArenaGuardian);
-        user.setName("Arena Guardian");
-        userDao.update(user);
-        return SUCCESS;
-    }
-
-    @Action(value = "notnpc", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
-    public String notNpc() {
-        user = userDao.get(id);
-        user.setType(UserType.User);
         userDao.update(user);
         return SUCCESS;
     }
@@ -303,14 +223,6 @@ public class UserAction extends BaseAction {
         this.id = id;
     }
 
-    public String getInstallUUID() {
-        return installUUID;
-    }
-
-    public void setInstallUUID(final String installUUID) {
-        this.installUUID = installUUID;
-    }
-
     public static long getSerialversionuid() {
         return serialVersionUID;
     }
@@ -355,12 +267,12 @@ public class UserAction extends BaseAction {
         this.cardDao = cardDao;
     }
 
-    public ArenaRankingDao getArenaRankingDao() {
-        return arenaRankingDao;
+    public CardTemplateDao getCardTemplateDao() {
+        return cardTemplateDao;
     }
 
-    public void setArenaRankingDao(final ArenaRankingDao arenaRankingDao) {
-        this.arenaRankingDao = arenaRankingDao;
+    public void setCardTemplateDao(final CardTemplateDao cardTemplateDao) {
+        this.cardTemplateDao = cardTemplateDao;
     }
 
     public String getJsonMsg() {
@@ -377,6 +289,14 @@ public class UserAction extends BaseAction {
 
     public void setUserStoreroomDao(final UserStoreroomDao userStoreroomDao) {
         this.userStoreroomDao = userStoreroomDao;
+    }
+
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(final List<Card> cards) {
+        this.cards = cards;
     }
 
 }

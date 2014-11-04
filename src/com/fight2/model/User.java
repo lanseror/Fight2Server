@@ -24,9 +24,10 @@ public class User extends BaseEntity {
     private UserQuestInfo questInfo;
     private List<Card> cards;
     private boolean isDisabled;
-    private boolean npc;
+    private UserType type;
     private Guild guild;
     private int guildContribution;
+    private int salary;
 
     public String getInstallUUID() {
         return installUUID;
@@ -132,14 +133,6 @@ public class User extends BaseEntity {
         this.isDisabled = isDisabled;
     }
 
-    public boolean isNpc() {
-        return npc;
-    }
-
-    public void setNpc(final boolean npc) {
-        this.npc = npc;
-    }
-
     @ManyToOne
     @JoinColumn(name = "guild_id")
     public Guild getGuild() {
@@ -156,6 +149,32 @@ public class User extends BaseEntity {
 
     public void setGuildContribution(final int guildContribution) {
         this.guildContribution = guildContribution;
+    }
+
+    public UserType getType() {
+        return type;
+    }
+
+    public void setType(final UserType type) {
+        this.type = type;
+    }
+
+    public int getSalary() {
+        return salary;
+    }
+
+    public void setSalary(final int salary) {
+        this.salary = salary;
+    }
+
+    public static int getUserCardpackSize() {
+        return USER_CARDPACK_SIZE;
+    }
+
+    public enum UserType {
+        User,
+        ArenaGuardian,
+        QuestNpc
     }
 
 }

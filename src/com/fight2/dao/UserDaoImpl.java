@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import com.fight2.model.Guild;
 import com.fight2.model.User;
+import com.fight2.model.User.UserType;
 
 @Repository
 public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao {
@@ -24,9 +25,9 @@ public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao {
     }
 
     @Override
-    public List<User> getAllNpc() {
+    public List<User> getAllArenaGuardians() {
         final Criteria criteria = getSession().createCriteria(getMyType());
-        criteria.add(Restrictions.eq("npc", true));
+        criteria.add(Restrictions.eq("type", UserType.ArenaGuardian));
         @SuppressWarnings("unchecked")
         final List<User> users = criteria.list();
         return users;
@@ -36,6 +37,15 @@ public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao {
     public List<User> listByGuild(final Guild guild) {
         final Criteria criteria = getSession().createCriteria(getMyType());
         criteria.add(Restrictions.eq("guild", guild));
+        @SuppressWarnings("unchecked")
+        final List<User> users = criteria.list();
+        return users;
+    }
+
+    @Override
+    public List<User> getAllQuestNpc() {
+        final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.add(Restrictions.eq("type", UserType.QuestNpc));
         @SuppressWarnings("unchecked")
         final List<User> users = criteria.list();
         return users;

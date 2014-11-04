@@ -280,12 +280,11 @@ public class ArenaAction extends BaseAction {
             }
         }
         arenaRecords.add(p3ArenaRecord);
-
     }
 
     private User randomNPC() {
         final Random random = new Random();
-        final List<User> npcs = userDao.getAllNpc();
+        final List<User> npcs = userDao.getAllArenaGuardians();
         return npcs.get(random.nextInt(npcs.size()));
     }
 
@@ -294,7 +293,7 @@ public class ArenaAction extends BaseAction {
         jsonUser.setId(user.getId());
         jsonUser.setAvatar(user.getAvatar());
         jsonUser.setName(user.getName());
-        jsonUser.setNpc(user.isNpc());
+        jsonUser.setType(user.getType());
         return jsonUser;
     }
 
