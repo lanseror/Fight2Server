@@ -213,7 +213,10 @@ public class UserAction extends BaseAction {
         for (final ArenaRanking arenaRanking : arenaRankings) {
             arenaRankingDao.delete(arenaRanking);
         }
-        userStoreroomDao.delete(user.getStoreroom());
+        final UserStoreroom userStorRoom = user.getStoreroom();
+        if (userStorRoom != null) {
+            userStoreroomDao.delete(userStorRoom);
+        }
         userDao.delete(user);
         return SUCCESS;
     }

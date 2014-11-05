@@ -6,16 +6,27 @@
 <center>
 
 <@s.form namespace="/npc" action="save" method="post" id="postFrom">
+<@s.if test="hasActionErrors()">
+   <ul>
+    <li><font color="red"><@s.actionerror /></font></li>
+  </ul>
+</@s.if>
 <table>
     <@s.if test="user!=null">
     <tr>
         <td>ID</td>
-        <td><@s.textfield size="80" name="user.id" readonly="true" /></td>
+        <td>
+            <@s.textfield size="80" name="user.id" readonly="true" />
+        </td>
     </tr>
     </@s.if>
     <tr>
         <td>名字</td>
         <td><@s.textfield size="80" name="user.name" cssClass="required max-length-80" /></td>
+    </tr>
+    <tr>
+        <td>类别</td>
+        <td><@s.select name="user.type" list=r"#{'ArenaGuardian':'竞技场守卫', 'QuestNpc':'野外NPC'}" value="user.salary"  /></td>
     </tr>
     <tr>
         <td>身价级别</td>
@@ -30,58 +41,28 @@
              <table id="partyTable" border="1" cellpadding="1" cellspacing="0" height="200px" >
                 <tbody id="partyBody">
                     <tr align="center">
-                        <td width="125px">
+                        <td width="125px" id="td0">
                             <table border="0" cellpadding="0" cellspacing="0" width="90px">
                                 <tr align="center">
                                     <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
                                 </tr>
                             </table>
                         </td>
-                        <td width="125px">
+                        <td width="125px" id="td1">
                             <table border="0" cellpadding="0" cellspacing="0" width="90px">
                                 <tr align="center">
                                     <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
                                 </tr>
                             </table>
                         </td>
-                        <td width="125px">
+                        <td width="125px" id="td2">
                             <table border="0" cellpadding="0" cellspacing="0" width="90px">
                                 <tr align="center">
                                     <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
                                 </tr>
                             </table>
                         </td>
-                        <td width="125px">
-                            <table border="0" cellpadding="0" cellspacing="0" width="90px">
-                                <tr align="center">
-                                    <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                     <tr align="center">
-                        <td width="125px">
-                            <table border="0" cellpadding="0" cellspacing="0" width="90px">
-                                <tr align="center">
-                                    <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td width="125px">
-                            <table border="0" cellpadding="0" cellspacing="0" width="90px">
-                                <tr align="center">
-                                    <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td width="125px">
-                            <table border="0" cellpadding="0" cellspacing="0" width="90px">
-                                <tr align="center">
-                                    <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td width="125px">
+                        <td width="125px" id="td3">
                             <table border="0" cellpadding="0" cellspacing="0" width="90px">
                                 <tr align="center">
                                     <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
@@ -90,28 +71,58 @@
                         </td>
                     </tr>
                      <tr align="center">
-                        <td width="125px">
+                        <td width="125px" id="td4">
                             <table border="0" cellpadding="0" cellspacing="0" width="90px">
                                 <tr align="center">
                                     <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
                                 </tr>
                             </table>
                         </td>
-                        <td width="125px">
+                        <td width="125px" id="td5">
                             <table border="0" cellpadding="0" cellspacing="0" width="90px">
                                 <tr align="center">
                                     <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
                                 </tr>
                             </table>
                         </td>
-                        <td width="125px">
+                        <td width="125px" id="td6">
                             <table border="0" cellpadding="0" cellspacing="0" width="90px">
                                 <tr align="center">
                                     <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
                                 </tr>
                             </table>
                         </td>
-                        <td width="125px">
+                        <td width="125px" id="td7">
+                            <table border="0" cellpadding="0" cellspacing="0" width="90px">
+                                <tr align="center">
+                                    <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                     <tr align="center">
+                        <td width="125px" id="td8">
+                            <table border="0" cellpadding="0" cellspacing="0" width="90px">
+                                <tr align="center">
+                                    <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="125px" id="td9">
+                            <table border="0" cellpadding="0" cellspacing="0" width="90px">
+                                <tr align="center">
+                                    <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="125px" id="td10">
+                            <table border="0" cellpadding="0" cellspacing="0" width="90px">
+                                <tr align="center">
+                                    <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="125px" id="td11">
                             <table border="0" cellpadding="0" cellspacing="0" width="90px">
                                 <tr align="center">
                                     <td><a href="###selectCard" onclick="selectCard(this);return false;">选择</a></td>
@@ -224,6 +235,9 @@
         var cardIdField = $('<input>').attr({type: 'hidden', name: 'cardIds', value: cardId});
         td2Insert.append(copyAvatar);
         td2Insert.append(cardIdField);
+        var partyId = td2Insert.attr('id').replace("td","");
+        var partyIdField = $('<input>').attr({type: 'hidden', name: 'partyIds', value: partyId});
+        td2Insert.append(partyIdField);
         cardTd.detach();
     }
     function initItem(cardTd, cardId) {

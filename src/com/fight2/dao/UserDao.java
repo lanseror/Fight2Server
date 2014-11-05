@@ -11,7 +11,7 @@ public interface UserDao extends BaseDao<User> {
 
     public List<User> getAllArenaGuardians();
     
-    public List<User> getAllQuestNpc();
+    public List<User> getAllNpc();
 
     public List<User> listByGuild(Guild guild);
 

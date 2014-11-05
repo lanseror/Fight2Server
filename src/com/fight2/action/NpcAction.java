@@ -1,9 +1,6 @@
 package com.fight2.action;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.struts2.convention.annotation.Action;
@@ -30,9 +27,7 @@ import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
 
 @Namespace("/npc")
@@ -59,18 +54,12 @@ public class NpcAction extends BaseAction {
     private List<User> datas;
     private int id;
     private String jsonMsg;
+    private int[] cardIds;
+    private int[] partyIds;
 
     @Action(value = "list", results = { @Result(name = SUCCESS, location = "npc_list.ftl") })
     public String list() {
-        datas = userDao.getAllQuestNpc();
-        return SUCCESS;
-    }
-
-    @Action(value = "list-json", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String listJson() {
-        final ActionContext context = ActionContext.getContext();
-        final List<User> list = userDao.list();
-        context.put("jsonMsg", new Gson().toJson(list));
+        datas = userDao.getAllNpc();
         return SUCCESS;
     }
 
@@ -107,23 +96,6 @@ public class NpcAction extends BaseAction {
         return SUCCESS;
     }
 
-    @Action(value = "save-user-info", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String saveUserInfo() {
-        final User loginUser = this.getLoginUser();
-        final User updateUser = userDao.get(loginUser.getId());
-        final User user = new Gson().fromJson(jsonMsg, User.class);
-        try {
-            updateUser.setName(URLDecoder.decode(user.getName(), "UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-        userDao.update(updateUser);
-        final Map<String, Integer> response = Maps.newHashMap();
-        response.put("status", 0);
-        jsonMsg = new Gson().toJson(response);
-        return SUCCESS;
-    }
-
     @Action(value = "add", results = { @Result(name = SUCCESS, location = "npc_form.ftl") })
     public String add() {
         loadCardData();
@@ -150,30 +122,26 @@ public class NpcAction extends BaseAction {
         }
     }
 
-    @Action(value = "delete", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
-    public String delete() {
-        return SUCCESS;
-    }
-
-    @Action(value = "disable", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
-    public String disable() {
-        user = userDao.get(id);
-        user.setDisabled(true);
-        userDao.update(user);
-        return SUCCESS;
-    }
-
-    @Action(value = "enable", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
-    public String enable() {
-        user = userDao.get(id);
-        user.setDisabled(false);
-        userDao.update(user);
-        return SUCCESS;
-    }
-
-    @Action(value = "save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = { @Result(
-            name = SUCCESS, location = "list", type = "redirect") })
+    @Action(value = "save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = {
+            @Result(name = SUCCESS, location = "list", type = "redirect"), @Result(name = INPUT, location = "npc_form.ftl") })
     public String save() {
+        if (partyIds[0] != 0) {
+            user = null;
+            loadCardData();
+            this.addActionError("你必须要有一个领军人物");
+            return INPUT;
+        }
+        final Set<Integer> cardIdSet = Sets.newHashSet();
+        for (final int cardId : cardIds) {
+            cardIdSet.add(cardId);
+        }
+        if (cardIds.length != cardIdSet.size()) {
+            user = null;
+            loadCardData();
+            this.addActionError("发现有重复的卡牌");
+            return INPUT;
+        }
+
         if (user.getId() == BaseEntity.EMPTY_ID) {
             return createSave();
         } else {
@@ -183,11 +151,55 @@ public class NpcAction extends BaseAction {
 
     private String createSave() {
         userDao.add(user);
+        final PartyInfo partyInfoAdd = new PartyInfo();
+        partyInfoAdd.setUser(user);
+        partyInfoDao.add(partyInfoAdd);
+        final List<Party> parties = Lists.newArrayList();
+        for (int i = 1; i < 4; i++) {
+            final Party party = new Party();
+            party.setPartyNumber(i);
+            party.setPartyInfo(partyInfoAdd);
+            partyDao.add(party);
+            parties.add(party);
+            final List<PartyGrid> partyGrids = Lists.newArrayList();
+            party.setPartyGrids(partyGrids);
+            for (int gridIndex = 1; gridIndex < 5; gridIndex++) {
+                final PartyGrid partyGrid = new PartyGrid();
+                partyGrid.setGridNumber(gridIndex);
+                partyGrid.setParty(party);
+                partyGridDao.add(partyGrid);
+                partyGrids.add(partyGrid);
+            }
+        }
+        for (int i = 0; i < cardIds.length; i++) {
+            final int cardId = cardIds[i];
+            final int partyId = partyIds[i];
+            final Party party = parties.get(partyId / 4);
+            final List<PartyGrid> partyGrids = party.getPartyGrids();
+            final PartyGrid partyGrid = partyGrids.get(partyId % 4);
+            final CardTemplate cardTemplate = cardTemplateDao.load(cardId);
+            final Card card = new Card();
+            card.setAtk(cardTemplate.getAtk());
+            card.setHp(cardTemplate.getHp());
+            card.setName(cardTemplate.getName());
+            card.setStar(cardTemplate.getStar());
+            card.setCardTemplate(cardTemplate);
+            card.setUser(user);
+            card.setStatus(CardStatus.InCardPack);
+            cardDao.add(card);
+            partyGrid.setCard(card);
+            partyGridDao.update(partyGrid);
+        }
+
         return SUCCESS;
     }
 
     private String editSave() {
-        userDao.update(user);
+        final User userUpdate = userDao.load(user.getId());
+        userUpdate.setName(user.getName());
+        userUpdate.setSalary(user.getSalary());
+        userUpdate.setType(user.getType());
+        userDao.update(userUpdate);
         return SUCCESS;
     }
 
@@ -297,6 +309,22 @@ public class NpcAction extends BaseAction {
 
     public void setCards(final List<Card> cards) {
         this.cards = cards;
+    }
+
+    public int[] getCardIds() {
+        return cardIds;
+    }
+
+    public void setCardIds(final int[] cardIds) {
+        this.cardIds = cardIds;
+    }
+
+    public int[] getPartyIds() {
+        return partyIds;
+    }
+
+    public void setPartyIds(final int[] partyIds) {
+        this.partyIds = partyIds;
     }
 
 }
