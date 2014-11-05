@@ -26,7 +26,7 @@
     </tr>
     <tr>
         <td>类别</td>
-        <td><@s.select name="user.type" list=r"#{'ArenaGuardian':'竞技场守卫', 'QuestNpc':'野外NPC'}" value="user.salary"  /></td>
+        <td><@s.select name="user.type" list=r"#{'':'请选择','ArenaGuardian':'竞技场守卫', 'QuestNpc':'野外NPC'}" value="user.salary" cssClass="required" /></td>
     </tr>
     <tr>
         <td>身价级别</td>
