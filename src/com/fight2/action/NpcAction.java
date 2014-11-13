@@ -189,7 +189,15 @@ public class NpcAction extends BaseAction {
             cardDao.add(card);
             partyGrid.setCard(card);
             partyGridDao.update(partyGrid);
+            party.setAtk(party.getAtk() + card.getAtk());
+            party.setHp(party.getHp() + card.getHp());
+            partyInfoAdd.setAtk(partyInfoAdd.getAtk() + card.getAtk());
+            partyInfoAdd.setHp(partyInfoAdd.getHp() + card.getHp());
         }
+        for (final Party party : parties) {
+            partyDao.update(party);
+        }
+        partyInfoDao.update(partyInfoAdd);
 
         return SUCCESS;
     }

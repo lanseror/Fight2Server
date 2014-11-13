@@ -72,7 +72,7 @@ public class ArenaAction extends BaseAction {
     private List<Arena> datas;
     private Arena arena;
     private int id;
-    private int index;
+    private int attackId;
 
     @Action(value = "enter", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String enter() {
@@ -324,7 +324,16 @@ public class ArenaAction extends BaseAction {
         final User attacker = (User) this.getSession().get(LOGIN_USER);
         final UserArenaInfo userArenaInfo = ArenaUtils.getUserArenaInfo(id, attacker.getId());
         final List<UserArenaRecord> arenaRecords = userArenaInfo.getArenaRecords();
-        final UserArenaRecord arenaRecord = arenaRecords.get(index);
+        UserArenaRecord arenaRecord = null;
+        int index = 0;
+        for (int i = 0; i < arenaRecords.size(); i++) {
+            final UserArenaRecord arenaRecordTmp = arenaRecords.get(i);
+            if (attackId == arenaRecordTmp.getUser().getId()) {
+                arenaRecord = arenaRecordTmp;
+                index = i;
+                break;
+            }
+        }
         if (arenaRecord.getStatus() != UserArenaRecordStatus.NoAction) {
             return INPUT;
         }
@@ -529,12 +538,12 @@ public class ArenaAction extends BaseAction {
         this.id = id;
     }
 
-    public int getIndex() {
-        return index;
+    public int getAttackId() {
+        return attackId;
     }
 
-    public void setIndex(final int index) {
-        this.index = index;
+    public void setAttackId(final int attackId) {
+        this.attackId = attackId;
     }
 
     public static long getSerialversionuid() {

@@ -3,6 +3,7 @@ package com.fight2.action;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -11,16 +12,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
 import com.fight2.dao.CardDao;
+import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserQuestInfoDao;
+import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardTemplate;
+import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
+import com.fight2.model.User.UserType;
 import com.fight2.model.UserQuestInfo;
 import com.fight2.model.quest.QuestTile;
 import com.fight2.model.quest.QuestTile.TileItem;
 import com.fight2.model.quest.QuestTreasureData;
+import com.fight2.service.BattleService;
 import com.fight2.util.QuestUtils;
 import com.fight2.util.SummonHelper;
 import com.google.common.collect.Maps;
@@ -36,6 +42,8 @@ public class QuestAction extends BaseAction {
     private CardDao cardDao;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private PartyInfoDao partyInfoDao;
     @Autowired
     private SummonHelper summonHelper;
     @Autowired
@@ -72,6 +80,7 @@ public class QuestAction extends BaseAction {
         final List<QuestTile> treasures = questTreasureData.getQuestTiles();
         final Iterator<QuestTile> it = treasures.iterator();
         int treasureIndex = 0;
+        boolean hasTreasure = false;
         while (it.hasNext()) {
             final QuestTile treasure = it.next();
             if (treasure.getRow() == row && treasure.getCol() == col) {
@@ -82,10 +91,32 @@ public class QuestAction extends BaseAction {
                     summonTreasure(response, user);
                 }
                 response.put("treasureIndex", treasureIndex);
+                hasTreasure = true;
                 it.remove();
                 break;
             }
             treasureIndex++;
+        }
+        if (!hasTreasure) {
+            final Random random = new Random();
+            final int randomNum = random.nextInt(40);
+            if (randomNum < 2) {
+                response.put("status", 2);
+                final List<User> users = userDao.listByType(UserType.User);
+                final User enemy = users.get(random.nextInt(users.size()));
+                final User enemyVo = new User();
+                enemyVo.setId(enemy.getId());
+                enemyVo.setName(enemy.getName());
+                response.put("enemy", enemyVo);
+            } else if (randomNum >= 2 && randomNum < 10) {
+                response.put("status", 2);
+                final List<User> npcs = userDao.listByType(UserType.QuestNpc);
+                final User enemy = npcs.get(random.nextInt(npcs.size()));
+                final User enemyVo = new User();
+                enemyVo.setId(enemy.getId());
+                enemyVo.setName(enemy.getName());
+                response.put("enemy", enemyVo);
+            }
         }
 
         final ActionContext context = ActionContext.getContext();
@@ -94,7 +125,15 @@ public class QuestAction extends BaseAction {
     }
 
     public void summonTreasure(final Map<String, Object> response, final User user) {
-        final CardTemplate cardTemplate = summonHelper.summon(1, 3);
+        final Random random = new Random();
+        final int randomNum = random.nextInt(100);
+        int addNum = 0;
+        if (randomNum == 0) {
+            addNum = 2;
+        } else if (randomNum > 0 && randomNum < 6) {
+            addNum = 1;
+        }
+        final CardTemplate cardTemplate = summonHelper.summon(1, 2 + addNum);
         final String avatar = cardTemplate.getAvatars().get(0).getUrl();
         final String image = cardTemplate.getThumbImages().get(0).getUrl();
 
@@ -141,6 +180,22 @@ public class QuestAction extends BaseAction {
             context.put("jsonMsg", new Gson().toJson(oldData));
         }
 
+        return SUCCESS;
+    }
+
+    @Action(value = "attack", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String attack() {
+        final User attacker = (User) this.getSession().get(LOGIN_USER);
+        final User defender = userDao.get(id);
+
+        final PartyInfo attackerPartyInfo = partyInfoDao.getByUser(attacker);
+        final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
+
+        final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo, null);
+        final BattleResult battleResult = battleService.fight(0);
+
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(battleResult));
         return SUCCESS;
     }
 
@@ -218,6 +273,14 @@ public class QuestAction extends BaseAction {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    public PartyInfoDao getPartyInfoDao() {
+        return partyInfoDao;
+    }
+
+    public void setPartyInfoDao(final PartyInfoDao partyInfoDao) {
+        this.partyInfoDao = partyInfoDao;
     }
 
 }

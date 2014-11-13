@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fight2.model.Guild;
 import com.fight2.model.User;
+import com.fight2.model.User.UserType;
 
 public interface UserDao extends BaseDao<User> {
 
@@ -12,6 +13,8 @@ public interface UserDao extends BaseDao<User> {
     public List<User> getAllArenaGuardians();
     
     public List<User> getAllNpc();
+    
+    public List<User> listByType(UserType type);
 
     public List<User> listByGuild(Guild guild);
 

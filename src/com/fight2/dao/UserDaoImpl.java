@@ -51,4 +51,13 @@ public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao {
         return users;
     }
 
+    @Override
+    public List<User> listByType(final UserType type) {
+        final Criteria criteria = getSession().createCriteria(getMyType());
+        criteria.add(Restrictions.or(Restrictions.eq("type", type)));
+        @SuppressWarnings("unchecked")
+        final List<User> users = criteria.list();
+        return users;
+    }
+
 }

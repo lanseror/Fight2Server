@@ -83,6 +83,7 @@ public class UserAction extends BaseAction {
             user = new User();
             user.setInstallUUID(installUUID);
             user.setName("User" + System.currentTimeMillis());
+            user.setType(UserType.User);
             userDao.add(user);
             user.setName("User" + user.getId());
             userDao.update(user);
