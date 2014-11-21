@@ -35,25 +35,23 @@ import java.util.HashMap;
 import java.util.Properties;
 
 /**
- * A TileLayer is a specialized MapLayer, used for tracking two dimensional
- * tile data.
+ * A TileLayer is a specialized MapLayer, used for tracking two dimensional tile data.
  */
-public class TileLayer extends MapLayer
-{
+public class TileLayer extends MapLayer {
     protected Tile[][] map;
     protected HashMap<Object, Properties> tileInstanceProperties = new HashMap<Object, Properties>();
 
-    public Properties getTileInstancePropertiesAt(int x, int y) {
+    public Properties getTileInstancePropertiesAt(final int x, final int y) {
         if (!bounds.contains(x, y)) {
             return null;
         }
-        Object key = new Point(x, y);
+        final Object key = new Point(x, y);
         return tileInstanceProperties.get(key);
     }
 
-    public void setTileInstancePropertiesAt(int x, int y, Properties tip) {
+    public void setTileInstancePropertiesAt(final int x, final int y, final Properties tip) {
         if (bounds.contains(x, y)) {
-            Object key = new Point(x, y);
+            final Object key = new Point(x, y);
             tileInstanceProperties.put(key, tip);
         }
     }
@@ -66,79 +64,87 @@ public class TileLayer extends MapLayer
 
     /**
      * Construct a TileLayer from the given width and height.
-     *
-     * @param w width in tiles
-     * @param h height in tiles
+     * 
+     * @param w
+     *            width in tiles
+     * @param h
+     *            height in tiles
      */
-    public TileLayer(int w, int h) {
+    public TileLayer(final int w, final int h) {
         super(w, h);
     }
 
     /**
      * Create a tile layer using the given bounds.
-     *
-     * @param r the bounds of the tile layer.
+     * 
+     * @param r
+     *            the bounds of the tile layer.
      */
-    public TileLayer(Rectangle r) {
+    public TileLayer(final Rectangle r) {
         super(r);
     }
 
     /**
-     * @param m the map this layer is part of
+     * @param m
+     *            the map this layer is part of
      */
-    TileLayer(Map m) {
+    TileLayer(final Map m) {
         super(m);
     }
 
     /**
-     * @param m the map this layer is part of
-     * @param w width in tiles
-     * @param h height in tiles
+     * @param m
+     *            the map this layer is part of
+     * @param w
+     *            width in tiles
+     * @param h
+     *            height in tiles
      */
-    public TileLayer(Map m, int w, int h) {
+    public TileLayer(final Map m, final int w, final int h) {
         super(w, h);
         setMap(m);
     }
 
     /**
      * Rotates the layer by the given Euler angle.
-     *
-     * @param angle The Euler angle (0-360) to rotate the layer array data by.
+     * 
+     * @param angle
+     *            The Euler angle (0-360) to rotate the layer array data by.
      * @see MapLayer#rotate(int)
      */
     @Override
-    public void rotate(int angle) {
+    public void rotate(final int angle) {
         Tile[][] trans;
         int xtrans = 0, ytrans = 0;
 
         switch (angle) {
-            case ROTATE_90:
-                trans = new Tile[bounds.width][bounds.height];
-                xtrans = bounds.height - 1;
-                break;
-            case ROTATE_180:
-                trans = new Tile[bounds.height][bounds.width];
-                xtrans = bounds.width - 1;
-                ytrans = bounds.height - 1;
-                break;
-            case ROTATE_270:
-                trans = new Tile[bounds.width][bounds.height];
-                ytrans = bounds.width - 1;
-                break;
-            default:
-                System.out.println("Unsupported rotation (" + angle + ")");
-                return;
+        case ROTATE_90:
+            trans = new Tile[bounds.width][bounds.height];
+            xtrans = bounds.height - 1;
+            break;
+        case ROTATE_180:
+            trans = new Tile[bounds.height][bounds.width];
+            xtrans = bounds.width - 1;
+            ytrans = bounds.height - 1;
+            break;
+        case ROTATE_270:
+            trans = new Tile[bounds.width][bounds.height];
+            ytrans = bounds.width - 1;
+            break;
+        default:
+            System.out.println("Unsupported rotation (" + angle + ")");
+            return;
         }
 
-        double ra = Math.toRadians(angle);
-        int cos_angle = (int)Math.round(Math.cos(ra));
-        int sin_angle = (int)Math.round(Math.sin(ra));
+        final double ra = Math.toRadians(angle);
+        final int cos_angle = (int) Math.round(Math.cos(ra));
+        final int sin_angle = (int) Math.round(Math.sin(ra));
 
         for (int y = 0; y < bounds.height; y++) {
             for (int x = 0; x < bounds.width; x++) {
-                int xrot = x * cos_angle - y * sin_angle;
-                int yrot = x * sin_angle + y * cos_angle;
-                trans[yrot + ytrans][xrot + xtrans] = getTileAt(x+bounds.x, y+bounds.y);
+                final int xrot = x * cos_angle - y * sin_angle;
+                final int yrot = x * sin_angle + y * cos_angle;
+                trans[yrot + ytrans][xrot + xtrans] = getTileAt(x + bounds.x, y + bounds.y);
             }
         }
 
@@ -148,17 +154,16 @@ public class TileLayer extends MapLayer
     }
 
     /**
-     * Performs a mirroring function on the layer data. Two orientations are
-     * allowed: vertical and horizontal.
-     *
-     * Example: <code>layer.mirror(MapLayer.MIRROR_VERTICAL);</code> will
-     * mirror the layer data around a horizontal axis.
-     *
-     * @param dir the axial orientation to mirror around
+     * Performs a mirroring function on the layer data. Two orientations are allowed: vertical and horizontal.
+     * 
+     * Example: <code>layer.mirror(MapLayer.MIRROR_VERTICAL);</code> will mirror the layer data around a horizontal axis.
+     * 
+     * @param dir
+     *            the axial orientation to mirror around
      */
     @Override
-    public void mirror(int dir) {
-        Tile[][] mirror = new Tile[bounds.height][bounds.width];
+    public void mirror(final int dir) {
+        final Tile[][] mirror = new Tile[bounds.height][bounds.width];
         for (int y = 0; y < bounds.height; y++) {
             for (int x = 0; x < bounds.width; x++) {
                 if (dir == MIRROR_VERTICAL) {
@@ -173,12 +178,12 @@ public class TileLayer extends MapLayer
 
     /**
      * Checks to see if the given Tile is used anywhere in the layer.
-     *
-     * @param t a Tile object to check for
-     * @return <code>true</code> if the Tile is used at least once,
-     *         <code>false</code> otherwise.
+     * 
+     * @param t
+     *            a Tile object to check for
+     * @return <code>true</code> if the Tile is used at least once, <code>false</code> otherwise.
      */
-    public boolean isUsed(Tile t) {
+    public boolean isUsed(final Tile t) {
         for (int y = 0; y < bounds.height; y++) {
             for (int x = 0; x < bounds.width; x++) {
                 if (map[y][x] == t) {
@@ -203,15 +208,15 @@ public class TileLayer extends MapLayer
     }
 
     /**
-     * Sets the bounds (in tiles) to the specified Rectangle. <b>Caution:</b>
-     * this causes a reallocation of the data array, and all previous data is
+     * Sets the bounds (in tiles) to the specified Rectangle. <b>Caution:</b> this causes a reallocation of the data array, and all previous data is
      * lost.
-     *
-     * @param bounds new new bounds of this tile layer (in tiles)
+     * 
+     * @param bounds
+     *            new new bounds of this tile layer (in tiles)
      * @see MapLayer#setBounds
      */
     @Override
-    protected void setBounds(Rectangle bounds) {
+    protected void setBounds(final Rectangle bounds) {
         super.setBounds(bounds);
         map = new Tile[bounds.height][bounds.width];
 
@@ -223,23 +228,23 @@ public class TileLayer extends MapLayer
     }
 
     /**
-     * Creates a diff of the two layers, <code>ml</code> is considered the
-     * significant difference.
-     *
+     * Creates a diff of the two layers, <code>ml</code> is considered the significant difference.
+     * 
      * @param ml
-     * @return A new MapLayer that represents the difference between this
-     *         layer, and the argument, or <b>null</b> if no difference exists.
+     * @return A new MapLayer that represents the difference between this layer, and the argument, or <b>null</b> if no difference exists.
      */
     @Override
-    public MapLayer createDiff(MapLayer ml) {
-        if (ml == null) { return null; }
+    public MapLayer createDiff(final MapLayer ml) {
+        if (ml == null) {
+            return null;
+        }
 
         if (ml instanceof TileLayer) {
             Rectangle r = null;
 
             for (int y = bounds.y; y < bounds.height + bounds.y; y++) {
                 for (int x = bounds.x; x < bounds.width + bounds.x; x++) {
-                    if (((TileLayer)ml).getTileAt(x, y) != getTileAt(x, y)) {
+                    if (((TileLayer) ml).getTileAt(x, y) != getTileAt(x, y)) {
                         if (r != null) {
                             r.add(x, y);
                         } else {
@@ -250,8 +255,7 @@ public class TileLayer extends MapLayer
             }
 
             if (r != null) {
-                MapLayer diff = new TileLayer(
-                        new Rectangle(r.x, r.y, r.width + 1, r.height + 1));
+                final MapLayer diff = new TileLayer(new Rectangle(r.x, r.y, r.width + 1, r.height + 1));
                 diff.copyFrom(ml);
                 return diff;
             } else {
@@ -263,12 +267,12 @@ public class TileLayer extends MapLayer
     }
 
     /**
-     * Removes any occurences of the given tile from this map layer. If layer
-     * is locked, an exception is thrown.
-     *
-     * @param tile the Tile to be removed
+     * Removes any occurences of the given tile from this map layer. If layer is locked, an exception is thrown.
+     * 
+     * @param tile
+     *            the Tile to be removed
      */
-    public void removeTile(Tile tile) {
+    public void removeTile(final Tile tile) {
         for (int y = 0; y < bounds.height; y++) {
             for (int x = 0; x < bounds.width; x++) {
                 if (map[y][x] == tile) {
@@ -279,14 +283,16 @@ public class TileLayer extends MapLayer
     }
 
     /**
-     * Sets the tile at the specified position. Does nothing if (tx, ty) falls
-     * outside of this layer.
-     *
-     * @param tx x position of tile
-     * @param ty y position of tile
-     * @param ti the tile object to place
+     * Sets the tile at the specified position. Does nothing if (tx, ty) falls outside of this layer.
+     * 
+     * @param tx
+     *            x position of tile
+     * @param ty
+     *            y position of tile
+     * @param ti
+     *            the tile object to place
      */
-    public void setTileAt(int tx, int ty, Tile ti) {
+    public void setTileAt(final int tx, final int ty, final Tile ti) {
         if (bounds.contains(tx, ty)) {
             map[ty - bounds.y][tx - bounds.x] = ti;
         }
@@ -294,26 +300,33 @@ public class TileLayer extends MapLayer
 
     /**
      * Returns the tile at the specified position.
-     *
-     * @param tx Tile-space x coordinate
-     * @param ty Tile-space y coordinate
-     * @return tile at position (tx, ty) or <code>null</code> when (tx, ty) is
-     *         outside this layer
+     * 
+     * @param tx
+     *            Tile-space x coordinate
+     * @param ty
+     *            Tile-space y coordinate
+     * @return tile at position (tx, ty) or <code>null</code> when (tx, ty) is outside this layer
      */
-    public Tile getTileAt(int tx, int ty) {
-        return (bounds.contains(tx, ty)) ?
-                map[ty - bounds.y][tx - bounds.x] : null;
+    public Tile getTileAt(final int tx, final int ty) {
+        return (bounds.contains(tx, ty)) ? map[ty - bounds.y][tx - bounds.x] : null;
+    }
+
+    public Tile getTile(final int row, final int col) {
+        if (map.length <= row || map[0].length <= col) {
+            return null;
+        } else {
+            return map[row][col];
+        }
     }
 
     /**
-     * Returns the first occurrence (using top down, left to right search) of
-     * the given tile.
-     *
-     * @param t the {@link Tile} to look for
-     * @return A java.awt.Point instance of the first instance of t, or
-     *         <code>null</code> if it is not found
+     * Returns the first occurrence (using top down, left to right search) of the given tile.
+     * 
+     * @param t
+     *            the {@link Tile} to look for
+     * @return A java.awt.Point instance of the first instance of t, or <code>null</code> if it is not found
      */
-    public Point locationOf(Tile t) {
+    public Point locationOf(final Tile t) {
         for (int y = bounds.y; y < bounds.height + bounds.y; y++) {
             for (int x = bounds.x; x < bounds.width + bounds.x; x++) {
                 if (getTileAt(x, y) == t) {
@@ -325,16 +338,17 @@ public class TileLayer extends MapLayer
     }
 
     /**
-     * Replaces all occurrences of the Tile <code>find</code> with the Tile
-     * <code>replace</code> in the entire layer
-     *
-     * @param find    the tile to replace
-     * @param replace the replacement tile
+     * Replaces all occurrences of the Tile <code>find</code> with the Tile <code>replace</code> in the entire layer
+     * 
+     * @param find
+     *            the tile to replace
+     * @param replace
+     *            the replacement tile
      */
-    public void replaceTile(Tile find, Tile replace) {
+    public void replaceTile(final Tile find, final Tile replace) {
         for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
             for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
-                if(getTileAt(x,y) == find) {
+                if (getTileAt(x, y) == find) {
                     setTileAt(x, y, replace);
                 }
             }
@@ -342,10 +356,10 @@ public class TileLayer extends MapLayer
     }
 
     @Override
-    public void mergeOnto(MapLayer other) {
+    public void mergeOnto(final MapLayer other) {
         for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
             for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
-                Tile tile = getTileAt(x, y);
+                final Tile tile = getTileAt(x, y);
                 if (tile != null) {
                     ((TileLayer) other).setTileAt(x, y, tile);
                 }
@@ -355,18 +369,18 @@ public class TileLayer extends MapLayer
 
     /**
      * Like mergeOnto, but will only copy the area specified.
-     *
+     * 
      * @see TileLayer#mergeOnto(MapLayer)
      * @param other
      * @param mask
      */
     @Override
-    public void maskedMergeOnto(MapLayer other, Area mask) {
-        Rectangle boundBox = mask.getBounds();
+    public void maskedMergeOnto(final MapLayer other, final Area mask) {
+        final Rectangle boundBox = mask.getBounds();
 
         for (int y = boundBox.y; y < boundBox.y + boundBox.height; y++) {
             for (int x = boundBox.x; x < boundBox.x + boundBox.width; x++) {
-                Tile tile = ((TileLayer) other).getTileAt(x, y);
+                final Tile tile = ((TileLayer) other).getTileAt(x, y);
                 if (mask.contains(x, y) && tile != null) {
                     setTileAt(x, y, tile);
                 }
@@ -375,14 +389,13 @@ public class TileLayer extends MapLayer
     }
 
     /**
-     * Copy data from another layer onto this layer. Unlike mergeOnto,
-     * copyFrom() copies the empty cells as well.
-     *
+     * Copy data from another layer onto this layer. Unlike mergeOnto, copyFrom() copies the empty cells as well.
+     * 
      * @see MapLayer#mergeOnto
      * @param other
      */
     @Override
-    public void copyFrom(MapLayer other) {
+    public void copyFrom(final MapLayer other) {
         for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
             for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
                 setTileAt(x, y, ((TileLayer) other).getTileAt(x, y));
@@ -392,18 +405,18 @@ public class TileLayer extends MapLayer
 
     /**
      * Like copyFrom, but will only copy the area specified.
-     *
+     * 
      * @see TileLayer#copyFrom(MapLayer)
      * @param other
      * @param mask
      */
     @Override
-    public void maskedCopyFrom(MapLayer other, Area mask) {
-        Rectangle boundBox = mask.getBounds();
+    public void maskedCopyFrom(final MapLayer other, final Area mask) {
+        final Rectangle boundBox = mask.getBounds();
 
         for (int y = boundBox.y; y < boundBox.y + boundBox.height; y++) {
             for (int x = boundBox.x; x < boundBox.x + boundBox.width; x++) {
-                if (mask.contains(x,y)) {
+                if (mask.contains(x, y)) {
                     setTileAt(x, y, ((TileLayer) other).getTileAt(x, y));
                 }
             }
@@ -412,13 +425,14 @@ public class TileLayer extends MapLayer
 
     /**
      * Unlike mergeOnto, copyTo includes the null tile when merging.
-     *
+     * 
      * @see MapLayer#copyFrom
      * @see MapLayer#mergeOnto
-     * @param other the layer to copy this layer to
+     * @param other
+     *            the layer to copy this layer to
      */
     @Override
-    public void copyTo(MapLayer other) {
+    public void copyTo(final MapLayer other) {
         for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
             for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
                 ((TileLayer) other).setTileAt(x, y, getTileAt(x, y));
@@ -428,14 +442,14 @@ public class TileLayer extends MapLayer
 
     /**
      * Creates a copy of this layer.
-     *
+     * 
      * @see Object#clone
      * @return a clone of this layer, as complete as possible
      * @exception CloneNotSupportedException
      */
     @Override
     public Object clone() throws CloneNotSupportedException {
-        TileLayer clone = (TileLayer) super.clone();
+        final TileLayer clone = (TileLayer) super.clone();
 
         // Clone the layer data
         clone.map = new Tile[map.length][];
@@ -446,10 +460,10 @@ public class TileLayer extends MapLayer
             System.arraycopy(map[i], 0, clone.map[i], 0, map[i].length);
 
             for (int j = 0; j < map[i].length; j++) {
-                Properties p = getTileInstancePropertiesAt(i, j);
+                final Properties p = getTileInstancePropertiesAt(i, j);
 
                 if (p != null) {
-                    Integer key = i + j * bounds.width;
+                    final Integer key = i + j * bounds.width;
                     clone.tileInstanceProperties.put(key, (Properties) p.clone());
                 }
             }
@@ -459,24 +473,28 @@ public class TileLayer extends MapLayer
     }
 
     /**
-     * @param width  the new width of the layer
-     * @param height the new height of the layer
-     * @param dx     the shift in x direction
-     * @param dy     the shift in y direction
+     * @param width
+     *            the new width of the layer
+     * @param height
+     *            the new height of the layer
+     * @param dx
+     *            the shift in x direction
+     * @param dy
+     *            the shift in y direction
      */
     @Override
-    public void resize(int width, int height, int dx, int dy) {
-        Tile[][] newMap = new Tile[height][width];
-        HashMap<Object, Properties> newTileInstanceProperties = new HashMap<Object, Properties>();
+    public void resize(final int width, final int height, final int dx, final int dy) {
+        final Tile[][] newMap = new Tile[height][width];
+        final HashMap<Object, Properties> newTileInstanceProperties = new HashMap<Object, Properties>();
 
-        int maxX = Math.min(width, bounds.width + dx);
-        int maxY = Math.min(height, bounds.height + dy);
+        final int maxX = Math.min(width, bounds.width + dx);
+        final int maxY = Math.min(height, bounds.height + dy);
 
         for (int x = Math.max(0, dx); x < maxX; x++) {
             for (int y = Math.max(0, dy); y < maxY; y++) {
                 newMap[y][x] = getTileAt(x - dx, y - dy);
 
-                Properties tip = getTileInstancePropertiesAt(x - dx, y - dy);
+                final Properties tip = getTileInstancePropertiesAt(x - dx, y - dy);
                 if (tip != null) {
                     newTileInstanceProperties.put(new Point(x, y), tip);
                 }

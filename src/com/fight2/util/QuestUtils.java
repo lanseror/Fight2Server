@@ -23,13 +23,13 @@ public class QuestUtils {
     public static void init() {
         final tiled.core.Map map = TmxUtils.getMap();
         final TileLayer tmxLayer = (TileLayer) map.getLayers().get(0);
-        for (int y = 0; y < tmxLayer.getHeight(); y++) {
-            for (int x = 0; x < tmxLayer.getWidth(); x++) {
-                final Tile tile = tmxLayer.getTileAt(x, y);
-                if (tile != null && tile.getId() == 4) {
+        for (int row = 0; row < tmxLayer.getHeight(); row++) {
+            for (int col = 0; col < tmxLayer.getWidth(); col++) {
+                final Tile tile = tmxLayer.getTile(row, col);
+                if (tile == null) {
                     final QuestTile questTile = new QuestTile();
-                    questTile.setRow(y);
-                    questTile.setCol(x);
+                    questTile.setRow(row);
+                    questTile.setCol(col);
                     ROAD_TILES.add(questTile);
                 }
             }

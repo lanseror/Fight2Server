@@ -12,7 +12,7 @@ public class TmxUtils {
 
     private static Map loadMap() {
         try {
-            final File mapFile = getFileFromResources("my.tmx");
+            final File mapFile = getFileFromResources("fight2.tmx");
             final Map map = new TMXMapReader().readMap(mapFile.getAbsolutePath());
             return map;
         } catch (final URISyntaxException e) {
