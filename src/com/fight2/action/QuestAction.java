@@ -142,6 +142,7 @@ public class QuestAction extends BaseAction {
         card.setAvatar(avatar);
         card.setHp(cardTemplate.getHp());
         card.setImage(image);
+        card.setRace(cardTemplate.getRace());
         card.setName(cardTemplate.getName());
         card.setStar(cardTemplate.getStar());
         card.setCardTemplate(cardTemplate);

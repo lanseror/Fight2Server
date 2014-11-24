@@ -216,6 +216,7 @@ public class GuildAction extends BaseAction {
             cardVo.setStar(template.getStar());
             final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, 1, template);
             cardVo.setImage(imageObj.getUrl());
+            cardVo.setRace(template.getRace());
             cardVo.setAmount(count);
             cardVos.add(cardVo);
         }

@@ -25,6 +25,7 @@ import com.fight2.model.BaseEntity;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardImage;
+import com.fight2.model.CardTemplate;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
@@ -132,9 +133,11 @@ public class UserAction extends BaseAction {
         final List<Card> nonPartyCards = Lists.newArrayList();
         for (final Card cardpackCard : cardpackCards) {
             if (!partyCards.contains(cardpackCard)) {
+                final CardTemplate cardTemplate=cardpackCard.getCardTemplate();
                 final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, cardpackCard.getTier(),
-                        cardpackCard.getCardTemplate());
+                        cardTemplate );
                 cardpackCard.setImage(imageObj.getUrl());
+                cardpackCard.setRace(cardTemplate.getRace());
                 nonPartyCards.add(cardpackCard);
             }
         }

@@ -37,7 +37,7 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
     public void onApplicationEvent(final ContextRefreshedEvent event) {
         QuestUtils.init();
         final Runnable refreshTreasureSchedule = createRefreshTreasureSchedule();
-        taskScheduler.scheduleAtFixedRate(refreshTreasureSchedule, TimeUnit.MINUTES.toMillis(1));
+        taskScheduler.scheduleAtFixedRate(refreshTreasureSchedule, TimeUnit.MINUTES.toMillis(5));
         final SessionFactory sessionFactory = arenaDao.getSessionFactory();
         HibernateUtils.openSession(sessionFactory);
         final List<Arena> arenas = arenaDao.getAliveArenas();

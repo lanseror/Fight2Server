@@ -5,6 +5,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import com.fight2.model.CardTemplate.Race;
+
 @Entity
 public class Card extends BaseEntity {
     private static final long serialVersionUID = 4701021880325329063L;
@@ -21,6 +23,7 @@ public class Card extends BaseEntity {
     private CardStatus status = CardStatus.InCardPack;
     private User user;
     private CardTemplate cardTemplate;
+    private Race race;
     private int amount; // Use to count cards in same card template.
 
     public Card() {
@@ -154,6 +157,15 @@ public class Card extends BaseEntity {
     }
 
     @Transient
+    public Race getRace() {
+        return race;
+    }
+
+    public void setRace(final Race race) {
+        this.race = race;
+    }
+
+    @Transient
     public int getAmount() {
         return amount;
     }
@@ -170,4 +182,5 @@ public class Card extends BaseEntity {
         InCardPack,
         InStoreroom;
     }
+
 }

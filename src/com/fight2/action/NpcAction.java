@@ -84,9 +84,10 @@ public class NpcAction extends BaseAction {
         final List<Card> nonPartyCards = Lists.newArrayList();
         for (final Card cardpackCard : cardpackCards) {
             if (!partyCards.contains(cardpackCard)) {
-                final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, cardpackCard.getTier(),
-                        cardpackCard.getCardTemplate());
+                final CardTemplate template = cardpackCard.getCardTemplate();
+                final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, cardpackCard.getTier(), template);
                 cardpackCard.setImage(imageObj.getUrl());
+                cardpackCard.setRace(template.getRace());
                 nonPartyCards.add(cardpackCard);
             }
         }

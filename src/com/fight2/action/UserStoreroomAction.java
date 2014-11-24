@@ -44,8 +44,10 @@ public class UserStoreroomAction extends BaseAction {
         userStoreroom = userStoreroomDao.get(id);
         final List<Card> cards = cardDao.listByUserAndStatus(userStoreroom.getUser(), CardStatus.InStoreroom);
         for (final Card card : cards) {
-            final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), card.getCardTemplate());
+            final CardTemplate template = card.getCardTemplate();
+            final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), template);
             card.setImage(imageObj.getUrl());
+            card.setRace(template.getRace());
         }
         userStoreroom.setCards(cards);
         return SUCCESS;
@@ -80,6 +82,7 @@ public class UserStoreroomAction extends BaseAction {
             cardVo.setStar(template.getStar());
             final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, 1, template);
             cardVo.setImage(imageObj.getUrl());
+            cardVo.setRace(template.getRace());
             cardVo.setAmount(count);
             cardVos.add(cardVo);
         }

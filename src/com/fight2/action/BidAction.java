@@ -19,6 +19,7 @@ import com.fight2.model.Bid.BidItemType;
 import com.fight2.model.Bid.BidStatus;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
+import com.fight2.model.CardTemplate;
 import com.fight2.model.Guild;
 import com.fight2.model.User;
 import com.fight2.util.DateUtils;
@@ -63,8 +64,10 @@ public class BidAction extends BaseAction {
             if (itemType == BidItemType.Card) {
                 final Card card = bid.getGuildCard().getCard();
                 final Card cardVo = new Card(card);
-                final CardImage thumbObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), card.getCardTemplate());
+                final CardTemplate cardTemplate = card.getCardTemplate();
+                final CardImage thumbObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), cardTemplate);
                 cardVo.setImage(thumbObj.getUrl());
+                cardVo.setRace(cardTemplate.getRace());
                 bidVo.setCard(cardVo);
             }
             bidVo.setType(itemType);

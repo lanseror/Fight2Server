@@ -59,7 +59,7 @@ public class QuestUtils {
         final List<QuestTile> questTiles = questTreasureData.getQuestTiles();
         questTiles.clear();
         final Set<Integer> randomNumbers = Sets.newHashSet();
-        while (randomNumbers.size() < 5) {
+        while (randomNumbers.size() < 15) {
             final int randomNumber = RANDOM.nextInt(ROAD_TILES.size());
             randomNumbers.add(randomNumber);
         }

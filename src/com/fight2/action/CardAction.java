@@ -59,6 +59,7 @@ public class CardAction extends BaseAction {
         card.setAvatar(avatar);
         card.setHp(cardTemplate.getHp());
         card.setImage(image);
+        card.setRace(cardTemplate.getRace());
         card.setName(cardTemplate.getName());
         card.setStar(cardTemplate.getStar());
         card.setCardTemplate(cardTemplate);
@@ -76,6 +77,7 @@ public class CardAction extends BaseAction {
         cardVo.setAvatar(avatar);
         cardVo.setHp(card.getHp());
         cardVo.setImage(image);
+        cardVo.setRace(cardTemplate.getRace());
         cardVo.setName(card.getName());
         cardVo.setSkill(card.getSkill());
         cardVo.setStar(card.getStar());
@@ -129,6 +131,7 @@ public class CardAction extends BaseAction {
             final CardTemplate cardTemplateVo = new CardTemplate();
             cardTemplateVo.setId(cardTemplate.getId());
             voCard.setCardTemplate(cardTemplateVo);
+            voCard.setRace(cardTemplate.getRace());
             voCards.add(voCard);
         }
 

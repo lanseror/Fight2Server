@@ -29,6 +29,10 @@
         <td><@s.textfield size="80" name="cardTemplate.name" cssClass="required max-length-80" /></td>
     </tr>
     <tr>
+        <td><b>种族</b></td>
+        <td><@s.select name="cardTemplate.race" list=r"#{'Human':'人族', 'Angel':'天使', 'Elf':'德鲁伊', 'Devil':'恶魔'}" value="cardTemplate.race"  /></td>
+    </tr>
+    <tr>
         <td><b>头像</b></td>
         <td>
             <table border="1" cellpadding="0" cellspacing="0" align="center">

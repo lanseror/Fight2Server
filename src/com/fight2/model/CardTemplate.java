@@ -21,6 +21,7 @@ public class CardTemplate extends BaseEntity {
     private int probability; // Summon probability, unit is 1/10000.
     private Skill skill;
     private int skillLevel;
+    private Race race;
     private int cardVersion;
 
     public static long getSerialversionuid() {
@@ -127,6 +128,14 @@ public class CardTemplate extends BaseEntity {
         this.skillLevel = skillLevel;
     }
 
+    public Race getRace() {
+        return race;
+    }
+
+    public void setRace(final Race race) {
+        this.race = race;
+    }
+
     public int getCardVersion() {
         return cardVersion;
     }
@@ -135,4 +144,10 @@ public class CardTemplate extends BaseEntity {
         this.cardVersion = cardVersion;
     }
 
+    public static enum Race {
+        Human,
+        Angel,
+        Elf,
+        Devil;
+    }
 }

@@ -15,6 +15,7 @@ import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
+import com.fight2.model.CardTemplate;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
@@ -100,15 +101,15 @@ public class PartyAction extends BaseAction {
                 voPartyGrid.setGridNumber(partyGrid.getGridNumber());
                 final Card card = partyGrid.getCard();
                 if (card != null) {
-                    final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(),
-                            card.getCardTemplate());
-                    final CardImage imageObj = cardImageDao
-                            .getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), card.getCardTemplate());
+                    final CardTemplate cardTemplate = card.getCardTemplate();
+                    final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), cardTemplate);
+                    final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), cardTemplate);
                     final Card voCard = new Card();
                     voCard.setId(card.getId());
                     voCard.setAtk(card.getAtk());
                     voCard.setAvatar(avatarObj.getUrl());
                     voCard.setImage(imageObj.getUrl());
+                    voCard.setRace(cardTemplate.getRace());
                     voCard.setHp(card.getHp());
                     voCard.setStar(card.getStar());
                     voCard.setTier(card.getTier());
