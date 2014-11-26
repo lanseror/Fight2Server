@@ -159,6 +159,7 @@ public class QuestAction extends BaseAction {
         cardVo.setName(card.getName());
         cardVo.setSkill(card.getSkill());
         cardVo.setStar(card.getStar());
+        cardVo.setRace(card.getRace());
         final CardTemplate cardTemplateVo = new CardTemplate();
         cardTemplateVo.setId(cardTemplate.getId());
         cardVo.setCardTemplate(cardTemplateVo);

@@ -19,6 +19,7 @@ import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserQuestInfoDao;
 import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.ArenaRanking;
 import com.fight2.model.BaseEntity;
@@ -31,6 +32,7 @@ import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
+import com.fight2.model.UserQuestInfo;
 import com.fight2.model.UserStoreroom;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -57,6 +59,8 @@ public class UserAction extends BaseAction {
     private CardDao cardDao;
     @Autowired
     private ArenaRankingDao arenaRankingDao;
+    @Autowired
+    private UserQuestInfoDao userQuestInfoDao;
     private User user;
     private List<User> datas;
     private int id;
@@ -133,9 +137,8 @@ public class UserAction extends BaseAction {
         final List<Card> nonPartyCards = Lists.newArrayList();
         for (final Card cardpackCard : cardpackCards) {
             if (!partyCards.contains(cardpackCard)) {
-                final CardTemplate cardTemplate=cardpackCard.getCardTemplate();
-                final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, cardpackCard.getTier(),
-                        cardTemplate );
+                final CardTemplate cardTemplate = cardpackCard.getCardTemplate();
+                final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, cardpackCard.getTier(), cardTemplate);
                 cardpackCard.setImage(imageObj.getUrl());
                 cardpackCard.setRace(cardTemplate.getRace());
                 nonPartyCards.add(cardpackCard);
@@ -220,6 +223,10 @@ public class UserAction extends BaseAction {
         final UserStoreroom userStorRoom = user.getStoreroom();
         if (userStorRoom != null) {
             userStoreroomDao.delete(userStorRoom);
+        }
+        final UserQuestInfo userQuestInfo = user.getQuestInfo();
+        if (userQuestInfo != null) {
+            userQuestInfoDao.delete(userQuestInfo);
         }
         userDao.delete(user);
         return SUCCESS;
@@ -368,6 +375,14 @@ public class UserAction extends BaseAction {
 
     public void setArenaRankingDao(final ArenaRankingDao arenaRankingDao) {
         this.arenaRankingDao = arenaRankingDao;
+    }
+
+    public UserQuestInfoDao getUserQuestInfoDao() {
+        return userQuestInfoDao;
+    }
+
+    public void setUserQuestInfoDao(final UserQuestInfoDao userQuestInfoDao) {
+        this.userQuestInfoDao = userQuestInfoDao;
     }
 
     public String getJsonMsg() {

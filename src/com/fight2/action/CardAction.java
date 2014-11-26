@@ -115,19 +115,22 @@ public class CardAction extends BaseAction {
         final List<Card> cards = cardDao.listByUserAndStatus(user, CardStatus.InCardPack);
         final List<Card> voCards = Lists.newArrayList();
         for (final Card card : cards) {
-            final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), card.getCardTemplate());
+            final CardTemplate cardTemplate = card.getCardTemplate();
+            final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), cardTemplate);
             final String avatar = avatarObj.getUrl();
-            final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), card.getCardTemplate());
+            final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), cardTemplate);
             final String image = imageObj.getUrl();
             final Card voCard = new Card();
             voCard.setId(card.getId());
+            voCard.setStar(card.getStar());
+            voCard.setLevel(card.getLevel());
+            voCard.setTier(card.getTier());
             voCard.setAtk(card.getAtk());
             voCard.setAvatar(avatar);
             voCard.setHp(card.getHp());
             voCard.setImage(image);
             voCard.setName(card.getName());
             voCard.setSkill(card.getSkill());
-            final CardTemplate cardTemplate = card.getCardTemplate();
             final CardTemplate cardTemplateVo = new CardTemplate();
             cardTemplateVo.setId(cardTemplate.getId());
             voCard.setCardTemplate(cardTemplateVo);

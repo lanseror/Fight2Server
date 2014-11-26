@@ -33,8 +33,8 @@
             <a href="<@s.url namespace="/user" action="disable"><@s.param name="id" value="${id}" /></@s.url>">停用</a>
         </#if>&nbsp;&nbsp;|&nbsp;&nbsp;
          <a href="<@s.url namespace="/user" action="parties"><@s.param name="id" value="${id}" /></@s.url>">玩家队伍</a>
-         <#if storeroom?exists>
          &nbsp;&nbsp;|&nbsp;&nbsp;
+         <#if storeroom?exists>
          <a href="<@s.url namespace="/user-storeroom" action="view"><@s.param name="id" value="${storeroom.id}" /></@s.url>">玩家仓库</a>
          &nbsp;&nbsp;|&nbsp;&nbsp;
          </#if>
