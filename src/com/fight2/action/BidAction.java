@@ -65,6 +65,8 @@ public class BidAction extends BaseAction {
                 final Card card = bid.getGuildCard().getCard();
                 final Card cardVo = new Card(card);
                 final CardTemplate cardTemplate = card.getCardTemplate();
+                final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), cardTemplate);
+                cardVo.setAvatar(avatarObj.getUrl());
                 final CardImage thumbObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), cardTemplate);
                 cardVo.setImage(thumbObj.getUrl());
                 cardVo.setRace(cardTemplate.getRace());
@@ -112,21 +114,6 @@ public class BidAction extends BaseAction {
         return SUCCESS;
     }
 
-    @Action(value = "upgrade", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
-    public String upgrade() {
-        final List<Bid> bids = bidDao.list();
-        for (final Bid bid : bids) {
-            final Date now = new Date();
-            bid.setStartDate(now);
-            bid.setEndDate(org.apache.commons.lang3.time.DateUtils.addMinutes(now, 5));
-            bidDao.update(bid);
-        }
-
-        final Map<String, Integer> response = Maps.newHashMap();
-        response.put("status", 0);
-        jsonMsg = new Gson().toJson(response);
-        return SUCCESS;
-    }
 
     @Action(value = "bid", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String bid() {

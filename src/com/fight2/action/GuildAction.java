@@ -214,6 +214,8 @@ public class GuildAction extends BaseAction {
             cardVo.setAtk(template.getAtk());
             cardVo.setName(template.getName());
             cardVo.setStar(template.getStar());
+            final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, 1, template);
+            cardVo.setAvatar(avatarObj.getUrl());
             final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, 1, template);
             cardVo.setImage(imageObj.getUrl());
             cardVo.setRace(template.getRace());
