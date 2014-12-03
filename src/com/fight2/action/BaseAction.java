@@ -9,6 +9,7 @@ import com.opensymphony.xwork2.ActionSupport;
 public class BaseAction extends ActionSupport {
     private static final long serialVersionUID = -1813468590478293643L;
     protected static final String LOGIN_USER = "LoginUser";
+    protected String jsonMsg;
 
     protected boolean isUserLogged() {
         final Map<String, Object> session = getSession();
@@ -27,4 +28,17 @@ public class BaseAction extends ActionSupport {
         final User sessionUser = (User) this.getSession().get(LOGIN_USER);
         return sessionUser;
     }
+
+    public String getJsonMsg() {
+        return jsonMsg;
+    }
+
+    public void setJsonMsg(final String jsonMsg) {
+        this.jsonMsg = jsonMsg;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
+
 }

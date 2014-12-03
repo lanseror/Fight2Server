@@ -18,6 +18,8 @@ public class Card extends BaseEntity {
     private int tier = 1;// Evolution tier
     private int hp;
     private int atk;// Attack value;
+    private int exp;
+    private int baseExp;
     private String skill;
     private int cardVersion;
     private CardStatus status = CardStatus.InCardPack;
@@ -110,6 +112,22 @@ public class Card extends BaseEntity {
 
     public void setAtk(final int atk) {
         this.atk = atk;
+    }
+
+    public int getExp() {
+        return exp;
+    }
+
+    public void setExp(final int exp) {
+        this.exp = exp;
+    }
+
+    public int getBaseExp() {
+        return baseExp;
+    }
+
+    public void setBaseExp(final int baseExp) {
+        this.baseExp = baseExp;
     }
 
     public String getSkill() {

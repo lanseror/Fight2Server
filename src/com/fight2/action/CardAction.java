@@ -16,6 +16,7 @@ import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.User;
+import com.fight2.util.CardUtils;
 import com.fight2.util.SummonHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -140,6 +141,39 @@ public class CardAction extends BaseAction {
 
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(voCards));
+        return SUCCESS;
+    }
+
+    @Action(value = "upgrade", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String upgrade() {
+        final User user = (User) this.getSession().get(LOGIN_USER);
+        @SuppressWarnings("unchecked")
+        final List<Double> cardIds = new Gson().fromJson(jsonMsg, List.class);
+
+        final List<Card> cards = Lists.newArrayList();
+        for (final Double cardIdDouble : cardIds) {
+            final int cardId = cardIdDouble.intValue();
+            final Card card = cardDao.get(cardId);
+            if (card.getUser().getId() != user.getId()) {
+                return INPUT;
+            }
+            cards.add(card);
+        }
+
+        final Card mainCard = cards.get(0);
+        cards.remove(0);// SupportCards left.
+
+        for (final Card supportCard : cards) {
+            final int baseExp = CardUtils.getBaseExp(supportCard);
+            final int exp = supportCard.getExp() / 2;
+            final int addExp = baseExp + exp;
+            mainCard.setExp(mainCard.getExp() + addExp);
+            cardDao.delete(supportCard);
+        }
+
+        CardUtils.getUpgradeLevel(mainCard);
+        cardDao.update(mainCard);
+
         return SUCCESS;
     }
 
