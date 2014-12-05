@@ -42,6 +42,8 @@ public class Card extends BaseEntity {
         this.tier = card.getTier();
         this.hp = card.getHp();
         this.atk = card.getAtk();
+        this.baseExp = card.getBaseExp();
+        this.exp = card.getExp();
         this.skill = card.getSkill();
         this.cardVersion = card.getCardVersion();
         this.status = card.getStatus();

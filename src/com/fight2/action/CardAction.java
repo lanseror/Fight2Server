@@ -127,6 +127,8 @@ public class CardAction extends BaseAction {
             voCard.setLevel(card.getLevel());
             voCard.setTier(card.getTier());
             voCard.setAtk(card.getAtk());
+            voCard.setBaseExp(card.getBaseExp());
+            voCard.setExp(card.getExp());
             voCard.setAvatar(avatar);
             voCard.setHp(card.getHp());
             voCard.setImage(image);
@@ -171,8 +173,15 @@ public class CardAction extends BaseAction {
             cardDao.delete(supportCard);
         }
 
-        CardUtils.getUpgradeLevel(mainCard);
+        CardUtils.upgrade(mainCard);
         cardDao.update(mainCard);
+
+        final Map<String, Object> jsonMap = Maps.newHashMap();
+        jsonMap.put("status", 0);
+        final Card card = new Card(mainCard);
+        jsonMap.put("card", card);
+
+        jsonMsg = new Gson().toJson(jsonMap);
 
         return SUCCESS;
     }
