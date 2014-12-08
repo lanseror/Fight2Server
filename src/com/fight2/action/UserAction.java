@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fight2.dao.ArenaRankingDao;
 import com.fight2.dao.CardDao;
 import com.fight2.dao.CardImageDao;
+import com.fight2.dao.CardTemplateDao;
 import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
@@ -61,6 +62,8 @@ public class UserAction extends BaseAction {
     private ArenaRankingDao arenaRankingDao;
     @Autowired
     private UserQuestInfoDao userQuestInfoDao;
+    @Autowired
+    private CardTemplateDao cardTemplateDao;
     private User user;
     private List<User> datas;
     private int id;
@@ -162,8 +165,20 @@ public class UserAction extends BaseAction {
         voUser.setInstallUUID(user.getInstallUUID());
         voUser.setUsername(user.getUsername());
 
-        final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(voUser));
+        final List<CardTemplate> cardTemplateVos = Lists.newArrayList();
+        final List<CardTemplate> cardTemplates = cardTemplateDao.list();
+        for (final CardTemplate cardTemplate : cardTemplates) {
+            final CardTemplate cardTemplateVo = new CardTemplate();
+            cardTemplateVo.setId(cardTemplate.getId());
+            cardTemplateVo.setAtk(cardTemplate.getAtk());
+            cardTemplateVo.setHp(cardTemplate.getHp());
+            cardTemplateVos.add(cardTemplateVo);
+        }
+        final Map<String, Object> response = Maps.newHashMap();
+        response.put("user", voUser);
+        response.put("cardTemplates", cardTemplateVos);
+
+        jsonMsg = new Gson().toJson(response);
         this.getSession().put(LOGIN_USER, user);
         return SUCCESS;
     }
@@ -385,10 +400,20 @@ public class UserAction extends BaseAction {
         this.userQuestInfoDao = userQuestInfoDao;
     }
 
+    public CardTemplateDao getCardTemplateDao() {
+        return cardTemplateDao;
+    }
+
+    public void setCardTemplateDao(final CardTemplateDao cardTemplateDao) {
+        this.cardTemplateDao = cardTemplateDao;
+    }
+
+    @Override
     public String getJsonMsg() {
         return jsonMsg;
     }
 
+    @Override
     public void setJsonMsg(final String jsonMsg) {
         this.jsonMsg = jsonMsg;
     }

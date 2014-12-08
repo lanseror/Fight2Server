@@ -24,6 +24,24 @@ public class CardTemplate extends BaseEntity {
     private Race race;
     private int cardVersion;
 
+    public CardTemplate() {
+        super();
+    }
+
+    public CardTemplate(final CardTemplate cardTemplate) {
+        super();
+        this.name = cardTemplate.getName();
+        this.star = cardTemplate.getStar();
+        this.level = cardTemplate.getLevel();
+        this.tier = cardTemplate.getTier();
+        this.hp = cardTemplate.getHp();
+        this.atk = cardTemplate.getAtk();
+        this.probability = cardTemplate.getProbability();
+        this.skillLevel = cardTemplate.getSkillLevel();
+        this.race = cardTemplate.getRace();
+        this.cardVersion = cardTemplate.getCardVersion();
+    }
+
     public static long getSerialversionuid() {
         return serialVersionUID;
     }
