@@ -186,6 +186,61 @@ public class CardAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "evo", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String evolution() {
+        final User user = (User) this.getSession().get(LOGIN_USER);
+        @SuppressWarnings("unchecked")
+        final List<Double> cardIds = new Gson().fromJson(jsonMsg, List.class);
+
+        final List<Card> cards = Lists.newArrayList();
+        for (final Double cardIdDouble : cardIds) {
+            final int cardId = cardIdDouble.intValue();
+            final Card card = cardDao.get(cardId);
+            if (card.getUser().getId() != user.getId()) {
+                return INPUT;
+            }
+            cards.add(card);
+        }
+
+        if (cards.size() != 2) {
+            return INPUT;
+        }
+
+        final Card card1 = cards.get(0);
+        final Card card2 = cards.get(1);
+        final Card mainCard = card1.getTier() > card2.getTier() ? card1 : card2;
+        final Card supportCard = card1.getTier() > card2.getTier() ? card2 : card1;
+
+        if (cards.size() != 2) {
+            return INPUT;
+        }
+        if (mainCard.getCardTemplate().getId() != supportCard.getCardTemplate().getId()) {
+            return INPUT;
+        }
+        if (CardUtils.getMaxEvoTier(mainCard) == mainCard.getTier() || CardUtils.getMaxEvoTier(supportCard) == supportCard.getTier()) {
+            return INPUT;
+        }
+
+        CardUtils.evolution(mainCard, supportCard);
+        cardDao.delete(supportCard);
+        cardDao.update(mainCard);
+
+        final Map<String, Object> jsonMap = Maps.newHashMap();
+        jsonMap.put("status", 0);
+        final Card card = new Card(mainCard);
+        final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), mainCard.getCardTemplate());
+        final String avatar = avatarObj.getUrl();
+        card.setAvatar(avatar);
+        final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), mainCard.getCardTemplate());
+        final String image = imageObj.getUrl();
+        card.setImage(image);
+        jsonMap.put("card", card);
+
+        jsonMsg = new Gson().toJson(jsonMap);
+
+        return SUCCESS;
+    }
+
     public CardDao getCardDao() {
         return cardDao;
     }
