@@ -34,6 +34,7 @@ public class Card extends BaseEntity {
 
     public Card(final Card card) {
         super();
+        this.id = card.getId();
         this.name = card.getName();
         this.avatar = card.getAvatar();
         this.image = card.getImage();

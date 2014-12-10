@@ -16,6 +16,7 @@ import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.User;
+import com.fight2.service.PartyService;
 import com.fight2.util.CardUtils;
 import com.fight2.util.SummonHelper;
 import com.google.common.collect.Lists;
@@ -32,6 +33,8 @@ public class CardAction extends BaseAction {
     private SummonHelper summonHelper;
     @Autowired
     private CardImageDao cardImageDao;
+    @Autowired
+    private PartyService partyService;
     @Autowired
     private UserDao userDao;
     private Card card;
@@ -208,30 +211,34 @@ public class CardAction extends BaseAction {
 
         final Card card1 = cards.get(0);
         final Card card2 = cards.get(1);
-        final Card mainCard = card1.getTier() > card2.getTier() ? card1 : card2;
-        final Card supportCard = card1.getTier() > card2.getTier() ? card2 : card1;
 
         if (cards.size() != 2) {
             return INPUT;
         }
-        if (mainCard.getCardTemplate().getId() != supportCard.getCardTemplate().getId()) {
+        if (card1.getCardTemplate().getId() != card2.getCardTemplate().getId()) {
             return INPUT;
         }
-        if (CardUtils.getMaxEvoTier(mainCard) == mainCard.getTier() || CardUtils.getMaxEvoTier(supportCard) == supportCard.getTier()) {
+        if (CardUtils.getMaxEvoTier(card1) == card1.getTier() || CardUtils.getMaxEvoTier(card2) == card2.getTier()) {
             return INPUT;
         }
 
-        CardUtils.evolution(mainCard, supportCard);
+        CardUtils.evolution(card1, card2);
+
+        final boolean isCard1InParty = partyService.isCardInParty(card1);
+        final Card mainCard = isCard1InParty ? card1 : card2;
+        final Card supportCard = isCard1InParty ? card2 : card1;
         cardDao.delete(supportCard);
         cardDao.update(mainCard);
+
+        partyService.refreshPartyHpAtk(user.getId());
 
         final Map<String, Object> jsonMap = Maps.newHashMap();
         jsonMap.put("status", 0);
         final Card card = new Card(mainCard);
-        final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), mainCard.getCardTemplate());
+        final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), card1.getCardTemplate());
         final String avatar = avatarObj.getUrl();
         card.setAvatar(avatar);
-        final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), mainCard.getCardTemplate());
+        final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), card1.getCardTemplate());
         final String image = imageObj.getUrl();
         card.setImage(image);
         jsonMap.put("card", card);
@@ -299,6 +306,14 @@ public class CardAction extends BaseAction {
 
     public void setUserDao(final UserDao userDao) {
         this.userDao = userDao;
+    }
+
+    public PartyService getPartyService() {
+        return partyService;
+    }
+
+    public void setPartyService(final PartyService partyService) {
+        this.partyService = partyService;
     }
 
 }

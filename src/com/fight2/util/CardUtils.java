@@ -77,5 +77,9 @@ public class CardUtils {
         mainCard.setHp(evoHp);
         mainCard.setAtk(evoAtk);
         mainCard.setTier(mainCard.getTier() + 1);
+
+        supportCard.setHp(evoHp);
+        supportCard.setAtk(evoAtk);
+        supportCard.setTier(mainCard.getTier());
     }
 }

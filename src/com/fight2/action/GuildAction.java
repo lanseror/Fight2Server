@@ -573,10 +573,12 @@ public class GuildAction extends BaseAction {
         this.guildDao = guildDao;
     }
 
+    @Override
     public String getJsonMsg() {
         return jsonMsg;
     }
 
+    @Override
     public void setJsonMsg(final String jsonMsg) {
         this.jsonMsg = jsonMsg;
     }

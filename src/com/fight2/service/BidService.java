@@ -75,8 +75,9 @@ public class BidService {
                 final Card card = guildCard.getCard();
                 card.setStatus(CardStatus.InStoreroom);
                 card.setUser(user);
-                cardDao.update(card);
+                bidDao.delete(bid);
                 guildCardDao.delete(guildCard);
+                cardDao.update(card);
             }
         }
 
