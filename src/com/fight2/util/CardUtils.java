@@ -74,12 +74,18 @@ public class CardUtils {
         final BigDecimal evoHpDecimal = BigDecimal.valueOf(evoHp);
         final int evoAtk = templateAtk.divide(templateHp, 6, RoundingMode.HALF_UP).multiply(evoHpDecimal).intValue();
 
+        final int evoBaseExp = (int) (getBaseExp(mainCard) * 0.75 + getBaseExp(supportCard) * 0.75 + mainCard.getExp() * 0.3 + supportCard.getExp() * 0.3);
+
         mainCard.setHp(evoHp);
         mainCard.setAtk(evoAtk);
         mainCard.setTier(mainCard.getTier() + 1);
+        mainCard.setBaseExp(evoBaseExp);
+        mainCard.setExp(0);
 
         supportCard.setHp(evoHp);
         supportCard.setAtk(evoAtk);
         supportCard.setTier(mainCard.getTier());
+        supportCard.setBaseExp(evoBaseExp);
+        supportCard.setExp(0);
     }
 }
