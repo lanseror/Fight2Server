@@ -104,16 +104,9 @@ public class PartyAction extends BaseAction {
                     final CardTemplate cardTemplate = card.getCardTemplate();
                     final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), cardTemplate);
                     final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), cardTemplate);
-                    final Card voCard = new Card();
-                    voCard.setId(card.getId());
-                    voCard.setAtk(card.getAtk());
+                    final Card voCard = new Card(card);
                     voCard.setAvatar(avatarObj.getUrl());
                     voCard.setImage(imageObj.getUrl());
-                    voCard.setRace(cardTemplate.getRace());
-                    voCard.setHp(card.getHp());
-                    voCard.setStar(card.getStar());
-                    voCard.setTier(card.getTier());
-                    voCard.setLevel(card.getLevel());
                     voPartyGrid.setCard(voCard);
                 }
                 voPartyGrids.add(voPartyGrid);
@@ -257,10 +250,12 @@ public class PartyAction extends BaseAction {
         return serialVersionUID;
     }
 
+    @Override
     public String getJsonMsg() {
         return jsonMsg;
     }
 
+    @Override
     public void setJsonMsg(final String jsonMsg) {
         this.jsonMsg = jsonMsg;
     }

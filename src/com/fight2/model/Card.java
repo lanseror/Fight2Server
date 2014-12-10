@@ -49,6 +49,7 @@ public class Card extends BaseEntity {
         this.cardVersion = card.getCardVersion();
         this.status = card.getStatus();
         this.amount = card.getAmount();
+        this.race = card.getCardTemplate().getRace();
     }
 
     public String getName() {
