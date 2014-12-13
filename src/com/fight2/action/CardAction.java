@@ -136,7 +136,8 @@ public class CardAction extends BaseAction {
             voCard.setHp(card.getHp());
             voCard.setImage(image);
             voCard.setName(card.getName());
-            voCard.setSkill(card.getSkill());
+            voCard.setSkill(cardTemplate.getSkill().getName());
+            voCard.setSkillEffect(CardUtils.getSkillEffectString(card));
             final CardTemplate cardTemplateVo = new CardTemplate();
             cardTemplateVo.setId(cardTemplate.getId());
             voCard.setCardTemplate(cardTemplateVo);

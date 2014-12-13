@@ -2,11 +2,29 @@ package com.fight2.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
+import java.util.Map;
 
 import com.fight2.model.Card;
 import com.fight2.model.CardTemplate;
+import com.fight2.model.Skill;
+import com.fight2.model.SkillApplyParty;
+import com.fight2.model.SkillOperation;
+import com.fight2.model.SkillType;
+import com.google.common.collect.Maps;
 
 public class CardUtils {
+    private final static Map<String, String> EFFECT_MAP = Maps.newHashMap();
+    static {
+        EFFECT_MAP.put("-1" + SkillType.HP, "对%s造成伤害");
+        EFFECT_MAP.put("1" + SkillType.HP, "为%s恢复生命值");
+        EFFECT_MAP.put("-1" + SkillType.ATK, "降低%s的攻击力");
+        EFFECT_MAP.put("1" + SkillType.ATK, "增加%s的攻击力");
+        EFFECT_MAP.put("-1" + SkillType.Defence, "为%s制造一个护盾");
+        EFFECT_MAP.put("1" + SkillType.Defence, "为%s制造一个护盾");
+        EFFECT_MAP.put("-1" + SkillType.Skip, "对%s造成眩晕");
+        EFFECT_MAP.put("1" + SkillType.Skip, "对%s造成眩晕");
+    }
 
     public static int getBaseExp(final Card card) {
         if (card.getBaseExp() == 0) {
@@ -87,5 +105,23 @@ public class CardUtils {
         supportCard.setTier(mainCard.getTier());
         supportCard.setBaseExp(evoBaseExp);
         supportCard.setExp(0);
+    }
+
+    public static String getSkillEffectString(final Card card) {
+        final StringBuilder effectStrs = new StringBuilder();
+        final CardTemplate cardTemplate = card.getCardTemplate();
+        final Skill skill = cardTemplate.getSkill();
+        final List<SkillOperation> operations = skill.getOperations();
+        for (final SkillOperation operation : operations) {
+            final SkillApplyParty skillApplyParty = operation.getSkillApplyParty();
+            final SkillType skillType = operation.getSkillType();
+            final int sign = operation.getSign();
+            final String effectStr = EFFECT_MAP.get(String.valueOf(sign) + skillType);
+            if (effectStrs.length() > 0) {
+                effectStrs.append("，");
+            }
+            effectStrs.append(String.format(effectStr, skillApplyParty.getDescription()));
+        }
+        return effectStrs.toString();
     }
 }

@@ -21,6 +21,7 @@ public class Card extends BaseEntity {
     private int exp;
     private int baseExp;
     private String skill;
+    private String skillEffect;
     private int cardVersion;
     private CardStatus status = CardStatus.InCardPack;
     private User user;
@@ -46,6 +47,7 @@ public class Card extends BaseEntity {
         this.baseExp = card.getBaseExp();
         this.exp = card.getExp();
         this.skill = card.getSkill();
+        this.skillEffect = card.getSkillEffect();
         this.cardVersion = card.getCardVersion();
         this.status = card.getStatus();
         this.amount = card.getAmount();
@@ -140,6 +142,14 @@ public class Card extends BaseEntity {
 
     public void setSkill(final String skill) {
         this.skill = skill;
+    }
+
+    public String getSkillEffect() {
+        return skillEffect;
+    }
+
+    public void setSkillEffect(final String skillEffect) {
+        this.skillEffect = skillEffect;
     }
 
     public int getCardVersion() {
