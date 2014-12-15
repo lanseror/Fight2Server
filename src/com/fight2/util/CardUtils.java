@@ -108,8 +108,11 @@ public class CardUtils {
     }
 
     public static String getSkillEffectString(final Card card) {
+        return getSkillEffectString(card.getCardTemplate());
+    }
+
+    public static String getSkillEffectString(final CardTemplate cardTemplate) {
         final StringBuilder effectStrs = new StringBuilder();
-        final CardTemplate cardTemplate = card.getCardTemplate();
         final Skill skill = cardTemplate.getSkill();
         final List<SkillOperation> operations = skill.getOperations();
         for (final SkillOperation operation : operations) {

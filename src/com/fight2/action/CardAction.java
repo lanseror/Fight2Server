@@ -75,16 +75,9 @@ public class CardAction extends BaseAction {
         card.setUser(user);
         cardDao.add(card);
 
-        final Card cardVo = new Card();
-        cardVo.setId(card.getId());
-        cardVo.setAtk(card.getAtk());
+        final Card cardVo = new Card(card);
         cardVo.setAvatar(avatar);
-        cardVo.setHp(card.getHp());
         cardVo.setImage(image);
-        cardVo.setRace(cardTemplate.getRace());
-        cardVo.setName(card.getName());
-        cardVo.setSkill(card.getSkill());
-        cardVo.setStar(card.getStar());
         final CardTemplate cardTemplateVo = new CardTemplate();
         cardTemplateVo.setId(cardTemplate.getId());
         cardVo.setCardTemplate(cardTemplateVo);
@@ -124,24 +117,12 @@ public class CardAction extends BaseAction {
             final String avatar = avatarObj.getUrl();
             final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), cardTemplate);
             final String image = imageObj.getUrl();
-            final Card voCard = new Card();
-            voCard.setId(card.getId());
-            voCard.setStar(card.getStar());
-            voCard.setLevel(card.getLevel());
-            voCard.setTier(card.getTier());
-            voCard.setAtk(card.getAtk());
-            voCard.setBaseExp(card.getBaseExp());
-            voCard.setExp(card.getExp());
+            final Card voCard = new Card(card);
             voCard.setAvatar(avatar);
-            voCard.setHp(card.getHp());
             voCard.setImage(image);
-            voCard.setName(card.getName());
-            voCard.setSkill(cardTemplate.getSkill().getName());
-            voCard.setSkillEffect(CardUtils.getSkillEffectString(card));
             final CardTemplate cardTemplateVo = new CardTemplate();
             cardTemplateVo.setId(cardTemplate.getId());
             voCard.setCardTemplate(cardTemplateVo);
-            voCard.setRace(cardTemplate.getRace());
             voCards.add(voCard);
         }
 

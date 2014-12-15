@@ -38,6 +38,7 @@ import com.fight2.model.GuildVoter;
 import com.fight2.model.User;
 import com.fight2.service.BidService;
 import com.fight2.util.BidUtils;
+import com.fight2.util.CardUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -220,6 +221,8 @@ public class GuildAction extends BaseAction {
             cardVo.setImage(imageObj.getUrl());
             cardVo.setRace(template.getRace());
             cardVo.setAmount(count);
+            cardVo.setSkill(template.getSkill().getName());
+            cardVo.setSkillEffect(CardUtils.getSkillEffectString(template));
             cardVos.add(cardVo);
         }
 

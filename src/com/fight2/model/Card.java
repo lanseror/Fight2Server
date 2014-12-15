@@ -6,6 +6,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import com.fight2.model.CardTemplate.Race;
+import com.fight2.util.CardUtils;
 
 @Entity
 public class Card extends BaseEntity {
@@ -46,12 +47,13 @@ public class Card extends BaseEntity {
         this.atk = card.getAtk();
         this.baseExp = card.getBaseExp();
         this.exp = card.getExp();
-        this.skill = card.getSkill();
-        this.skillEffect = card.getSkillEffect();
+        final CardTemplate template = card.getCardTemplate();
+        this.skill = template.getSkill().getName();
+        this.skillEffect = CardUtils.getSkillEffectString(card);
         this.cardVersion = card.getCardVersion();
         this.status = card.getStatus();
         this.amount = card.getAmount();
-        this.race = card.getCardTemplate().getRace();
+        this.race = template.getRace();
     }
 
     public String getName() {
