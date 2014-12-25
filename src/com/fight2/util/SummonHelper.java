@@ -87,7 +87,8 @@ public class SummonHelper {
 
     public CardTemplate summon(final int min, final int max) {
         final int randomStar = min + random.nextInt(max - min + 1);
-        final List<CardTemplate> grids = STAR_GRIDS[randomStar - 1];
+        final List<CardTemplate> checkGrids = STAR_GRIDS[randomStar - 1];
+        final List<CardTemplate> grids = checkGrids.size() > 0 ? checkGrids : STAR_GRIDS[min - 1];
         final int randomIndex = random.nextInt(grids.size());
         return grids.get(randomIndex);
     }
