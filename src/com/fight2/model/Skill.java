@@ -3,6 +3,7 @@ package com.fight2.model;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -35,7 +36,7 @@ public class Skill extends BaseEntity {
         this.probability = probability;
     }
 
-    @OneToMany(mappedBy = "skill")
+    @OneToMany(mappedBy = "skill", fetch = FetchType.EAGER)
     public List<SkillOperation> getOperations() {
         return operations;
     }

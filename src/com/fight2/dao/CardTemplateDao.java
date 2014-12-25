@@ -6,6 +6,6 @@ import com.fight2.model.CardTemplate;
 
 public interface CardTemplateDao extends BaseDao<CardTemplate> {
 
-    public List<CardTemplate> listMostProbabilityCard(int i);
+    public List<CardTemplate> listMostProbabilityCardByStar(int i, int star);
 
 }

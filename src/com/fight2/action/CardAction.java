@@ -40,6 +40,7 @@ public class CardAction extends BaseAction {
     private Card card;
     private List<Card> datas;
     private int id;
+    private int type;
 
     @Action(value = "summon", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String summon() {
@@ -54,7 +55,18 @@ public class CardAction extends BaseAction {
         }
         final List<Card> cardpackCards = cardDao.listByUserAndStatus(user, CardStatus.InCardPack);
         final int cardpackSize = cardpackCards.size();
-        final CardTemplate cardTemplate = summonHelper.summon(4, 6);
+
+        int min = 0;
+        int max = 0;
+        if (type == 1) {
+            min = 1;
+            max = 3;
+        } else if (type == 2) {
+            min = 3;
+            max = 6;
+        }
+
+        final CardTemplate cardTemplate = summonHelper.summon(min, max);
         final String avatar = cardTemplate.getAvatars().get(0).getUrl();
         final String image = cardTemplate.getThumbImages().get(0).getUrl();
 
@@ -75,7 +87,8 @@ public class CardAction extends BaseAction {
         card.setUser(user);
         cardDao.add(card);
 
-        final Card cardVo = new Card(card);
+        final Card cardPo = cardDao.load(card.getId());
+        final Card cardVo = new Card(cardPo);
         cardVo.setAvatar(avatar);
         cardVo.setImage(image);
         final CardTemplate cardTemplateVo = new CardTemplate();
@@ -296,6 +309,14 @@ public class CardAction extends BaseAction {
 
     public void setPartyService(final PartyService partyService) {
         this.partyService = partyService;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(final int type) {
+        this.type = type;
     }
 
 }

@@ -57,7 +57,7 @@ public class SummonHelper {
                 final int diffCount = GRID_SIZE - gridCount;
 
                 int mostCardCount = 0;
-                final List<CardTemplate> mostCards = cardTemplateDao.listMostProbabilityCard(2);
+                final List<CardTemplate> mostCards = cardTemplateDao.listMostProbabilityCardByStar(2, i + 1);
                 for (final CardTemplate mostCard : mostCards) {
                     mostCardCount += mostCard.getProbability();
                 }
