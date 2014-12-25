@@ -96,7 +96,7 @@ public class CardUtils {
 
         mainCard.setHp(evoHp);
         mainCard.setAtk(evoAtk);
-        mainCard.setTier(mainCard.getTier() + 1);
+        mainCard.setTier(higherTierCard.getTier() + 1);
         mainCard.setBaseExp(evoBaseExp);
         mainCard.setExp(0);
 

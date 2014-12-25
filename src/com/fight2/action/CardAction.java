@@ -87,8 +87,7 @@ public class CardAction extends BaseAction {
         card.setUser(user);
         cardDao.add(card);
 
-        final Card cardPo = cardDao.load(card.getId());
-        final Card cardVo = new Card(cardPo);
+        final Card cardVo = new Card(card);
         cardVo.setAvatar(avatar);
         cardVo.setImage(image);
         final CardTemplate cardTemplateVo = new CardTemplate();

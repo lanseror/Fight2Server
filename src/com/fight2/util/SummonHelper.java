@@ -21,9 +21,8 @@ import com.fight2.model.CardTemplate;
 @Lazy(true)
 public class SummonHelper {
     private final static int GRID_SIZE = 10000;
-    private final static int DEFAULT_STAR = 2;
     @SuppressWarnings("unchecked")
-    private final static List<CardTemplate>[] STAR_GRIDS = new List[6];
+    private final static List<Integer>[] STAR_GRIDS = new List[6];
     @Autowired
     private CardTemplateDao cardTemplateDao;
     @Autowired
@@ -33,25 +32,19 @@ public class SummonHelper {
     @PostConstruct
     public void reLoadData() {
         for (int i = 0; i < STAR_GRIDS.length; i++) {
-            STAR_GRIDS[i] = new ArrayList<CardTemplate>(GRID_SIZE);
+            STAR_GRIDS[i] = new ArrayList<Integer>(GRID_SIZE);
         }
 
         final List<CardTemplate> cardTemplates = cardTemplateDao.list();
         for (final CardTemplate cardTemplate : cardTemplates) {
             final int star = cardTemplate.getStar();
-            final List<CardTemplate> grids = STAR_GRIDS[star - 1];
-            final List<CardImage> avatars = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_AVATAR, cardTemplate);
-            final List<CardImage> mainImages = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_MAIN, cardTemplate);
-            final List<CardImage> thumbs = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_THUMB, cardTemplate);
-            cardTemplate.setAvatars(avatars);
-            cardTemplate.setMainImages(mainImages);
-            cardTemplate.setThumbImages(thumbs);
+            final List<Integer> grids = STAR_GRIDS[star - 1];
             for (int i = 0; i < cardTemplate.getProbability(); i++) {
-                grids.add(cardTemplate);
+                grids.add(cardTemplate.getId());
             }
         }
         for (int i = 0; i < STAR_GRIDS.length; i++) {
-            final List<CardTemplate> grids = STAR_GRIDS[i];
+            final List<Integer> grids = STAR_GRIDS[i];
             final int gridCount = grids.size();
             if (gridCount < GRID_SIZE) {
                 final int diffCount = GRID_SIZE - gridCount;
@@ -63,15 +56,9 @@ public class SummonHelper {
                 }
                 if (mostCardCount != 0) {
                     for (final CardTemplate mostCard : mostCards) {
-                        final List<CardImage> avatars = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_AVATAR, mostCard);
-                        final List<CardImage> mainImages = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_MAIN, mostCard);
-                        final List<CardImage> thumbs = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_THUMB, mostCard);
-                        mostCard.setAvatars(avatars);
-                        mostCard.setMainImages(mainImages);
-                        mostCard.setThumbImages(thumbs);
                         final int shouldAddCount = diffCount * mostCard.getProbability() / mostCardCount;
                         for (int addCount = 0; addCount < shouldAddCount; addCount++) {
-                            grids.add(mostCard);
+                            grids.add(mostCard.getId());
                         }
                     }
                 }
@@ -79,18 +66,20 @@ public class SummonHelper {
         }
     }
 
-    public CardTemplate summon() {
-        final List<CardTemplate> grids = STAR_GRIDS[DEFAULT_STAR - 1];
-        final int randomIndex = random.nextInt(grids.size());
-        return grids.get(randomIndex);
-    }
-
     public CardTemplate summon(final int min, final int max) {
         final int randomStar = min + random.nextInt(max - min + 1);
-        final List<CardTemplate> checkGrids = STAR_GRIDS[randomStar - 1];
-        final List<CardTemplate> grids = checkGrids.size() > 0 ? checkGrids : STAR_GRIDS[min - 1];
+        final List<Integer> checkGrids = STAR_GRIDS[randomStar - 1];
+        final List<Integer> grids = checkGrids.size() > 0 ? checkGrids : STAR_GRIDS[min - 1];
         final int randomIndex = random.nextInt(grids.size());
-        return grids.get(randomIndex);
+        final int templateId = grids.get(randomIndex);
+        final CardTemplate cardTemplate = cardTemplateDao.load(templateId);
+        final List<CardImage> avatars = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_AVATAR, cardTemplate);
+        final List<CardImage> mainImages = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_MAIN, cardTemplate);
+        final List<CardImage> thumbs = cardImageDao.listByTypeAndCardTemplate(CardImage.TYPE_THUMB, cardTemplate);
+        cardTemplate.setAvatars(avatars);
+        cardTemplate.setMainImages(mainImages);
+        cardTemplate.setThumbImages(thumbs);
+        return cardTemplate;
     }
 
     public CardTemplateDao getCardTemplateDao() {
