@@ -13,6 +13,8 @@
     <a href="<@s.url namespace="/arena" action="list" />">竞技场</a>
     <br/><br/>
     <a href="<@s.url namespace="/guild" action="list" />">公会</a>
+    <br/><br/>
+    <a href="<@s.url namespace="/task" action="list" />">任务</a>
     <br/>
     
 </h2>

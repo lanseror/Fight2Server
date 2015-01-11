@@ -1,0 +1,39 @@
+<#include "/WEB-INF/templates/head.ftl" />
+
+<center>
+
+<@s.form namespace="/task" action="save" method="post" cssClass="required-validate">
+<table>
+    <@s.if test="task!=null">
+    <tr>
+        <td>ID</td>
+        <td><@s.textfield size="80" name="task.id" readonly="true" /></td>
+    </tr>
+    </@s.if>
+    <tr>
+        <td>任务名</td>
+        <td><@s.textfield size="80" name="task.title" cssClass="required max-length-80" /></td>
+    </tr>
+    <tr>
+        <td>对话</td>
+        <td>
+            <@s.textarea cols="50" rows="15" name="task.dialog" cssClass="required min-length-10" />
+        </td>
+    </tr>
+    <tr>
+        <td>提示</td>
+        <td>
+            <@s.textarea cols="50" rows="15" name="task.tips" cssClass="required min-length-10" />
+        </td>
+    </tr>
+
+    <tr>
+        <td>&nbsp;</td>
+        <td align="right"> <@s.submit value="更新" /></td>
+    </tr>
+   
+</table>
+<@s.token />
+</@s.form>
+
+</center>
