@@ -12,6 +12,10 @@ public class QuestTask extends BaseEntity {
 
     private String tips;
 
+    private int x;
+
+    private int y;
+
     public String getTitle() {
         return title;
     }
@@ -34,6 +38,22 @@ public class QuestTask extends BaseEntity {
 
     public void setTips(final String tips) {
         this.tips = tips;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(final int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(final int y) {
+        this.y = y;
     }
 
     public static long getSerialversionuid() {

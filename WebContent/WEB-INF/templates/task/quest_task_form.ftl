@@ -15,6 +15,13 @@
         <td><@s.textfield size="80" name="task.title" cssClass="required max-length-80" /></td>
     </tr>
     <tr>
+        <td>坐标</td>
+        <td>
+           X: <@s.textfield size="30" name="task.x" cssClass="required validate-integer" />
+           Y：<@s.textfield size="30" name="task.y" cssClass="required validate-integer" />
+        </td>
+    </tr>
+    <tr>
         <td>对话</td>
         <td>
             <@s.textarea cols="50" rows="15" name="task.dialog" cssClass="required min-length-10" />
