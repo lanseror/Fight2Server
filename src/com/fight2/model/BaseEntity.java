@@ -9,10 +9,19 @@ import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class BaseEntity implements Serializable {
+
     private static final long serialVersionUID = 1L;
     public static final int EMPTY_ID = 0;
 
     protected int id;
+
+    public BaseEntity() {
+
+    }
+
+    public BaseEntity(final BaseEntity baseEntity) {
+        this.id = baseEntity.getId();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

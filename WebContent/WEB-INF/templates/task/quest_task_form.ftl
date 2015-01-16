@@ -10,6 +10,9 @@
         <td><@s.textfield size="80" name="task.id" readonly="true" /></td>
     </tr>
     </@s.if>
+    <@s.else>
+        <@s.hidden name="task.id" value="0" />
+    </@s.else>
     <tr>
         <td>任务名</td>
         <td><@s.textfield size="80" name="task.title" cssClass="required max-length-80" /></td>

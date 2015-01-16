@@ -16,6 +16,19 @@ public class QuestTask extends BaseEntity {
 
     private int y;
 
+    public QuestTask() {
+
+    }
+
+    public QuestTask(final QuestTask questTask) {
+        super(questTask);
+        this.title = questTask.getTitle();
+        this.dialog = questTask.getDialog();
+        this.tips = questTask.getTips();
+        this.x = questTask.getX();
+        this.y = questTask.getY();
+    }
+
     public String getTitle() {
         return title;
     }

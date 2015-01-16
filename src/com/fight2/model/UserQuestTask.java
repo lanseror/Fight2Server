@@ -1,21 +1,47 @@
 package com.fight2.model;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class UserQuestTask extends BaseEntity {
     private static final long serialVersionUID = -1159247933482212997L;
 
-    private int taskId;
+    private QuestTask task;
 
-    private UserTaskStatus status;
+    private User user;
 
-    public int getTaskId() {
-        return taskId;
+    private UserTaskStatus status = UserTaskStatus.Ready;
+
+    public UserQuestTask() {
+
     }
 
-    public void setTaskId(final int taskId) {
-        this.taskId = taskId;
+    public UserQuestTask(final UserQuestTask userQuestTask) {
+        super(userQuestTask);
+        this.task = new QuestTask(userQuestTask.getTask());
+        this.status = userQuestTask.getStatus();
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    public QuestTask getTask() {
+        return task;
+    }
+
+    public void setTask(final QuestTask task) {
+        this.task = task;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(final User user) {
+        this.user = user;
     }
 
     public UserTaskStatus getStatus() {
@@ -31,6 +57,7 @@ public class UserQuestTask extends BaseEntity {
     }
 
     public enum UserTaskStatus {
+        Ready,
         Started,
         Finished;
     }

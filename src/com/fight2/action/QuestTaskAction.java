@@ -3,6 +3,7 @@ package com.fight2.action;
 import java.util.List;
 
 import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,8 @@ public class QuestTaskAction extends BaseAction {
         return SUCCESS;
     }
 
-    @Action(value = "save", results = { @Result(name = SUCCESS, location = "list", type = "redirect"),
-            @Result(name = INPUT, location = "quest_task_form.ftl") })
+    @Action(value = "save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = {
+            @Result(name = SUCCESS, location = "list", type = "redirect"), @Result(name = INPUT, location = "quest_task_form.ftl") })
     public String save() {
         if (task.getId() == BaseEntity.EMPTY_ID) {
             return createSave();
