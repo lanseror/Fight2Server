@@ -1,6 +1,7 @@
 package com.fight2.action;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
@@ -10,8 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.QuestTaskDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserQuestTaskDao;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.QuestTask;
+import com.fight2.model.User;
+import com.fight2.model.UserQuestTask;
+import com.fight2.model.UserQuestTask.UserTaskStatus;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 
 @Namespace("/task")
 public class QuestTaskAction extends BaseAction {
@@ -20,6 +27,8 @@ public class QuestTaskAction extends BaseAction {
     private UserDao userDao;
     @Autowired
     private QuestTaskDao questTaskDao;
+    @Autowired
+    private UserQuestTaskDao userQuestTaskDao;
     private QuestTask task;
     private List<QuestTask> datas;
     private int id;
@@ -49,6 +58,23 @@ public class QuestTaskAction extends BaseAction {
         } else {
             return editSave();
         }
+    }
+
+    @Action(value = "accept", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String accept() {
+        final User loginUser = getLoginUser();
+        final User user = userDao.load(loginUser.getId());
+        final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(user);
+        if (userQuestTask.getStatus() == UserTaskStatus.Ready) {
+            userQuestTask.setStatus(UserTaskStatus.Started);
+            userQuestTaskDao.update(userQuestTask);
+        } else {
+            throw new RuntimeException("Cannot start a task if it's not in ready status!");
+        }
+        final Map<String, Object> response = Maps.newHashMap();
+        response.put("status", 0);
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
     }
 
     private String editSave() {
@@ -91,6 +117,14 @@ public class QuestTaskAction extends BaseAction {
 
     public void setQuestTaskDao(final QuestTaskDao questTaskDao) {
         this.questTaskDao = questTaskDao;
+    }
+
+    public UserQuestTaskDao getUserQuestTaskDao() {
+        return userQuestTaskDao;
+    }
+
+    public void setUserQuestTaskDao(final UserQuestTaskDao userQuestTaskDao) {
+        this.userQuestTaskDao = userQuestTaskDao;
     }
 
     public int getId() {

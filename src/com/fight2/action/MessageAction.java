@@ -1,7 +1,5 @@
 package com.fight2.action;
 
-import java.util.List;
-
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
@@ -30,10 +28,10 @@ public class MessageAction extends BaseAction {
     public String get() {
         final User user = getLoginUser();
         final User userPo = userDao.load(user.getId());
-        final List<UserQuestTask> userTasks = userQuestTaskDao.listByUser(userPo);
+        final UserQuestTask userTask = userQuestTaskDao.getUserCurrentTask(userPo);
         UserQuestTask userQuestTaskVo;
-        if (userTasks.size() > 0) {
-            userQuestTaskVo = new UserQuestTask(userTasks.get(0));
+        if (userTask != null) {
+            userQuestTaskVo = new UserQuestTask(userTask);
         } else {
             final QuestTask questTask = questTaskDao.get(1);
             final UserQuestTask userQuestTask = new UserQuestTask();

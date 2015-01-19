@@ -8,5 +8,7 @@ import com.fight2.model.UserQuestTask;
 public interface UserQuestTaskDao extends BaseDao<UserQuestTask> {
 
     public List<UserQuestTask> listByUser(User user);
+    
+    public UserQuestTask getUserCurrentTask(User user);
 
 }
