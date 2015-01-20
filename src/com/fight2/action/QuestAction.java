@@ -15,14 +15,18 @@ import com.fight2.dao.CardDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserQuestInfoDao;
+import com.fight2.dao.UserQuestTaskDao;
 import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.PartyInfo;
+import com.fight2.model.QuestTask;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
 import com.fight2.model.UserQuestInfo;
+import com.fight2.model.UserQuestTask;
+import com.fight2.model.UserQuestTask.UserTaskStatus;
 import com.fight2.model.quest.QuestTile;
 import com.fight2.model.quest.QuestTile.TileItem;
 import com.fight2.model.quest.QuestTreasureData;
@@ -44,6 +48,8 @@ public class QuestAction extends BaseAction {
     private UserDao userDao;
     @Autowired
     private PartyInfoDao partyInfoDao;
+    @Autowired
+    private UserQuestTaskDao userQuestTaskDao;
     @Autowired
     private SummonHelper summonHelper;
     @Autowired
@@ -77,48 +83,58 @@ public class QuestAction extends BaseAction {
             response.put("treasureUpdate", false);
         }
 
-        final List<QuestTile> treasures = questTreasureData.getQuestTiles();
-        final Iterator<QuestTile> it = treasures.iterator();
-        int treasureIndex = 0;
-        boolean hasTreasure = false;
-        while (it.hasNext()) {
-            final QuestTile treasure = it.next();
-            if (treasure.getRow() == row && treasure.getCol() == col) {
-                response.put("status", 1);
-                final TileItem tileItem = treasure.getItem();
-                response.put("treasureItem", tileItem);
-                if (tileItem == TileItem.Card) {
-                    summonTreasure(response, user);
+        final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(user);
+        final QuestTask questTask = userQuestTask.getTask();
+        if (userQuestTask.getStatus() == UserTaskStatus.Started && questTask.getX() == col && questTask.getY() == row) {
+            response.put("status", 3);
+            final User boss = questTask.getBoss();
+            final User bossVo = new User();
+            bossVo.setId(boss.getId());
+            bossVo.setName(boss.getName());
+            response.put("boss", bossVo);
+        } else {
+            final List<QuestTile> treasures = questTreasureData.getQuestTiles();
+            final Iterator<QuestTile> it = treasures.iterator();
+            int treasureIndex = 0;
+            boolean hasTreasure = false;
+            while (it.hasNext()) {
+                final QuestTile treasure = it.next();
+                if (treasure.getRow() == row && treasure.getCol() == col) {
+                    response.put("status", 1);
+                    final TileItem tileItem = treasure.getItem();
+                    response.put("treasureItem", tileItem);
+                    if (tileItem == TileItem.Card) {
+                        summonTreasure(response, user);
+                    }
+                    response.put("treasureIndex", treasureIndex);
+                    hasTreasure = true;
+                    it.remove();
+                    break;
                 }
-                response.put("treasureIndex", treasureIndex);
-                hasTreasure = true;
-                it.remove();
-                break;
+                treasureIndex++;
             }
-            treasureIndex++;
-        }
-        if (!hasTreasure) {
-            final Random random = new Random();
-            final int randomNum = random.nextInt(40);
-            if (randomNum < 2) {
-                response.put("status", 2);
-                final List<User> users = userDao.listByType(UserType.User);
-                final User enemy = users.get(random.nextInt(users.size()));
-                final User enemyVo = new User();
-                enemyVo.setId(enemy.getId());
-                enemyVo.setName(enemy.getName());
-                response.put("enemy", enemyVo);
-            } else if (randomNum >= 2 && randomNum < 10) {
-                response.put("status", 2);
-                final List<User> npcs = userDao.listByType(UserType.QuestNpc);
-                final User enemy = npcs.get(random.nextInt(npcs.size()));
-                final User enemyVo = new User();
-                enemyVo.setId(enemy.getId());
-                enemyVo.setName(enemy.getName());
-                response.put("enemy", enemyVo);
+            if (!hasTreasure) {
+                final Random random = new Random();
+                final int randomNum = random.nextInt(40);
+                if (randomNum < 2) {
+                    response.put("status", 2);
+                    final List<User> users = userDao.listByType(UserType.User);
+                    final User enemy = users.get(random.nextInt(users.size()));
+                    final User enemyVo = new User();
+                    enemyVo.setId(enemy.getId());
+                    enemyVo.setName(enemy.getName());
+                    response.put("enemy", enemyVo);
+                } else if (randomNum >= 2 && randomNum < 10) {
+                    response.put("status", 2);
+                    final List<User> npcs = userDao.listByType(UserType.QuestNpc);
+                    final User enemy = npcs.get(random.nextInt(npcs.size()));
+                    final User enemyVo = new User();
+                    enemyVo.setId(enemy.getId());
+                    enemyVo.setName(enemy.getName());
+                    response.put("enemy", enemyVo);
+                }
             }
         }
-
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(response));
         return SUCCESS;
@@ -283,6 +299,14 @@ public class QuestAction extends BaseAction {
 
     public void setPartyInfoDao(final PartyInfoDao partyInfoDao) {
         this.partyInfoDao = partyInfoDao;
+    }
+
+    public UserQuestTaskDao getUserQuestTaskDao() {
+        return userQuestTaskDao;
+    }
+
+    public void setUserQuestTaskDao(final UserQuestTaskDao userQuestTaskDao) {
+        this.userQuestTaskDao = userQuestTaskDao;
     }
 
 }

@@ -25,7 +25,7 @@
         <td><#if disabled>停用<#else>正常</#if></td>
         <td>${level?default("")}</td>
         <td>${salary?default("")}</td>
-        <td><@s.select name="type" list=r"#{'ArenaGuardian':'竞技场守卫', 'QuestNpc':'野外NPC'}" value="type" disabled=true /></td>
+        <td><@s.select name="type" list=r"#{'ArenaGuardian':'竞技场守卫', 'QuestNpc':'野外NPC', 'Boss':'Boss'}" value="type" disabled=true /></td>
         <td>
         <#if disabled>
             <a href="<@s.url namespace="/user" action="enable"><@s.param name="id" value="${id}" /></@s.url>">启用</a>

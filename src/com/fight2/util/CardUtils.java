@@ -37,7 +37,7 @@ public class CardUtils {
     public static void upgrade(final Card card) {
         final int exp = card.getExp();
         final int currentLevel = card.getLevel();
-        final int maxLevel = card.getStar() * 10 + (card.getTier() - 1) * 10;
+        final int maxLevel = getMaxLevel(card);
 
         int level = 1;
         int levelExp = 0;
@@ -64,6 +64,16 @@ public class CardUtils {
             card.setAtk(upgradeAtk);
         }
 
+    }
+
+    public static int getLevelExp(final Card card, final int level) {
+        final int maxLevel = getMaxLevel(card);
+        final int toLevel = level > maxLevel ? maxLevel : level;
+        int levelExp = 0;
+        for (int i = 1; i < toLevel; i++) {
+            levelExp += (int) (100 * Math.pow(1.065, i));
+        }
+        return levelExp;
     }
 
     public static int getMaxLevel(final Card card) {

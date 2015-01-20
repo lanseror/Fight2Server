@@ -26,7 +26,7 @@
     </tr>
     <tr>
         <td>类别</td>
-        <td><@s.select name="user.type" list=r"#{'':'请选择','ArenaGuardian':'竞技场守卫', 'QuestNpc':'野外NPC'}" value="user.salary" cssClass="required" /></td>
+        <td><@s.select name="user.type" list=r"#{'':'请选择','ArenaGuardian':'竞技场守卫', 'QuestNpc':'野外NPC', 'Boss':'Boss'}" value="user.salary" cssClass="required" /></td>
     </tr>
     <tr>
         <td>身价级别</td>
@@ -164,6 +164,11 @@
                 </tr>
                 <tr align="center">
                     <td><img src="<@s.url value="${avatar}" />" height="60" width="60" /></td>
+                </tr>
+                <tr align="center">
+                    <td>级数: <@s.textfield size="2" name="levels" value="1" />
+                    <br/>阶数: <@s.textfield size="2" name="tiers" value="1" />
+                    </td>
                 </tr>
                 <tr align="center">
                     <td>

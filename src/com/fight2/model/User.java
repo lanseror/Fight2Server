@@ -183,7 +183,8 @@ public class User extends BaseEntity {
     public enum UserType {
         User,
         ArenaGuardian,
-        QuestNpc
+        QuestNpc,
+        Boss
     }
 
 }

@@ -1,6 +1,8 @@
 package com.fight2.model;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class QuestTask extends BaseEntity {
@@ -10,11 +12,15 @@ public class QuestTask extends BaseEntity {
 
     private String dialog;
 
+    private String bossDialog;
+
     private String tips;
 
     private int x;
 
     private int y;
+
+    private User boss;
 
     public QuestTask() {
 
@@ -24,9 +30,20 @@ public class QuestTask extends BaseEntity {
         super(questTask);
         this.title = questTask.getTitle();
         this.dialog = questTask.getDialog();
+        this.bossDialog = questTask.getBossDialog();
         this.tips = questTask.getTips();
         this.x = questTask.getX();
         this.y = questTask.getY();
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "boss_id")
+    public User getBoss() {
+        return boss;
+    }
+
+    public void setBoss(final User boss) {
+        this.boss = boss;
     }
 
     public String getTitle() {
@@ -43,6 +60,14 @@ public class QuestTask extends BaseEntity {
 
     public void setDialog(final String dialog) {
         this.dialog = dialog;
+    }
+
+    public String getBossDialog() {
+        return bossDialog;
+    }
+
+    public void setBossDialog(final String bossDialog) {
+        this.bossDialog = bossDialog;
     }
 
     public String getTips() {

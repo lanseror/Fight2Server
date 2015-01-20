@@ -36,6 +36,17 @@
             <@s.textarea cols="50" rows="15" name="task.tips" cssClass="required min-length-10" />
         </td>
     </tr>
+    <tr>
+        <td>BOSS</td>
+        <td><@s.select name="task.boss.id" headerKey="0" headerValue="无BOSS" list="bosses" listKey="id" listValue="name" value="task.boss.id" cssClass="required" />
+        </td>
+    </tr>
+    <tr>
+        <td>BOSS说话</td>
+        <td>
+            <@s.textarea cols="50" rows="15" name="task.bossDialog" />
+        </td>
+    </tr>
 
     <tr>
         <td>&nbsp;</td>

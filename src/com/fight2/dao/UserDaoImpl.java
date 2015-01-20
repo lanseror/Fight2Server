@@ -45,7 +45,8 @@ public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao {
     @Override
     public List<User> getAllNpc() {
         final Criteria criteria = getSession().createCriteria(getMyType());
-        criteria.add(Restrictions.or(Restrictions.eq("type", UserType.QuestNpc), Restrictions.eq("type", UserType.ArenaGuardian)));
+        final UserType[] npcTypes = { UserType.QuestNpc, UserType.ArenaGuardian, UserType.Boss };
+        criteria.add(Restrictions.in("type", npcTypes));
         @SuppressWarnings("unchecked")
         final List<User> users = criteria.list();
         return users;

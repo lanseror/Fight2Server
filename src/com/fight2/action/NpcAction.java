@@ -26,6 +26,7 @@ import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
+import com.fight2.util.CardUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.opensymphony.xwork2.ActionContext;
@@ -56,6 +57,8 @@ public class NpcAction extends BaseAction {
     private String jsonMsg;
     private int[] cardIds;
     private int[] partyIds;
+    private int[] levels;
+    private int[] tiers;
 
     @Action(value = "list", results = { @Result(name = SUCCESS, location = "npc_list.ftl") })
     public String list() {
@@ -132,17 +135,17 @@ public class NpcAction extends BaseAction {
             this.addActionError("你必须要有一个领军人物");
             return INPUT;
         }
-        final Set<Integer> cardIdSet = Sets.newHashSet();
-        for (final int cardId : cardIds) {
-            cardIdSet.add(cardId);
-        }
-        if (cardIds.length != cardIdSet.size()) {
-            user = null;
-            loadCardData();
-            this.addActionError("发现有重复的卡牌");
-            return INPUT;
-        }
-
+        // final Set<Integer> cardIdSet = Sets.newHashSet();
+        // for (final int cardId : cardIds) {
+        // cardIdSet.add(cardId);
+        // }
+        // if (cardIds.length != cardIdSet.size()) {
+        // user = null;
+        // loadCardData();
+        // this.addActionError("发现有重复的卡牌");
+        // return INPUT;
+        // }
+        // final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), card.getCardTemplate());
         if (user.getId() == BaseEntity.EMPTY_ID) {
             return createSave();
         } else {
@@ -175,6 +178,8 @@ public class NpcAction extends BaseAction {
         for (int i = 0; i < cardIds.length; i++) {
             final int cardId = cardIds[i];
             final int partyId = partyIds[i];
+            final int level = levels[i];
+            final int tier = tiers[i];
             final Party party = parties.get(partyId / 4);
             final List<PartyGrid> partyGrids = party.getPartyGrids();
             final PartyGrid partyGrid = partyGrids.get(partyId % 4);
@@ -187,6 +192,7 @@ public class NpcAction extends BaseAction {
             card.setCardTemplate(cardTemplate);
             card.setUser(user);
             card.setStatus(CardStatus.InCardPack);
+            upgradeCard(card, tier, level);
             cardDao.add(card);
             partyGrid.setCard(card);
             partyGridDao.update(partyGrid);
@@ -194,6 +200,11 @@ public class NpcAction extends BaseAction {
             party.setHp(party.getHp() + card.getHp());
             partyInfoAdd.setAtk(partyInfoAdd.getAtk() + card.getAtk());
             partyInfoAdd.setHp(partyInfoAdd.getHp() + card.getHp());
+            if (i == 0) {
+                final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), card.getCardTemplate());
+                user.setAvatar(avatarObj.getUrl());
+                userDao.update(user);
+            }
         }
         for (final Party party : parties) {
             partyDao.update(party);
@@ -201,6 +212,24 @@ public class NpcAction extends BaseAction {
         partyInfoDao.update(partyInfoAdd);
 
         return SUCCESS;
+    }
+
+    private void upgradeCard(final Card card, final int tier, final int level) {
+        if (tier != 1) {
+            final int maxTier = CardUtils.getMaxEvoTier(card);
+            for (int i = 2; i <= maxTier; i++) {
+                final int maxLevel = CardUtils.getMaxLevel(card);
+                final int maxLevelExp = CardUtils.getLevelExp(card, maxLevel);
+                card.setExp(maxLevelExp);
+                CardUtils.upgrade(card);
+                final Card supportCard = new Card(card);
+                CardUtils.evolution(card, supportCard);
+            }
+        }
+
+        final int levelExp = CardUtils.getLevelExp(card, level);
+        card.setExp(levelExp);
+        CardUtils.upgrade(card);
     }
 
     private String editSave() {
@@ -296,10 +325,12 @@ public class NpcAction extends BaseAction {
         this.cardTemplateDao = cardTemplateDao;
     }
 
+    @Override
     public String getJsonMsg() {
         return jsonMsg;
     }
 
+    @Override
     public void setJsonMsg(final String jsonMsg) {
         this.jsonMsg = jsonMsg;
     }
@@ -334,6 +365,22 @@ public class NpcAction extends BaseAction {
 
     public void setPartyIds(final int[] partyIds) {
         this.partyIds = partyIds;
+    }
+
+    public int[] getLevels() {
+        return levels;
+    }
+
+    public void setLevels(final int[] levels) {
+        this.levels = levels;
+    }
+
+    public int[] getTiers() {
+        return tiers;
+    }
+
+    public void setTiers(final int[] tiers) {
+        this.tiers = tiers;
     }
 
 }

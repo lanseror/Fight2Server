@@ -15,6 +15,7 @@ import com.fight2.dao.UserQuestTaskDao;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.QuestTask;
 import com.fight2.model.User;
+import com.fight2.model.User.UserType;
 import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserQuestTask.UserTaskStatus;
 import com.google.common.collect.Maps;
@@ -32,6 +33,8 @@ public class QuestTaskAction extends BaseAction {
     private QuestTask task;
     private List<QuestTask> datas;
     private int id;
+    private List<User> bosses;
+    private int bossId;
 
     @Action(value = "list", results = { @Result(name = SUCCESS, location = "quest_task_list.ftl") })
     public String list() {
@@ -41,18 +44,27 @@ public class QuestTaskAction extends BaseAction {
 
     @Action(value = "add", results = { @Result(name = SUCCESS, location = "quest_task_form.ftl") })
     public String add() {
+        loadBossData();
         return SUCCESS;
     }
 
     @Action(value = "edit", results = { @Result(name = SUCCESS, location = "quest_task_form.ftl") })
     public String edit() {
         task = questTaskDao.get(id);
+        loadBossData();
         return SUCCESS;
+    }
+
+    private void loadBossData() {
+        bosses = userDao.listByType(UserType.Boss);
     }
 
     @Action(value = "save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = {
             @Result(name = SUCCESS, location = "list", type = "redirect"), @Result(name = INPUT, location = "quest_task_form.ftl") })
     public String save() {
+        if (task.getBoss().getId() == BaseEntity.EMPTY_ID) {
+            task.setBoss(null);
+        }
         if (task.getId() == BaseEntity.EMPTY_ID) {
             return createSave();
         } else {
@@ -137,6 +149,22 @@ public class QuestTaskAction extends BaseAction {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    public List<User> getBosses() {
+        return bosses;
+    }
+
+    public void setBosses(final List<User> bosses) {
+        this.bosses = bosses;
+    }
+
+    public int getBossId() {
+        return bossId;
+    }
+
+    public void setBossId(final int bossId) {
+        this.bossId = bossId;
     }
 
 }
