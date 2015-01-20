@@ -91,7 +91,7 @@ public class QuestAction extends BaseAction {
             final User bossVo = new User();
             bossVo.setId(boss.getId());
             bossVo.setName(boss.getName());
-            response.put("boss", bossVo);
+            response.put("enemy", bossVo);
         } else {
             final List<QuestTile> treasures = questTreasureData.getQuestTiles();
             final Iterator<QuestTile> it = treasures.iterator();
