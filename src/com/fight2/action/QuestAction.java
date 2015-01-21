@@ -21,7 +21,6 @@ import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.PartyInfo;
-import com.fight2.model.QuestTask;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
 import com.fight2.model.UserQuestInfo;
@@ -84,10 +83,10 @@ public class QuestAction extends BaseAction {
         }
 
         final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(user);
-        final QuestTask questTask = userQuestTask.getTask();
-        if (userQuestTask.getStatus() == UserTaskStatus.Started && questTask.getX() == col && questTask.getY() == row) {
+        if (userQuestTask != null && userQuestTask.getStatus() == UserTaskStatus.Started && userQuestTask.getTask().getX() == col
+                && userQuestTask.getTask().getY() == row) {
             response.put("status", 3);
-            final User boss = questTask.getBoss();
+            final User boss = userQuestTask.getTask().getBoss();
             final User bossVo = new User();
             bossVo.setId(boss.getId());
             bossVo.setName(boss.getName());

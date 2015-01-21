@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.CardDao;
 import com.fight2.dao.CardImageDao;
-import com.fight2.dao.CardTemplateDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.Card;
@@ -35,8 +34,6 @@ public class UserStoreroomAction extends BaseAction {
     private CardDao cardDao;
     @Autowired
     private UserDao userDao;
-    @Autowired
-    private CardTemplateDao cardTemplateDao;
     @Autowired
     private CardImageDao cardImageDao;
     private List<UserStoreroom> datas;
@@ -63,20 +60,20 @@ public class UserStoreroomAction extends BaseAction {
         final User userPo = userDao.get(loginUser.getId());
         final UserStoreroom userStoreroomPo = userPo.getStoreroom();
         final List<Card> cards = cardDao.listByUserAndStatus(userPo, CardStatus.InStoreroom);
-        final Map<Integer, Integer> cardTemplates = Maps.newLinkedHashMap();
+        final Map<CardTemplate, Integer> cardTemplates = Maps.newLinkedHashMap();
         for (final Card card : cards) {
-            final int cardTemplateId = card.getCardTemplate().getId();
-            if (cardTemplates.containsKey(cardTemplateId)) {
-                final Integer count = cardTemplates.get(cardTemplateId);
-                cardTemplates.put(cardTemplateId, count + 1);
+            final CardTemplate cardTemplate = card.getCardTemplate();
+            if (cardTemplates.containsKey(cardTemplate)) {
+                final Integer count = cardTemplates.get(cardTemplate);
+                cardTemplates.put(cardTemplate, count + 1);
             } else {
-                cardTemplates.put(cardTemplateId, 1);
+                cardTemplates.put(cardTemplate, 1);
             }
         }
 
         final List<Card> cardVos = Lists.newArrayList();
-        for (final Entry<Integer, Integer> entry : cardTemplates.entrySet()) {
-            final CardTemplate template = cardTemplateDao.get(entry.getKey());
+        for (final Entry<CardTemplate, Integer> entry : cardTemplates.entrySet()) {
+            final CardTemplate template = entry.getKey();
             final int count = entry.getValue();
             final Card cardVo = new Card();
             cardVo.setId(template.getId());
@@ -190,14 +187,6 @@ public class UserStoreroomAction extends BaseAction {
 
     public void setUserDao(final UserDao userDao) {
         this.userDao = userDao;
-    }
-
-    public CardTemplateDao getCardTemplateDao() {
-        return cardTemplateDao;
-    }
-
-    public void setCardTemplateDao(final CardTemplateDao cardTemplateDao) {
-        this.cardTemplateDao = cardTemplateDao;
     }
 
 }

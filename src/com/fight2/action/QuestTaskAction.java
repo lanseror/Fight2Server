@@ -9,17 +9,22 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.QuestTaskDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserQuestTaskDao;
 import com.fight2.model.BaseEntity;
+import com.fight2.model.BattleResult;
+import com.fight2.model.PartyInfo;
 import com.fight2.model.QuestTask;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
 import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserQuestTask.UserTaskStatus;
+import com.fight2.service.BattleService;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.opensymphony.xwork2.ActionContext;
 
 @Namespace("/task")
 public class QuestTaskAction extends BaseAction {
@@ -30,6 +35,8 @@ public class QuestTaskAction extends BaseAction {
     private QuestTaskDao questTaskDao;
     @Autowired
     private UserQuestTaskDao userQuestTaskDao;
+    @Autowired
+    private PartyInfoDao partyInfoDao;
     private QuestTask task;
     private List<QuestTask> datas;
     private int id;
@@ -86,6 +93,42 @@ public class QuestTaskAction extends BaseAction {
         final Map<String, Object> response = Maps.newHashMap();
         response.put("status", 0);
         jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "test", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String revert() {
+        final List<UserQuestTask> userQuestTasks = userQuestTaskDao.list();
+        for (final UserQuestTask userQuestTask : userQuestTasks) {
+            userQuestTask.setStatus(UserTaskStatus.Ready);
+            userQuestTaskDao.update(userQuestTask);
+        }
+        final Map<String, Object> response = Maps.newHashMap();
+        response.put("status", 0);
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
+    @Action(value = "attack", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String attack() {
+        final User attacker = (User) this.getSession().get(LOGIN_USER);
+        final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(attacker);
+        if (userQuestTask.getStatus() != UserTaskStatus.Started) {
+            return INPUT;
+        }
+
+        final User defender = userQuestTask.getTask().getBoss();
+        final PartyInfo attackerPartyInfo = partyInfoDao.getByUser(attacker);
+        final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
+
+        final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo, null);
+        final BattleResult battleResult = battleService.fight(0);
+        if (battleResult.isWinner()) {
+            userQuestTask.setStatus(UserTaskStatus.Finished);
+            userQuestTaskDao.update(userQuestTask);
+        }
+        final ActionContext context = ActionContext.getContext();
+        context.put("jsonMsg", new Gson().toJson(battleResult));
         return SUCCESS;
     }
 
@@ -165,6 +208,14 @@ public class QuestTaskAction extends BaseAction {
 
     public void setBossId(final int bossId) {
         this.bossId = bossId;
+    }
+
+    public PartyInfoDao getPartyInfoDao() {
+        return partyInfoDao;
+    }
+
+    public void setPartyInfoDao(final PartyInfoDao partyInfoDao) {
+        this.partyInfoDao = partyInfoDao;
     }
 
 }
