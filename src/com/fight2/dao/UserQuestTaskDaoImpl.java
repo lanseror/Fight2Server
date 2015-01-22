@@ -30,7 +30,7 @@ public class UserQuestTaskDaoImpl extends BaseDaoImpl<UserQuestTask> implements 
     public UserQuestTask getUserCurrentTask(final User user) {
         final Criteria criteria = getSession().createCriteria(getMyType());
         criteria.add(Restrictions.eq("user", user));
-        final UserTaskStatus[] inProgressStatuses = { UserTaskStatus.Ready, UserTaskStatus.Started };
+        final UserTaskStatus[] inProgressStatuses = { UserTaskStatus.Ready, UserTaskStatus.Started , UserTaskStatus.Finished };
         criteria.add(Restrictions.in("status", inProgressStatuses));
         return (UserQuestTask) criteria.uniqueResult();
     }

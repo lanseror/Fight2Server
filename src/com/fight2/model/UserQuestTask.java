@@ -59,7 +59,8 @@ public class UserQuestTask extends BaseEntity {
     public enum UserTaskStatus {
         Ready,
         Started,
-        Finished;
+        Finished,
+        End;
     }
 
 }

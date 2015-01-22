@@ -9,18 +9,28 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fight2.dao.CardDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.QuestTaskDao;
+import com.fight2.dao.TaskRewardDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserQuestTaskDao;
+import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.BattleResult;
+import com.fight2.model.Card;
+import com.fight2.model.Card.CardStatus;
+import com.fight2.model.CardTemplate;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.QuestTask;
+import com.fight2.model.TaskReward;
+import com.fight2.model.TaskRewardItem;
+import com.fight2.model.TaskRewardItem.TaskRewardItemType;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
 import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserQuestTask.UserTaskStatus;
+import com.fight2.model.UserStoreroom;
 import com.fight2.service.BattleService;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -37,6 +47,12 @@ public class QuestTaskAction extends BaseAction {
     private UserQuestTaskDao userQuestTaskDao;
     @Autowired
     private PartyInfoDao partyInfoDao;
+    @Autowired
+    private TaskRewardDao taskRewardDao;
+    @Autowired
+    private UserStoreroomDao userStoreroomDao;
+    @Autowired
+    private CardDao cardDao;
     private QuestTask task;
     private List<QuestTask> datas;
     private int id;
@@ -132,6 +148,65 @@ public class QuestTaskAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "complete", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String completeTask() {
+        final User loginUser = getLoginUser();
+        final User user = userDao.load(loginUser.getId());
+        final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(user);
+        if (userQuestTask.getStatus() != UserTaskStatus.Finished) {
+            return INPUT;
+        }
+        final UserStoreroom userStoreroom = user.getStoreroom();
+        final QuestTask questTask = userQuestTask.getTask();
+        final List<TaskReward> rewards = taskRewardDao.listByTask(questTask);
+        for (final TaskReward reward : rewards) {
+            for (final TaskRewardItem rewardItem : reward.getRewardItems()) {
+                final TaskRewardItemType rewardItemType = rewardItem.getType();
+                final int amount = rewardItem.getAmount();
+                if (rewardItemType == TaskRewardItemType.ArenaTicket) {
+                    userStoreroom.setTicket(userStoreroom.getTicket() + amount);
+                    userStoreroomDao.update(userStoreroom);
+                } else if (rewardItemType == TaskRewardItemType.Stamina) {
+                    userStoreroom.setStamina(userStoreroom.getStamina() + amount);
+                    userStoreroomDao.update(userStoreroom);
+                } else if (rewardItemType == TaskRewardItemType.Card) {
+                    final CardTemplate cardTemplate = rewardItem.getCardTemplate();
+                    for (int i = 1; i <= amount; i++) {
+                        final Card card = new Card();
+                        card.setAtk(cardTemplate.getAtk());
+                        card.setHp(cardTemplate.getHp());
+                        card.setName(cardTemplate.getName());
+                        card.setStar(cardTemplate.getStar());
+                        card.setCardTemplate(cardTemplate);
+                        card.setUser(user);
+                        card.setStatus(CardStatus.InStoreroom);
+                        cardDao.add(card);
+                    }
+                    final List<Card> cards = cardDao.listByUser(user);
+                    user.setCardCount(cards.size());
+                    userDao.update(user);
+                } else if (rewardItemType == TaskRewardItemType.GuildContribution) {
+                    user.setGuildContribution(user.getGuildContribution() + amount);
+                    userDao.update(user);
+                }
+            }
+        }
+        userQuestTask.setStatus(UserTaskStatus.End);
+        userQuestTaskDao.update(userQuestTask);
+
+        final QuestTask nextQuestTask = questTaskDao.get(questTask.getId() + 1);
+        final UserQuestTask nextUserQuestTask = new UserQuestTask();
+        userQuestTask.setUser(user);
+        userQuestTask.setStatus(UserTaskStatus.Ready);
+        userQuestTask.setTask(nextQuestTask);
+        userQuestTaskDao.add(nextUserQuestTask);
+
+        final Map<String, Object> response = Maps.newHashMap();
+        response.put("status", 0);
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
     private String editSave() {
         questTaskDao.update(task);
         return SUCCESS;
@@ -216,6 +291,30 @@ public class QuestTaskAction extends BaseAction {
 
     public void setPartyInfoDao(final PartyInfoDao partyInfoDao) {
         this.partyInfoDao = partyInfoDao;
+    }
+
+    public TaskRewardDao getTaskRewardDao() {
+        return taskRewardDao;
+    }
+
+    public void setTaskRewardDao(final TaskRewardDao taskRewardDao) {
+        this.taskRewardDao = taskRewardDao;
+    }
+
+    public UserStoreroomDao getUserStoreroomDao() {
+        return userStoreroomDao;
+    }
+
+    public void setUserStoreroomDao(final UserStoreroomDao userStoreroomDao) {
+        this.userStoreroomDao = userStoreroomDao;
+    }
+
+    public CardDao getCardDao() {
+        return cardDao;
+    }
+
+    public void setCardDao(final CardDao cardDao) {
+        this.cardDao = cardDao;
     }
 
 }
