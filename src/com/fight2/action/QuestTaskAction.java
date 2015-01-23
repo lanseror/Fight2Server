@@ -194,15 +194,20 @@ public class QuestTaskAction extends BaseAction {
         userQuestTask.setStatus(UserTaskStatus.End);
         userQuestTaskDao.update(userQuestTask);
 
-        final QuestTask nextQuestTask = questTaskDao.get(questTask.getId() + 1);
-        final UserQuestTask nextUserQuestTask = new UserQuestTask();
-        userQuestTask.setUser(user);
-        userQuestTask.setStatus(UserTaskStatus.Ready);
-        userQuestTask.setTask(nextQuestTask);
-        userQuestTaskDao.add(nextUserQuestTask);
-
+        QuestTask nextQuestTask = questTaskDao.get(questTask.getId() + 1);
+        if (nextQuestTask == null) {
+            nextQuestTask = questTaskDao.getNextTask(questTask);
+        }
+        if (nextQuestTask != null) {
+            final UserQuestTask nextUserQuestTask = new UserQuestTask();
+            userQuestTask.setUser(user);
+            userQuestTask.setStatus(UserTaskStatus.Ready);
+            userQuestTask.setTask(nextQuestTask);
+            userQuestTaskDao.add(nextUserQuestTask);
+        }
         final Map<String, Object> response = Maps.newHashMap();
         response.put("status", 0);
+
         jsonMsg = new Gson().toJson(response);
         return SUCCESS;
     }
