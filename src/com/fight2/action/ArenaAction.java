@@ -219,12 +219,13 @@ public class ArenaAction extends BaseAction {
         final int rank = arenaRanking.getRankNumber();
         final int maxRank = arenaRankingDao.getArenaMaxRank(arenaRanking.getArena());
 
+        final List<User> randomNpcs = random3NPC();
         // Rank == 0 means the user is the first time enter into the arena, give him all NPC.
         if (rank == 0) {
             for (int i = 0; i < 3; i++) {
                 final UserArenaRecord arenaRecord = new UserArenaRecord();
                 arenaRecord.setStatus(UserArenaRecordStatus.NoAction);
-                arenaRecord.setUser(toArenaJsonUser(randomNPC()));
+                arenaRecord.setUser(toArenaJsonUser(randomNpcs.get(i)));
                 arenaRecords.add(arenaRecord);
             }
             return;
@@ -241,9 +242,9 @@ public class ArenaAction extends BaseAction {
             p1RankNum = random.nextInt(rank);
         }
         if (p1RankNum > maxRank || p1RankNum <= 0) {
-            p1ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
+            p1ArenaRecord.setUser(toArenaJsonUser(randomNpcs.get(0)));
         } else {
-            System.out.println("p1RankNum:" + arena.getId() + "-" + p1RankNum);
+            // System.out.println("p1RankNum:" + arena.getId() + "-" + p1RankNum);
             final ArenaRanking p1Ranking = arenaRankingDao.getByArenaRank(arena, p1RankNum);
             final User p1User = p1Ranking.getUser();
             p1ArenaRecord.setUser(toArenaJsonUser(p1User));
@@ -255,7 +256,7 @@ public class ArenaAction extends BaseAction {
         final int p2RankNumSeed = 5 - random.nextInt(11);
         final int p2RankNum = rank + p2RankNumSeed;
         if (p2RankNum == rank || p2RankNum == p1RankNum || p2RankNum > maxRank || p2RankNum <= 0) {
-            p2ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
+            p2ArenaRecord.setUser(toArenaJsonUser(randomNpcs.get(1)));
         } else {
             final ArenaRanking p2Ranking = arenaRankingDao.getByArenaRank(arena, p2RankNum);
             // System.out.println("p2RankNum:" + arena.getId() + "-" + p2RankNum);
@@ -267,14 +268,14 @@ public class ArenaAction extends BaseAction {
         final UserArenaRecord p3ArenaRecord = new UserArenaRecord();
         p3ArenaRecord.setStatus(UserArenaRecordStatus.NoAction);
         if (rank == maxRank) {
-            p3ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
+            p3ArenaRecord.setUser(toArenaJsonUser(randomNpcs.get(2)));
         } else {
             final int p3RankNum = rank + random.nextInt(maxRank - rank) + 1;
-            if (p3RankNum == p2RankNum) {
-                p3ArenaRecord.setUser(toArenaJsonUser(randomNPC()));
+            if (p3RankNum == p2RankNum || p3RankNum == p1RankNum) {
+                p3ArenaRecord.setUser(toArenaJsonUser(randomNpcs.get(2)));
             } else {
                 final ArenaRanking p3Ranking = arenaRankingDao.getByArenaRank(arena, p3RankNum);
-                System.out.println("p3RankNum:" + arena.getId() + "-" + p3RankNum);
+                // System.out.println("p3RankNum:" + arena.getId() + "-" + p3RankNum);
                 final User p3User = p3Ranking.getUser();
                 p3ArenaRecord.setUser(toArenaJsonUser(p3User));
             }
@@ -282,10 +283,17 @@ public class ArenaAction extends BaseAction {
         arenaRecords.add(p3ArenaRecord);
     }
 
-    private User randomNPC() {
+    private List<User> random3NPC() {
+        final List<User> randomNpcs = Lists.newArrayList();
         final Random random = new Random();
         final List<User> npcs = userDao.getAllArenaGuardians();
-        return npcs.get(random.nextInt(npcs.size()));
+        while (randomNpcs.size() < 3) {
+            final User randomNpc = npcs.get(random.nextInt(npcs.size()));
+            if (!randomNpcs.contains(randomNpc)) {
+                randomNpcs.add(randomNpc);
+            }
+        }
+        return randomNpcs;
     }
 
     private User toArenaJsonUser(final User user) {
