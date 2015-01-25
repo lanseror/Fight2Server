@@ -20,6 +20,8 @@ public class SkillOperation extends BaseEntity {
 
     private Skill skill;
 
+    private ComboSkill comboSkill;
+
     @ManyToOne
     @JoinColumn(name = "skill_id")
     public Skill getSkill() {
@@ -28,6 +30,16 @@ public class SkillOperation extends BaseEntity {
 
     public void setSkill(final Skill skill) {
         this.skill = skill;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "combo_skill_id")
+    public ComboSkill getComboSkill() {
+        return comboSkill;
+    }
+
+    public void setComboSkill(final ComboSkill comboSkill) {
+        this.comboSkill = comboSkill;
     }
 
     public int getSign() {
