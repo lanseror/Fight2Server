@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
 @Entity
 public class ComboSkill extends BaseEntity {
@@ -19,6 +20,17 @@ public class ComboSkill extends BaseEntity {
     private List<SkillOperation> operations;
 
     private List<ComboSkillCard> comboSkillCards;
+
+    public ComboSkill() {
+        super();
+    }
+
+    public ComboSkill(final ComboSkill comboSkill) {
+        super(comboSkill);
+        this.name = comboSkill.getName();
+        this.probability = comboSkill.getProbability();
+        this.icon = comboSkill.getIcon();
+    }
 
     public String getName() {
         return name;
@@ -58,6 +70,7 @@ public class ComboSkill extends BaseEntity {
     }
 
     @OneToMany(mappedBy = "comboSkill")
+    @OrderBy("cardTemplate.id ASC")
     public List<ComboSkillCard> getComboSkillCards() {
         return comboSkillCards;
     }

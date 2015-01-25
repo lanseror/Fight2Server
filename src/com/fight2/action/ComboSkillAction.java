@@ -26,6 +26,7 @@ import com.fight2.model.SkillApplyParty;
 import com.fight2.model.SkillOperation;
 import com.fight2.model.SkillPointAttribute;
 import com.fight2.model.SkillType;
+import com.fight2.service.ComboSkillService;
 import com.google.common.collect.Lists;
 
 @Namespace("/combo-skill")
@@ -35,6 +36,8 @@ public class ComboSkillAction extends BaseAction {
     private UserDao userDao;
     @Autowired
     private ComboSkillDao comboSkillDao;
+    @Autowired
+    private ComboSkillService comboSkillService;
     @Autowired
     private ComboSkillCardDao comboSkillCardDao;
     @Autowired
@@ -91,6 +94,12 @@ public class ComboSkillAction extends BaseAction {
         datas = comboSkillDao.list();
         return SUCCESS;
     }
+    
+    @Action(value = "refresh", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
+    public String refresh() {
+        comboSkillService.reLoadData();
+        return SUCCESS;
+    }
 
     private void loadCardData() {
         final List<CardTemplate> cardTemplates = cardTemplateDao.list();
@@ -109,7 +118,7 @@ public class ComboSkillAction extends BaseAction {
             interceptorRefs = {
                     @InterceptorRef(value = "fileUpload", params = { "allowedExtensions ", ".jpg,.png", "allowedTypes",
                             "image/png,image/jpeg,image/pjpeg" }), @InterceptorRef("tokenSession"), @InterceptorRef("basicStack") }, results = {
-                    @Result(name = SUCCESS, location = "list", type = "redirect"), @Result(name = INPUT, location = "combo_skill_list.ftl") })
+                    @Result(name = SUCCESS, location = "refresh", type = "redirect"), @Result(name = INPUT, location = "combo_skill_list.ftl") })
     public String save() {
         if (comboSkill.getId() == BaseEntity.EMPTY_ID) {
             createSave();
@@ -334,6 +343,14 @@ public class ComboSkillAction extends BaseAction {
 
     public void setSavedCards(final List<Card> savedCards) {
         this.savedCards = savedCards;
+    }
+
+    public ComboSkillService getComboSkillService() {
+        return comboSkillService;
+    }
+
+    public void setComboSkillService(final ComboSkillService comboSkillService) {
+        this.comboSkillService = comboSkillService;
     }
 
 }

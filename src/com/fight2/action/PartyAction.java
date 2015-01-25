@@ -16,10 +16,12 @@ import com.fight2.dao.UserDao;
 import com.fight2.model.Card;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
+import com.fight2.model.ComboSkill;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
+import com.fight2.service.ComboSkillService;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
@@ -38,6 +40,8 @@ public class PartyAction extends BaseAction {
     private CardDao cardDao;
     @Autowired
     private CardImageDao cardImageDao;
+    @Autowired
+    private ComboSkillService comboSkillService;
     private Party party;
     private List<Party> datas;
     private int id;
@@ -95,6 +99,7 @@ public class PartyAction extends BaseAction {
             voParty.setHp(poParty.getHp());
             final List<PartyGrid> voPartyGrids = Lists.newArrayList();
             voParty.setPartyGrids(voPartyGrids);
+            final List<Integer> partyTemplateIds = Lists.newArrayList();
             for (final PartyGrid partyGrid : poParty.getPartyGrids()) {
                 final PartyGrid voPartyGrid = new PartyGrid();
                 voPartyGrid.setId(partyGrid.getId());
@@ -108,8 +113,14 @@ public class PartyAction extends BaseAction {
                     voCard.setAvatar(avatarObj.getUrl());
                     voCard.setImage(imageObj.getUrl());
                     voPartyGrid.setCard(voCard);
+                    partyTemplateIds.add(cardTemplate.getId());
                 }
                 voPartyGrids.add(voPartyGrid);
+            }
+
+            final List<ComboSkill> partyComboSkill = comboSkillService.getComboSkills(partyTemplateIds, false);
+            if (partyComboSkill.size() > 0) {
+                voParty.setComboSkils(partyComboSkill);
             }
             voParties.add(voParty);
         }
@@ -290,6 +301,14 @@ public class PartyAction extends BaseAction {
 
     public void setArenaRankingDao(final ArenaRankingDao arenaRankingDao) {
         this.arenaRankingDao = arenaRankingDao;
+    }
+
+    public ComboSkillService getComboSkillService() {
+        return comboSkillService;
+    }
+
+    public void setComboSkillService(final ComboSkillService comboSkillService) {
+        this.comboSkillService = comboSkillService;
     }
 
 }

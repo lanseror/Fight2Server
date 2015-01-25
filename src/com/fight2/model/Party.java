@@ -27,6 +27,8 @@ public class Party extends BaseEntity {
 
     private List<Integer> cards;
 
+    private List<ComboSkill> comboSkils;
+
     private PartyInfo partyInfo;
 
     public Party() {
@@ -41,6 +43,7 @@ public class Party extends BaseEntity {
         this.atk = party.getAtk();
         this.defence = party.getDefence();
         this.cards = party.getCards();
+        this.comboSkils = party.getComboSkils();
         this.partyGrids = party.getPartyGrids();
     }
 
@@ -103,6 +106,15 @@ public class Party extends BaseEntity {
 
     public void setCards(final List<Integer> cards) {
         this.cards = cards;
+    }
+
+    @Transient
+    public List<ComboSkill> getComboSkils() {
+        return comboSkils;
+    }
+
+    public void setComboSkils(final List<ComboSkill> comboSkils) {
+        this.comboSkils = comboSkils;
     }
 
     @ManyToOne
