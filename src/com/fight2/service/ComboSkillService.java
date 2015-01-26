@@ -11,9 +11,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.fight2.dao.CardImageDao;
 import com.fight2.dao.CardTemplateDao;
 import com.fight2.dao.ComboSkillCardDao;
 import com.fight2.dao.ComboSkillDao;
+import com.fight2.model.Card;
+import com.fight2.model.CardImage;
+import com.fight2.model.CardTemplate;
 import com.fight2.model.ComboSkill;
 import com.fight2.model.ComboSkillCard;
 import com.google.common.collect.Lists;
@@ -31,6 +35,8 @@ public class ComboSkillService {
     private ComboSkillCardDao comboSkillCardDao;
     @Autowired
     private CardTemplateDao cardTemplateDao;
+    @Autowired
+    private CardImageDao cardImageDao;
 
     @PostConstruct
     public void reLoadData() {
@@ -87,6 +93,32 @@ public class ComboSkillService {
         keys.addAll(addKeys);
     }
 
+    public List<ComboSkill> getComboSkills(final int templateId, final boolean persistent) {
+        final List<ComboSkill> comboSkills = comboSkillDao.getComboSkills(templateId);
+        if (persistent) {
+            return comboSkills;
+        } else {
+            final List<ComboSkill> skills = Lists.newArrayList();
+            for (final ComboSkill comboSkill : comboSkills) {
+                final ComboSkill comboSkillVo = new ComboSkill(comboSkill);
+                final List<ComboSkillCard> comboSkillCards = comboSkill.getComboSkillCards();
+                final List<Card> cards = Lists.newArrayList();
+                for (final ComboSkillCard comboSkillCard : comboSkillCards) {
+                    final CardTemplate cardTemplate = comboSkillCard.getCardTemplate();
+                    final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, 1, cardTemplate);
+                    final String avatar = avatarObj.getUrl();
+                    final Card card = new Card();
+                    card.setId(cardTemplate.getId());
+                    card.setAvatar(avatar);
+                    cards.add(card);
+                }
+                comboSkillVo.setCards(cards);
+                skills.add(comboSkillVo);
+            }
+            return skills;
+        }
+    }
+
     public ComboSkillDao getComboSkillDao() {
         return comboSkillDao;
     }
@@ -109,6 +141,14 @@ public class ComboSkillService {
 
     public void setCardTemplateDao(final CardTemplateDao cardTemplateDao) {
         this.cardTemplateDao = cardTemplateDao;
+    }
+
+    public CardImageDao getCardImageDao() {
+        return cardImageDao;
+    }
+
+    public void setCardImageDao(final CardImageDao cardImageDao) {
+        this.cardImageDao = cardImageDao;
     }
 
 }

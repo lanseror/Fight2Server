@@ -65,14 +65,19 @@ public class PartyAction extends BaseAction {
             voParty.setHp(poParty.getHp());
             final List<Integer> cards = Lists.newArrayList();
             voParty.setCards(cards);
+            final List<Integer> partyTemplateIds = Lists.newArrayList();
             for (final PartyGrid partyGrid : poParty.getPartyGrids()) {
                 final Card card = partyGrid.getCard();
                 if (card != null) {
                     cards.add(card.getId());
+                    partyTemplateIds.add(card.getCardTemplate().getId());
                 } else {
                     cards.add(-1);
                 }
-
+            }
+            final List<ComboSkill> partyComboSkill = comboSkillService.getComboSkills(partyTemplateIds, false);
+            if (partyComboSkill.size() > 0) {
+                voParty.setComboSkils(partyComboSkill);
             }
             voParties.add(voParty);
         }

@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Transient;
 
 @Entity
 public class ComboSkill extends BaseEntity {
@@ -21,6 +22,8 @@ public class ComboSkill extends BaseEntity {
 
     private List<ComboSkillCard> comboSkillCards;
 
+    private List<Card> cards;
+
     public ComboSkill() {
         super();
     }
@@ -30,6 +33,7 @@ public class ComboSkill extends BaseEntity {
         this.name = comboSkill.getName();
         this.probability = comboSkill.getProbability();
         this.icon = comboSkill.getIcon();
+        this.cards = comboSkill.getCards();
     }
 
     public String getName() {
@@ -77,6 +81,15 @@ public class ComboSkill extends BaseEntity {
 
     public void setComboSkillCards(final List<ComboSkillCard> comboSkillCards) {
         this.comboSkillCards = comboSkillCards;
+    }
+
+    @Transient
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(final List<Card> cards) {
+        this.cards = cards;
     }
 
 }

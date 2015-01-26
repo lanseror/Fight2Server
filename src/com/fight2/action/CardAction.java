@@ -10,12 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.CardDao;
 import com.fight2.dao.CardImageDao;
+import com.fight2.dao.CardTemplateDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
+import com.fight2.model.ComboSkill;
 import com.fight2.model.User;
+import com.fight2.service.ComboSkillService;
 import com.fight2.service.PartyService;
 import com.fight2.util.CardUtils;
 import com.fight2.util.SummonHelper;
@@ -34,7 +37,11 @@ public class CardAction extends BaseAction {
     @Autowired
     private CardImageDao cardImageDao;
     @Autowired
+    private CardTemplateDao cardTemplateDao;
+    @Autowired
     private PartyService partyService;
+    @Autowired
+    private ComboSkillService comboSkillService;
     @Autowired
     private UserDao userDao;
     private Card card;
@@ -242,6 +249,14 @@ public class CardAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "combos", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String combos() {
+        final CardTemplate cardTemplate = cardTemplateDao.get(id);
+        final List<ComboSkill> combos = comboSkillService.getComboSkills(cardTemplate.getId(), false);
+        jsonMsg = new Gson().toJson(combos);
+        return SUCCESS;
+    }
+
     public CardDao getCardDao() {
         return cardDao;
     }
@@ -316,6 +331,22 @@ public class CardAction extends BaseAction {
 
     public void setType(final int type) {
         this.type = type;
+    }
+
+    public ComboSkillService getComboSkillService() {
+        return comboSkillService;
+    }
+
+    public void setComboSkillService(final ComboSkillService comboSkillService) {
+        this.comboSkillService = comboSkillService;
+    }
+
+    public CardTemplateDao getCardTemplateDao() {
+        return cardTemplateDao;
+    }
+
+    public void setCardTemplateDao(final CardTemplateDao cardTemplateDao) {
+        this.cardTemplateDao = cardTemplateDao;
     }
 
 }
