@@ -1,12 +1,16 @@
 package com.fight2.model;
 
-public class BattleRecord {
+import java.util.List;
 
+import com.google.common.collect.Lists;
+
+public class BattleRecord {
     private String actionPlayer;
     private int atkParty;
     private int defenceParty;
     private int atk;
     private SkillRecord skill;
+    private List<ComboSkillRecord> comboRecords = Lists.newArrayList();
 
     public String getActionPlayer() {
         return actionPlayer;
@@ -46,6 +50,14 @@ public class BattleRecord {
 
     public void setSkill(final SkillRecord skill) {
         this.skill = skill;
+    }
+
+    public List<ComboSkillRecord> getComboRecords() {
+        return comboRecords;
+    }
+
+    public void setComboRecords(final List<ComboSkillRecord> comboRecords) {
+        this.comboRecords = comboRecords;
     }
 
 }

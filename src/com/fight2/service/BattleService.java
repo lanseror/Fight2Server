@@ -13,6 +13,8 @@ import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.ComboSkill;
+import com.fight2.model.ComboSkillRecord;
+import com.fight2.model.ComboSkillRecord.ComboSkillType;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
@@ -175,7 +177,8 @@ public class BattleService {
                         final BattleRecord atkBattleRecord = new BattleRecord();
                         atkBattleRecord.setActionPlayer("Player1");
                         atkBattleRecord.setAtkParty(partyIndex);
-                        final SkillRecord skillRecord = useSkill(attackerParty, attackerParties, defenderParties, "Player1", "Player2");
+                        final SkillRecord skillRecord = useSkill(attackerParty, attackerParties, defenderParties, "Player1", "Player2",
+                                atkBattleRecord);
                         atkBattleRecord.setSkill(skillRecord);
                         battleRecords.add(atkBattleRecord);
                         for (int defenderIndex = 0; defenderIndex < defenderParties.size(); defenderIndex++) {
@@ -184,7 +187,8 @@ public class BattleService {
                                 continue;
                             } else {
                                 atkBattleRecord.setDefenceParty(defenderIndex);
-                                final int atk = attack(attackerParty, defenderParty, attackerParties, defenderParties, "Player1", "Player2");
+                                final int atk = attack(attackerParty, defenderParty, attackerParties, defenderParties, "Player1", "Player2",
+                                        atkBattleRecord);
                                 atkBattleRecord.setAtk(atk);
                                 break;
                             }
@@ -202,7 +206,8 @@ public class BattleService {
                         final BattleRecord dfcBattleRecord = new BattleRecord();
                         dfcBattleRecord.setActionPlayer("Player2");
                         dfcBattleRecord.setAtkParty(partyIndex);
-                        final SkillRecord skillRecord = useSkill(defenderParty, defenderParties, attackerParties, "Player2", "Player1");
+                        final SkillRecord skillRecord = useSkill(defenderParty, defenderParties, attackerParties, "Player2", "Player1",
+                                dfcBattleRecord);
                         dfcBattleRecord.setSkill(skillRecord);
                         battleRecords.add(dfcBattleRecord);
                         for (int attackeIndex = 0; attackeIndex < attackerParties.size(); attackeIndex++) {
@@ -211,7 +216,8 @@ public class BattleService {
                                 continue;
                             } else {
                                 dfcBattleRecord.setDefenceParty(attackeIndex);
-                                final int atk = attack(defenderParty, attackerParty, defenderParties, attackerParties, "Player2", "Player1");
+                                final int atk = attack(defenderParty, attackerParty, defenderParties, attackerParties, "Player2", "Player1",
+                                        dfcBattleRecord);
                                 dfcBattleRecord.setAtk(atk);
                                 break;
                             }
@@ -249,7 +255,7 @@ public class BattleService {
     }
 
     private int attack(final Party attackerParty, final Party defenderParty, final List<Party> attackerParties, final List<Party> defenderParties,
-            final String attacker, final String defender) {
+            final String attacker, final String defender, final BattleRecord battleRecord) {
         // useSkill(attackerParty, defenderParty, attackerParties, defenderParties, attacker, defender);
 
         for (int i = 0; i < attackerParties.size(); i++) {
@@ -275,22 +281,33 @@ public class BattleService {
         System.out.println();
         System.out.println();
         if (defenderParty.getHp() <= 0) {
-            reviveIfApplicable(defenderParty);
+            reviveIfApplicable(defenderParty, ComboSkillType.AfterAttack, battleRecord);
         }
         return atk;
     }
 
-    private void reviveIfApplicable(final Party party) {
+    private void reviveIfApplicable(final Party party, final ComboSkillType type, final BattleRecord battleRecord) {
         final List<ComboSkill> comboSkills = comboSkillMap.get(party.getId());
         final Iterator<ComboSkill> it = comboSkills.iterator();
         ComboLoop: while (it.hasNext()) {
             final ComboSkill comboSkill = it.next();
+
             for (final SkillOperation operation : comboSkill.getOperations()) {
                 if (operation.getSkillType() == SkillType.Revival) {
                     if (random.nextInt(100) < comboSkill.getProbability()) {
                         final int point = operation.getPoint();
                         final int changePoint = point * party.getFullHp() / 100;
                         party.setHp(changePoint);
+                        final ComboSkillRecord comboRecord = new ComboSkillRecord();
+                        comboRecord.setComboId(comboSkill.getId());
+                        battleRecord.getComboRecords().add(comboRecord);
+                        final List<SkillOperation> operationRecords = comboRecord.getOperations();
+                        final SkillOperation operationRecord = new SkillOperation();
+                        operationRecord.setSign(operation.getSign());
+                        operationRecord.setPoint(changePoint * operation.getSign());
+                        operationRecord.setSkillApplyParty(operation.getSkillApplyParty());
+                        operationRecord.setSkillType(operation.getSkillType());
+                        operationRecords.add(operationRecord);
                         it.remove();
                         System.out.println(String.format("触发复活技能，复活了%s%%", changePoint));
                         break ComboLoop;
@@ -301,7 +318,7 @@ public class BattleService {
     }
 
     private SkillRecord useSkill(final Party selfParty, final List<Party> selfParties, final List<Party> opponentParties, final String attacker,
-            final String defender) {
+            final String defender, final BattleRecord battleRecord) {
         final List<PartyGrid> atPartyGrids = Lists.newArrayList();
         for (final PartyGrid partyGrid : selfParty.getPartyGrids()) {
             final Card card = partyGrid.getCard();
@@ -399,7 +416,7 @@ public class BattleService {
             for (int i = 0; i < opponentParties.size(); i++) {
                 final Party party = opponentParties.get(i);
                 if (opponentPartiesAliveInfo.get(i) && !isPartyAlive(party)) {
-                    reviveIfApplicable(party);
+                    reviveIfApplicable(party, ComboSkillType.AfterSkill, battleRecord);
                 }
             }
             return skillRecord;
