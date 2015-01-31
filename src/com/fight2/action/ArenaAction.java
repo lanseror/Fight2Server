@@ -39,6 +39,7 @@ import com.fight2.model.UserArenaRecord.UserArenaRecordStatus;
 import com.fight2.model.json.ArenaJson;
 import com.fight2.service.ArenaService;
 import com.fight2.service.BattleService;
+import com.fight2.service.ComboSkillService;
 import com.fight2.util.ArenaUtils;
 import com.fight2.util.DateUtils;
 import com.google.common.collect.Lists;
@@ -67,6 +68,8 @@ public class ArenaAction extends BaseAction {
     private ArenaContinuousWinDao arenaContinuousWinDao;
     @Autowired
     private GuildArenaUserDao guildArenaUserDao;
+    @Autowired
+    private ComboSkillService comboSkillService;
     @Autowired
     private TaskScheduler taskScheduler;
     private List<Arena> datas;
@@ -360,6 +363,7 @@ public class ArenaAction extends BaseAction {
             }
         }
         final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo, continuousWin);
+        battleService.setComboSkillService(comboSkillService);
         final BattleResult battleResult = battleService.fight(index);
         final int arenaId = ArenaUtils.getEnteredArena(attacker.getId());
         final Arena arena = arenaDao.load(arenaId);
@@ -628,6 +632,14 @@ public class ArenaAction extends BaseAction {
 
     public void setGuildArenaUserDao(final GuildArenaUserDao guildArenaUserDao) {
         this.guildArenaUserDao = guildArenaUserDao;
+    }
+
+    public ComboSkillService getComboSkillService() {
+        return comboSkillService;
+    }
+
+    public void setComboSkillService(final ComboSkillService comboSkillService) {
+        this.comboSkillService = comboSkillService;
     }
 
 }

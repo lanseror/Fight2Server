@@ -32,6 +32,7 @@ import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserQuestTask.UserTaskStatus;
 import com.fight2.model.UserStoreroom;
 import com.fight2.service.BattleService;
+import com.fight2.service.ComboSkillService;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
@@ -53,6 +54,8 @@ public class QuestTaskAction extends BaseAction {
     private UserStoreroomDao userStoreroomDao;
     @Autowired
     private CardDao cardDao;
+    @Autowired
+    private ComboSkillService comboSkillService;
     private QuestTask task;
     private List<QuestTask> datas;
     private int id;
@@ -138,6 +141,7 @@ public class QuestTaskAction extends BaseAction {
         final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
 
         final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo, null);
+        battleService.setComboSkillService(comboSkillService);
         final BattleResult battleResult = battleService.fight(0);
         if (battleResult.isWinner()) {
             userQuestTask.setStatus(UserTaskStatus.Finished);
@@ -320,6 +324,14 @@ public class QuestTaskAction extends BaseAction {
 
     public void setCardDao(final CardDao cardDao) {
         this.cardDao = cardDao;
+    }
+
+    public ComboSkillService getComboSkillService() {
+        return comboSkillService;
+    }
+
+    public void setComboSkillService(final ComboSkillService comboSkillService) {
+        this.comboSkillService = comboSkillService;
     }
 
 }

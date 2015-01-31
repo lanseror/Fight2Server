@@ -63,7 +63,7 @@
                 <tr>
                     <td align="center"><@s.select  name="signs" list=r"#{1:'加', -1:'减'}" value="1" /></td>
                     <td><@s.select name="skillApplyPartys" list=r"#{'Self':'本方', 'Opponent':'对方', 'Leader':'本方领队', 'OpponentLeader':'对方领队', 'SelfAll':'本方(全体)', 'OpponentAll':'对方(全体)'}" value="'Self'" /></td>
-                    <td align="center"><@s.select name="skillTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力', 'Skip':'击晕'}" value="'HP'" /></td>
+                    <td align="center"><@s.select name="skillTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力', 'Revival':'复活'}" value="'HP'" /></td>
                     <td width="160px" align="right"><@s.select name="skillPointAttributes" list=r"#{'HP':'生命值', 'ATK':'攻击力'}" value="'HP'" onchange="switchSkillPointAttribute(this);" /></td>
                     <td align="center"><@s.textfield size="20" name="points" cssClass="required int-range-1-300" />%</td>
                     <td align="right"><a href="###deleteOperation" onclick="deleteOperation(this);return false;">删除</a></td>
@@ -74,11 +74,11 @@
                      <tr>
                         <td align="center"><@s.select  name="signs" list=r"#{1:'加', -1:'减'}" value="sign" /></td>
                         <td><@s.select name="skillApplyPartys" list=r"#{'Self':'本方', 'Opponent':'对方', 'Leader':'本方领队', 'OpponentLeader':'对方领队', 'SelfAll':'本方(全体)', 'OpponentAll':'对方(全体)'}" value="skillApplyParty" /></td>
-                        <td align="center"><@s.select name="skillTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力'}" value="skillType"  /></td>
+                        <td align="center"><@s.select name="skillTypes" list=r"#{'HP':'生命值', 'ATK':'攻击力', 'Defence':'防御力', 'Revival':'复活'}" value="skillType"  /></td>
                         <td width="160px" align="right"><@s.select name="skillPointAttributes" list=r"#{'HP':'生命值', 'ATK':'攻击力'}" value="skillPointAttribute" onchange="switchSkillPointAttribute(this);" /></td>
                         <td align="center">
                             <#if skillPointAttribute=='ATK'>
-                                <@s.textfield size="20" name="points" cssClass="required int-range-100-1000" value="${point}" />%
+                                <@s.textfield size="20" name="points" cssClass="required int-range-1-300" value="${point}" />%
                             <#else>
                                 <@s.textfield size="20" name="points" cssClass="required int-range-1-300" value="${point}" />%
                             </#if>

@@ -9,6 +9,9 @@ public class BattleResult {
     private int cwMight;
     private int totalMight;
     private int cwRate;
+    private List<Party> attackerParties;
+    private List<Party> defenderParties;
+
     private List<BattleRecord> battleRecord;
 
     public boolean isWinner() {
@@ -65,6 +68,22 @@ public class BattleResult {
 
     public void setBattleRecord(final List<BattleRecord> battleRecord) {
         this.battleRecord = battleRecord;
+    }
+
+    public List<Party> getAttackerParties() {
+        return attackerParties;
+    }
+
+    public void setAttackerParties(final List<Party> attackerParties) {
+        this.attackerParties = attackerParties;
+    }
+
+    public List<Party> getDefenderParties() {
+        return defenderParties;
+    }
+
+    public void setDefenderParties(final List<Party> defenderParties) {
+        this.defenderParties = defenderParties;
     }
 
 }

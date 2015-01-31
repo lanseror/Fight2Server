@@ -23,11 +23,13 @@ public class Party extends BaseEntity {
 
     private int defence;
 
+    private int protection;
+
     private List<PartyGrid> partyGrids;
 
     private List<Integer> cards;
 
-    private List<ComboSkill> comboSkils;
+    private List<ComboSkill> comboSkills;
 
     private PartyInfo partyInfo;
 
@@ -42,9 +44,9 @@ public class Party extends BaseEntity {
         this.fullHp = party.getFullHp();
         this.atk = party.getAtk();
         this.defence = party.getDefence();
+        this.protection = party.getProtection();
         this.cards = party.getCards();
-        this.comboSkils = party.getComboSkils();
-        this.partyGrids = party.getPartyGrids();
+        this.comboSkills = party.getComboSkills();
     }
 
     public int getPartyNumber() {
@@ -89,6 +91,15 @@ public class Party extends BaseEntity {
         this.defence = defence;
     }
 
+    @Transient
+    public int getProtection() {
+        return protection;
+    }
+
+    public void setProtection(final int protection) {
+        this.protection = protection;
+    }
+
     @OneToMany(mappedBy = "party")
     @OrderBy("gridNumber ASC")
     public List<PartyGrid> getPartyGrids() {
@@ -109,12 +120,12 @@ public class Party extends BaseEntity {
     }
 
     @Transient
-    public List<ComboSkill> getComboSkils() {
-        return comboSkils;
+    public List<ComboSkill> getComboSkills() {
+        return comboSkills;
     }
 
-    public void setComboSkils(final List<ComboSkill> comboSkils) {
-        this.comboSkils = comboSkils;
+    public void setComboSkills(final List<ComboSkill> comboSkills) {
+        this.comboSkills = comboSkills;
     }
 
     @ManyToOne

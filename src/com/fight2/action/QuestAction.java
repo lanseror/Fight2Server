@@ -30,6 +30,7 @@ import com.fight2.model.quest.QuestTile;
 import com.fight2.model.quest.QuestTile.TileItem;
 import com.fight2.model.quest.QuestTreasureData;
 import com.fight2.service.BattleService;
+import com.fight2.service.ComboSkillService;
 import com.fight2.util.QuestUtils;
 import com.fight2.util.SummonHelper;
 import com.google.common.collect.Maps;
@@ -53,6 +54,8 @@ public class QuestAction extends BaseAction {
     private SummonHelper summonHelper;
     @Autowired
     private TaskScheduler taskScheduler;
+    @Autowired
+    private ComboSkillService comboSkillService;
     private int id;
     private int row;
     private int col;
@@ -209,6 +212,7 @@ public class QuestAction extends BaseAction {
         final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
 
         final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo, null);
+        battleService.setComboSkillService(comboSkillService);
         final BattleResult battleResult = battleService.fight(0);
 
         final ActionContext context = ActionContext.getContext();
@@ -306,6 +310,14 @@ public class QuestAction extends BaseAction {
 
     public void setUserQuestTaskDao(final UserQuestTaskDao userQuestTaskDao) {
         this.userQuestTaskDao = userQuestTaskDao;
+    }
+
+    public ComboSkillService getComboSkillService() {
+        return comboSkillService;
+    }
+
+    public void setComboSkillService(final ComboSkillService comboSkillService) {
+        this.comboSkillService = comboSkillService;
     }
 
 }

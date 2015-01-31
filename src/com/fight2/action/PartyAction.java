@@ -77,7 +77,7 @@ public class PartyAction extends BaseAction {
             }
             final List<ComboSkill> partyComboSkill = comboSkillService.getComboSkills(partyTemplateIds, false);
             if (partyComboSkill.size() > 0) {
-                voParty.setComboSkils(partyComboSkill);
+                voParty.setComboSkills(partyComboSkill);
             }
             voParties.add(voParty);
         }
@@ -125,7 +125,7 @@ public class PartyAction extends BaseAction {
 
             final List<ComboSkill> partyComboSkill = comboSkillService.getComboSkills(partyTemplateIds, false);
             if (partyComboSkill.size() > 0) {
-                voParty.setComboSkils(partyComboSkill);
+                voParty.setComboSkills(partyComboSkill);
             }
             voParties.add(voParty);
         }

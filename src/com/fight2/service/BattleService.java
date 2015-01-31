@@ -2,6 +2,7 @@ package com.fight2.service;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -11,6 +12,7 @@ import com.fight2.model.BattleRecord;
 import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
 import com.fight2.model.CardTemplate;
+import com.fight2.model.ComboSkill;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
@@ -26,13 +28,20 @@ import com.google.common.collect.Maps;
 
 public class BattleService {
     private static final int[] MIGHTS = { 10, 8, 5, 2 };
+    private final PartyInfo attackerPartyInfo;
+    private final PartyInfo defenderPartyInfo;
     private final List<Party> attackerParties = Lists.newArrayList();
     private final List<Party> defenderParties = Lists.newArrayList();
+    private final List<Party> attackerPartiesVo = Lists.newArrayList();
+    private final List<Party> defenderPartiesVo = Lists.newArrayList();
     private final ArenaContinuousWin continuousWin;
+    private ComboSkillService comboSkillService;
+    private final Map<Integer, List<ComboSkill>> comboSkillMap = Maps.newHashMap();
 
     private final static Map<String, String> EFFECT_MAP = Maps.newHashMap();
     private final Map<Card, Random> randomMap = Maps.newHashMap();
     private final Map<Card, int[]> randomGridMap = Maps.newHashMap();
+    private final Random random = new Random();
     static {
         EFFECT_MAP.put("-1" + SkillType.HP, "对%s造成伤害");
         EFFECT_MAP.put("1" + SkillType.HP, "为%s恢复生命值");
@@ -48,13 +57,52 @@ public class BattleService {
             final ArenaContinuousWin continuousWin) {
         super();
         this.continuousWin = continuousWin;
+        this.attackerPartyInfo = attackerPartyInfo;
+        this.defenderPartyInfo = defenderPartyInfo;
+    }
+
+    private void handlePreCombo(final Party party, final Party origParty) {
+        final List<ComboSkill> comboSkills = comboSkillMap.get(party.getId());
+        final Iterator<ComboSkill> it = comboSkills.iterator();
+        while (it.hasNext()) {
+            final ComboSkill skill = it.next();
+            for (final SkillOperation operation : skill.getOperations()) {
+                final SkillType skillType = operation.getSkillType();
+                final int point = operation.getPoint();
+                if (skillType == SkillType.HP) {
+                    final int changePoint = point * origParty.getHp() / 100;
+                    party.setHp(party.getHp() + changePoint);
+                } else if (skillType == SkillType.ATK) {
+                    final int changePoint = point * origParty.getAtk() / 100;
+                    party.setAtk(party.getAtk() + changePoint);
+                } else if (skillType == SkillType.Defence) {
+                    party.setProtection(point);
+                }
+                if (skillType != SkillType.Revival) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    public BattleResult fight(final int index) {
         for (final Party partyPo : attackerPartyInfo.getParties()) {
-            final Party partyVo = new Party(partyPo);
-            attackerParties.add(partyVo);
+            final Party copyParty = new Party(partyPo);
+            copyParty.setPartyGrids(partyPo.getPartyGrids());
+            final List<ComboSkill> comboSkills = comboSkillService.getComboSkills(partyPo, true);
+            comboSkillMap.put(copyParty.getId(), comboSkills);
+            handlePreCombo(copyParty, partyPo);
+            attackerParties.add(copyParty);
+            attackerPartiesVo.add(new Party(copyParty));
         }
         for (final Party partyPo : defenderPartyInfo.getParties()) {
-            final Party partyVo = new Party(partyPo);
-            defenderParties.add(partyVo);
+            final Party copyParty = new Party(partyPo);
+            copyParty.setPartyGrids(partyPo.getPartyGrids());
+            final List<ComboSkill> comboSkills = comboSkillService.getComboSkills(partyPo, true);
+            comboSkillMap.put(copyParty.getId(), comboSkills);
+            handlePreCombo(copyParty, partyPo);
+            defenderParties.add(copyParty);
+            defenderPartiesVo.add(new Party(copyParty));
         }
 
         for (final Party party : attackerParties) {
@@ -93,10 +141,10 @@ public class BattleService {
                 }
             }
         }
-    }
 
-    public BattleResult fight(final int index) {
-
+        final BattleResult battleResult = new BattleResult();
+        battleResult.setAttackerParties(attackerPartiesVo);
+        battleResult.setDefenderParties(defenderPartiesVo);
         System.out.println("----初始数值----");
         for (int i = 0; i < attackerParties.size(); i++) {
             final Party party = attackerParties.get(i);
@@ -184,7 +232,7 @@ public class BattleService {
         final boolean isAllAlive = isPartiesAllAlive(attackerParties);
         final int baseMight = isWinner ? MIGHTS[index] : MIGHTS[3];
         final int aliveMight = isAllAlive ? 3 : 0;
-        final BattleResult battleResult = new BattleResult();
+
         battleResult.setBattleRecord(battleRecords);
         battleResult.setWinner(isWinner);
         battleResult.setBaseMight(baseMight);
@@ -212,7 +260,7 @@ public class BattleService {
         }
 
         final int hp = defenderParty.getHp();
-        final int atk = attackerParty.getAtk();
+        final int atk = attackerParty.getAtk() * (100 - defenderParty.getProtection()) / 100;
         final int defence = defenderParty.getDefence();
         final int changeDefence = defence - atk;
         if (changeDefence > 0) {
@@ -226,7 +274,30 @@ public class BattleService {
                 defenderParty.getPartyNumber(), atk));
         System.out.println();
         System.out.println();
+        if (defenderParty.getHp() <= 0) {
+            reviveIfApplicable(defenderParty);
+        }
         return atk;
+    }
+
+    private void reviveIfApplicable(final Party party) {
+        final List<ComboSkill> comboSkills = comboSkillMap.get(party.getId());
+        final Iterator<ComboSkill> it = comboSkills.iterator();
+        ComboLoop: while (it.hasNext()) {
+            final ComboSkill comboSkill = it.next();
+            for (final SkillOperation operation : comboSkill.getOperations()) {
+                if (operation.getSkillType() == SkillType.Revival) {
+                    if (random.nextInt(100) < comboSkill.getProbability()) {
+                        final int point = operation.getPoint();
+                        final int changePoint = point * party.getFullHp() / 100;
+                        party.setHp(changePoint);
+                        it.remove();
+                        System.out.println(String.format("触发复活技能，复活了%s%%", changePoint));
+                        break ComboLoop;
+                    }
+                }
+            }
+        }
     }
 
     private SkillRecord useSkill(final Party selfParty, final List<Party> selfParties, final List<Party> opponentParties, final String attacker,
@@ -248,6 +319,10 @@ public class BattleService {
 
         final PartyGrid skillPartyGrid = getSkillCard(atPartyGrids);
         if (skillPartyGrid != null && skillPartyGrid.getCard() != null) {
+            final List<Boolean> opponentPartiesAliveInfo = Lists.newArrayList();
+            for (final Party party : opponentParties) {
+                opponentPartiesAliveInfo.add(isPartyAlive(party));
+            }
             final Card card = skillPartyGrid.getCard();
             final SkillRecord skillRecord = new SkillRecord();
             final CardTemplate cardTemplate = card.getCardTemplate();
@@ -283,7 +358,8 @@ public class BattleService {
                     switch (skillType) {
                     case HP:
                         if (changePoint < 0) {
-                            final int changeDefence = applyParty.getDefence() + changePoint;
+                            final int changeDefence = applyParty.getDefence() + changePoint * (100 - applyParty.getProtection()) / 100;
+                            ;
                             if (changeDefence > 0) {
                                 applyParty.setDefence(changeDefence);
                             } else {
@@ -308,6 +384,9 @@ public class BattleService {
                     case Skip:
                         // TODO
                         break;
+                    case Revival:
+                        // TODO
+                        break;
                     }
                 }
 
@@ -316,6 +395,13 @@ public class BattleService {
             skillRecord.setEffect(effectStrs.toString());
             System.out.println(String.format("%s的team%s - %s发动技能：%s. 效果：%s", attacker, selfParty.getPartyNumber(), cardTemplate.getName(),
                     skill.getName(), effectStrs.toString()));
+
+            for (int i = 0; i < opponentParties.size(); i++) {
+                final Party party = opponentParties.get(i);
+                if (opponentPartiesAliveInfo.get(i) && !isPartyAlive(party)) {
+                    reviveIfApplicable(party);
+                }
+            }
             return skillRecord;
         }
 
@@ -432,4 +518,17 @@ public class BattleService {
         }
         return isAllAlive;
     }
+
+    private boolean isPartyAlive(final Party party) {
+        return party.getHp() > 0;
+    }
+
+    public ComboSkillService getComboSkillService() {
+        return comboSkillService;
+    }
+
+    public void setComboSkillService(final ComboSkillService comboSkillService) {
+        this.comboSkillService = comboSkillService;
+    }
+
 }

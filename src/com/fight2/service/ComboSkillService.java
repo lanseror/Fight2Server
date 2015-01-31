@@ -20,6 +20,8 @@ import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.ComboSkill;
 import com.fight2.model.ComboSkillCard;
+import com.fight2.model.Party;
+import com.fight2.model.PartyGrid;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -74,6 +76,18 @@ public class ComboSkillService {
             }
         }
         return skills;
+    }
+
+    public List<ComboSkill> getComboSkills(final Party party, final boolean persistent) {
+        final List<Integer> partyTemplateIds = Lists.newArrayList();
+        for (final PartyGrid partyGrid : party.getPartyGrids()) {
+            final Card card = partyGrid.getCard();
+            if (card != null) {
+                partyTemplateIds.add(card.getCardTemplate().getId());
+            }
+        }
+
+        return getComboSkills(partyTemplateIds, persistent);
     }
 
     private static void calculateKey(final List<String> keys, final List<Integer> idList) {
