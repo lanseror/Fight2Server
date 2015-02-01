@@ -13,11 +13,11 @@ import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.ComboSkill;
-import com.fight2.model.ComboSkillRecord;
-import com.fight2.model.ComboSkillRecord.ComboSkillType;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
+import com.fight2.model.RevivalRecord;
+import com.fight2.model.RevivalRecord.RevivalType;
 import com.fight2.model.Skill;
 import com.fight2.model.SkillApplyParty;
 import com.fight2.model.SkillOperation;
@@ -281,12 +281,12 @@ public class BattleService {
         System.out.println();
         System.out.println();
         if (defenderParty.getHp() <= 0) {
-            reviveIfApplicable(defenderParty, ComboSkillType.AfterAttack, battleRecord);
+            reviveIfApplicable(defenderParty, RevivalType.AfterAttack, battleRecord);
         }
         return atk;
     }
 
-    private void reviveIfApplicable(final Party party, final ComboSkillType type, final BattleRecord battleRecord) {
+    private void reviveIfApplicable(final Party party, final RevivalType type, final BattleRecord battleRecord) {
         final List<ComboSkill> comboSkills = comboSkillMap.get(party.getId());
         final Iterator<ComboSkill> it = comboSkills.iterator();
         ComboLoop: while (it.hasNext()) {
@@ -298,16 +298,12 @@ public class BattleService {
                         final int point = operation.getPoint();
                         final int changePoint = point * party.getFullHp() / 100;
                         party.setHp(changePoint);
-                        final ComboSkillRecord comboRecord = new ComboSkillRecord();
-                        comboRecord.setComboId(comboSkill.getId());
-                        battleRecord.getComboRecords().add(comboRecord);
-                        final List<SkillOperation> operationRecords = comboRecord.getOperations();
-                        final SkillOperation operationRecord = new SkillOperation();
-                        operationRecord.setSign(operation.getSign());
-                        operationRecord.setPoint(changePoint * operation.getSign());
-                        operationRecord.setSkillApplyParty(operation.getSkillApplyParty());
-                        operationRecord.setSkillType(operation.getSkillType());
-                        operationRecords.add(operationRecord);
+                        final RevivalRecord revivalRecord = new RevivalRecord();
+                        revivalRecord.setComboId(comboSkill.getId());
+                        revivalRecord.setType(type);
+                        revivalRecord.setPoint(point);
+                        revivalRecord.setPartyNumber(party.getPartyNumber());
+                        battleRecord.getRevivalRecords().add(revivalRecord);
                         it.remove();
                         System.out.println(String.format("触发复活技能，复活了%s%%", changePoint));
                         break ComboLoop;
@@ -416,7 +412,7 @@ public class BattleService {
             for (int i = 0; i < opponentParties.size(); i++) {
                 final Party party = opponentParties.get(i);
                 if (opponentPartiesAliveInfo.get(i) && !isPartyAlive(party)) {
-                    reviveIfApplicable(party, ComboSkillType.AfterSkill, battleRecord);
+                    reviveIfApplicable(party, RevivalType.AfterSkill, battleRecord);
                 }
             }
             return skillRecord;

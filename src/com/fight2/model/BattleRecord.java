@@ -10,7 +10,7 @@ public class BattleRecord {
     private int defenceParty;
     private int atk;
     private SkillRecord skill;
-    private List<ComboSkillRecord> comboRecords = Lists.newArrayList();
+    private final List<RevivalRecord> revivalRecords = Lists.newArrayList();
 
     public String getActionPlayer() {
         return actionPlayer;
@@ -52,12 +52,8 @@ public class BattleRecord {
         this.skill = skill;
     }
 
-    public List<ComboSkillRecord> getComboRecords() {
-        return comboRecords;
-    }
-
-    public void setComboRecords(final List<ComboSkillRecord> comboRecords) {
-        this.comboRecords = comboRecords;
+    public List<RevivalRecord> getRevivalRecords() {
+        return revivalRecords;
     }
 
 }
