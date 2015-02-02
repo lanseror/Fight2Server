@@ -38,7 +38,7 @@ public class Party extends BaseEntity {
     }
 
     public Party(final Party party) {
-        super();
+        super(party);
         this.partyNumber = party.getPartyNumber();
         this.hp = party.getHp();
         this.fullHp = party.getFullHp();

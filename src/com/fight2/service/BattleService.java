@@ -305,7 +305,7 @@ public class BattleService {
                         revivalRecord.setPartyNumber(party.getPartyNumber());
                         battleRecord.getRevivalRecords().add(revivalRecord);
                         it.remove();
-                        System.out.println(String.format("触发复活技能，复活了%s%%", changePoint));
+                        System.out.println(String.format("触发复活技能，复活了%s%%", point));
                         break ComboLoop;
                     }
                 }
