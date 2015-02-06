@@ -13,6 +13,7 @@ import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.ChatMessageDao;
+import com.fight2.dao.UserDao;
 import com.fight2.model.ChatMessage;
 import com.fight2.model.User;
 import com.google.common.collect.Maps;
@@ -23,10 +24,11 @@ import com.opensymphony.xwork2.ActionContext;
 public class ChatAction extends BaseAction {
     private static final long serialVersionUID = 5916134694406462553L;
     private static final int MAX_MSG_SIZE = 1000;
-    private static final Map<Integer, Integer> MSG_USER_INDEX = Maps.newConcurrentMap();
 
     @Autowired
     private ChatMessageDao chatMessageDao;
+    @Autowired
+    private UserDao userDao;
     private List<ChatMessage> datas;
     private String msg;
     private int index;
@@ -101,16 +103,15 @@ public class ChatAction extends BaseAction {
     }
 
     private int getUserIndex(final int index) {
-        final User user = getLoginUser();
-        final int userId = user.getId();
-        final Integer userIndex = MSG_USER_INDEX.get(userId);
-        if (userIndex == null) {
-            final int initIndex = -1;
-            MSG_USER_INDEX.put(userId, initIndex);
-            return initIndex;
+        final User userLogin = getLoginUser();
+        final User user = userDao.get(userLogin.getId());
+        final int userIndex = user.getMsgIndex();
+        if (userIndex == -1) {
+            return userIndex;
         } else {
             if (index > userIndex) {
-                MSG_USER_INDEX.put(userId, index);
+                user.setMsgIndex(index);
+                userDao.update(user);
                 return index;
             } else {
                 return userIndex;
@@ -142,6 +143,14 @@ public class ChatAction extends BaseAction {
 
     public void setChatMessageDao(final ChatMessageDao chatMessageDao) {
         this.chatMessageDao = chatMessageDao;
+    }
+
+    public UserDao getUserDao() {
+        return userDao;
+    }
+
+    public void setUserDao(final UserDao userDao) {
+        this.userDao = userDao;
     }
 
     public List<ChatMessage> getDatas() {

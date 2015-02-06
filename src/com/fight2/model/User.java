@@ -29,6 +29,7 @@ public class User extends BaseEntity {
     private int guildContribution;
     private int salary;
     private int glory;
+    private int msgIndex=-1;
 
     public String getInstallUUID() {
         return installUUID;
@@ -178,6 +179,14 @@ public class User extends BaseEntity {
 
     public static int getUserCardpackSize() {
         return USER_CARDPACK_SIZE;
+    }
+
+    public int getMsgIndex() {
+        return msgIndex;
+    }
+
+    public void setMsgIndex(final int msgIndex) {
+        this.msgIndex = msgIndex;
     }
 
     public enum UserType {

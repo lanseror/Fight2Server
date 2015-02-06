@@ -68,6 +68,7 @@ public class BattleService {
         final Iterator<ComboSkill> it = comboSkills.iterator();
         while (it.hasNext()) {
             final ComboSkill skill = it.next();
+            boolean isRevival = false;
             for (final SkillOperation operation : skill.getOperations()) {
                 final SkillType skillType = operation.getSkillType();
                 final int point = operation.getPoint();
@@ -79,10 +80,12 @@ public class BattleService {
                     party.setAtk(party.getAtk() + changePoint);
                 } else if (skillType == SkillType.Defence) {
                     party.setProtection(point);
+                } else if (skillType == SkillType.Revival) {
+                    isRevival = true;
                 }
-                if (skillType != SkillType.Revival) {
-                    it.remove();
-                }
+            }
+            if (!isRevival) {
+                it.remove();
             }
         }
     }

@@ -233,11 +233,11 @@
         var skillPointAttribute = $(pointAttribute);
         var tr = skillPointAttribute.parent().parent();
         var type = skillPointAttribute.val();
-        var oldCss = "int-range-100-1000";
+        var oldCss = "int-range-1-300";
         var newCss = "int-range-1-300";
         if(type=='ATK'){
            oldCss = "int-range-1-300";
-           newCss = "int-range-100-1000";
+           newCss = "int-range-1-300";
         }
         tr.find("input[name=points]").each(function(){
             var point = $(this);
