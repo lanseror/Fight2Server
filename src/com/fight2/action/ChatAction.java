@@ -38,7 +38,8 @@ public class ChatAction extends BaseAction {
 
     @Action(value = "send", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String send() {
-        final User user = getLoginUser();
+        final User loginUser = getLoginUser();
+        final User user = userDao.get(loginUser.getId());
         final Calendar calendar = Calendar.getInstance();
         final DateFormat dateFormat = new SimpleDateFormat("HH:mm");
         final String dateString = dateFormat.format(calendar.getTime());

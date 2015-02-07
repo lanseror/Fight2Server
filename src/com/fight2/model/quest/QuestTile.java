@@ -40,6 +40,7 @@ public class QuestTile extends BaseEntity {
     public enum TileItem {
         Ticket,
         Stamina,
+        CoinBag,
         Card
     }
 }

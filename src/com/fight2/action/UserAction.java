@@ -179,7 +179,7 @@ public class UserAction extends BaseAction {
         response.put("cardTemplates", cardTemplateVos);
 
         jsonMsg = new Gson().toJson(response);
-        this.getSession().put(LOGIN_USER, user);
+        this.getSession().put(LOGIN_USER, voUser);
         return SUCCESS;
     }
 
