@@ -89,6 +89,17 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "fix", results = { @Result(name = SUCCESS, location = "user_list.ftl") })
+    public String fix() {
+        datas = userDao.list();
+        for (final User user : datas) {
+            final UserProperties userProperties = user.getUserProperties();
+            userProperties.setStamina(100);
+            userPropertiesDao.update(userProperties);
+        }
+        return SUCCESS;
+    }
+
     @Action(value = "register", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String register() {
         final User checkUser = userDao.getByInstallUUID(installUUID);

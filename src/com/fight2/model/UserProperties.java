@@ -8,6 +8,8 @@ import javax.persistence.OneToOne;
 public class UserProperties extends BaseEntity {
     private static final long serialVersionUID = 1335023426567017048L;
     private int stamina;
+    private boolean staminaRecoverStarted = false;
+    private long staminaTime=0;
     private int ticket;
     private int coin;
     private User user;
@@ -18,6 +20,22 @@ public class UserProperties extends BaseEntity {
 
     public void setStamina(final int stamina) {
         this.stamina = stamina;
+    }
+
+    public boolean isStaminaRecoverStarted() {
+        return staminaRecoverStarted;
+    }
+
+    public void setStaminaRecoverStarted(final boolean staminaRecoverStarted) {
+        this.staminaRecoverStarted = staminaRecoverStarted;
+    }
+
+    public long getStaminaTime() {
+        return staminaTime;
+    }
+
+    public void setStaminaTime(final long staminaTime) {
+        this.staminaTime = staminaTime;
     }
 
     public int getTicket() {

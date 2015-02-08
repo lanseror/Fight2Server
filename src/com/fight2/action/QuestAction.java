@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -14,6 +16,7 @@ import org.springframework.scheduling.TaskScheduler;
 import com.fight2.dao.CardDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserPropertiesDao;
 import com.fight2.dao.UserQuestInfoDao;
 import com.fight2.dao.UserQuestTaskDao;
 import com.fight2.dao.UserStoreroomDao;
@@ -24,6 +27,7 @@ import com.fight2.model.CardTemplate;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
+import com.fight2.model.UserProperties;
 import com.fight2.model.UserQuestInfo;
 import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserQuestTask.UserTaskStatus;
@@ -35,6 +39,7 @@ import com.fight2.service.BattleService;
 import com.fight2.service.ComboSkillService;
 import com.fight2.util.QuestUtils;
 import com.fight2.util.SummonHelper;
+import com.fight2.util.TmxUtils;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.opensymphony.xwork2.ActionContext;
@@ -54,6 +59,8 @@ public class QuestAction extends BaseAction {
     private UserQuestTaskDao userQuestTaskDao;
     @Autowired
     private UserStoreroomDao userStoreroomDao;
+    @Autowired
+    private UserPropertiesDao userPropertiesDao;
     @Autowired
     private SummonHelper summonHelper;
     @Autowired
@@ -76,11 +83,17 @@ public class QuestAction extends BaseAction {
             userQuestInfo.setUser(user);
             userQuestInfoDao.add(userQuestInfo);
         }
-        userQuestInfo.setRow(row);
-        userQuestInfo.setCol(col);
-        userQuestInfoDao.update(userQuestInfo);
 
-        response.put("status", 0);
+        final QuestTile startTile = new QuestTile();
+        startTile.setCol(userQuestInfo.getCol());
+        startTile.setRow(userQuestInfo.getRow());
+        final QuestTile desTile = new QuestTile();
+        desTile.setCol(col);
+        desTile.setRow(row);
+        final Stack<QuestTile> path = TmxUtils.findPath(startTile, desTile);
+        final boolean staminaEnough = useStamina(path, user);
+
+        int status = 0;
         final QuestTreasureData questTreasureData = QuestUtils.getUserData(currentUser.getId());
         if (questTreasureData.getVersion() > version) {
             response.put("treasureUpdate", true);
@@ -90,9 +103,11 @@ public class QuestAction extends BaseAction {
         }
 
         final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(user);
-        if (userQuestTask != null && userQuestTask.getStatus() == UserTaskStatus.Started && userQuestTask.getTask().getX() == col
+        if (!staminaEnough) {
+            status = 4;
+        } else if (userQuestTask != null && userQuestTask.getStatus() == UserTaskStatus.Started && userQuestTask.getTask().getX() == col
                 && userQuestTask.getTask().getY() == row) {
-            response.put("status", 3);
+            status = 3;
             final User boss = userQuestTask.getTask().getBoss();
             final User bossVo = new User();
             bossVo.setId(boss.getId());
@@ -106,7 +121,7 @@ public class QuestAction extends BaseAction {
             while (it.hasNext()) {
                 final QuestTile treasure = it.next();
                 if (treasure.getRow() == row && treasure.getCol() == col) {
-                    response.put("status", 1);
+                    status = 1;
                     final TileItem tileItem = treasure.getItem();
                     response.put("treasureItem", tileItem);
 
@@ -134,7 +149,7 @@ public class QuestAction extends BaseAction {
                 final Random random = new Random();
                 final int randomNum = random.nextInt(40);
                 if (randomNum < 2) {
-                    response.put("status", 2);
+                    status = 2;
                     final List<User> users = userDao.listByType(UserType.User);
                     final User enemy = users.get(random.nextInt(users.size()));
                     final User enemyVo = new User();
@@ -142,7 +157,7 @@ public class QuestAction extends BaseAction {
                     enemyVo.setName(enemy.getName());
                     response.put("enemy", enemyVo);
                 } else if (randomNum >= 2 && randomNum < 10) {
-                    response.put("status", 2);
+                    status = 2;
                     final List<User> npcs = userDao.listByType(UserType.QuestNpc);
                     final User enemy = npcs.get(random.nextInt(npcs.size()));
                     final User enemyVo = new User();
@@ -152,12 +167,42 @@ public class QuestAction extends BaseAction {
                 }
             }
         }
+        if (staminaEnough) {
+            userQuestInfo.setRow(row);
+            userQuestInfo.setCol(col);
+            userQuestInfoDao.update(userQuestInfo);
+        }
+        response.put("stamina", user.getUserProperties().getStamina());
+        response.put("status", status);
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(response));
         return SUCCESS;
     }
 
-    public void summonTreasure(final Map<String, Object> response, final User user) {
+    private boolean useStamina(final Stack<QuestTile> path, final User user) {
+        final int costStamina = path.size();
+        final UserProperties userProperties = user.getUserProperties();
+        calculateStamina(userProperties);
+        if (costStamina > userProperties.getStamina()) {
+            userPropertiesDao.update(userProperties);
+            return false;
+        }
+        userProperties.setStamina(userProperties.getStamina() - costStamina);
+        userPropertiesDao.update(userProperties);
+        return true;
+    }
+
+    private void calculateStamina(final UserProperties userProperties) {
+        final long now = System.currentTimeMillis();
+        final long timeDiff = now - userProperties.getStaminaTime();
+        final long minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiff);
+        final int recoverStamina = (int) (minutes * 1) + userProperties.getStamina();
+        final int nowStamina = recoverStamina > 100 ? 100 : recoverStamina;
+        userProperties.setStamina(nowStamina);
+        userProperties.setStaminaTime(now);
+    }
+
+    private void summonTreasure(final Map<String, Object> response, final User user) {
         final Random random = new Random();
         final int randomNum = random.nextInt(100);
         int addNum = 0;
@@ -333,6 +378,14 @@ public class QuestAction extends BaseAction {
 
     public void setUserStoreroomDao(final UserStoreroomDao userStoreroomDao) {
         this.userStoreroomDao = userStoreroomDao;
+    }
+
+    public UserPropertiesDao getUserPropertiesDao() {
+        return userPropertiesDao;
+    }
+
+    public void setUserPropertiesDao(final UserPropertiesDao userPropertiesDao) {
+        this.userPropertiesDao = userPropertiesDao;
     }
 
     public ComboSkillService getComboSkillService() {
