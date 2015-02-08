@@ -16,6 +16,7 @@ import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserQuestInfoDao;
 import com.fight2.dao.UserQuestTaskDao;
+import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
@@ -26,6 +27,7 @@ import com.fight2.model.User.UserType;
 import com.fight2.model.UserQuestInfo;
 import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserQuestTask.UserTaskStatus;
+import com.fight2.model.UserStoreroom;
 import com.fight2.model.quest.QuestTile;
 import com.fight2.model.quest.QuestTile.TileItem;
 import com.fight2.model.quest.QuestTreasureData;
@@ -50,6 +52,8 @@ public class QuestAction extends BaseAction {
     private PartyInfoDao partyInfoDao;
     @Autowired
     private UserQuestTaskDao userQuestTaskDao;
+    @Autowired
+    private UserStoreroomDao userStoreroomDao;
     @Autowired
     private SummonHelper summonHelper;
     @Autowired
@@ -105,8 +109,19 @@ public class QuestAction extends BaseAction {
                     response.put("status", 1);
                     final TileItem tileItem = treasure.getItem();
                     response.put("treasureItem", tileItem);
+
                     if (tileItem == TileItem.Card) {
                         summonTreasure(response, user);
+                    } else {
+                        final UserStoreroom userStoreroom = user.getStoreroom();
+                        if (tileItem == TileItem.CoinBag) {
+                            userStoreroom.setCoinBag(userStoreroom.getCoinBag() + 1);
+                        } else if (tileItem == TileItem.Stamina) {
+                            userStoreroom.setStamina(userStoreroom.getStamina() + 1);
+                        } else if (tileItem == TileItem.Ticket) {
+                            userStoreroom.setTicket(userStoreroom.getTicket() + 1);
+                        }
+                        userStoreroomDao.update(userStoreroom);
                     }
                     response.put("treasureIndex", treasureIndex);
                     hasTreasure = true;
@@ -310,6 +325,14 @@ public class QuestAction extends BaseAction {
 
     public void setUserQuestTaskDao(final UserQuestTaskDao userQuestTaskDao) {
         this.userQuestTaskDao = userQuestTaskDao;
+    }
+
+    public UserStoreroomDao getUserStoreroomDao() {
+        return userStoreroomDao;
+    }
+
+    public void setUserStoreroomDao(final UserStoreroomDao userStoreroomDao) {
+        this.userStoreroomDao = userStoreroomDao;
     }
 
     public ComboSkillService getComboSkillService() {

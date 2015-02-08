@@ -97,7 +97,7 @@ public class UserStoreroomAction extends BaseAction {
 
         final UserStoreroom userStoreroomVo = new UserStoreroom();
         userStoreroomVo.setId(userStoreroomPo.getId());
-        userStoreroomVo.setCoin(userStoreroomPo.getCoin());
+        userStoreroomVo.setCoinBag(userStoreroomPo.getCoinBag());
         userStoreroomVo.setStamina(userStoreroomPo.getStamina());
         userStoreroomVo.setTicket(userStoreroomPo.getTicket());
         userStoreroomVo.setCards(cardVos);

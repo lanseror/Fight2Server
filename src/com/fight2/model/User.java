@@ -21,6 +21,7 @@ public class User extends BaseEntity {
     private int level = 1;
     private PartyInfo partyInfo;
     private UserStoreroom storeroom;
+    private UserProperties userProperties;
     private UserQuestInfo questInfo;
     private List<Card> cards;
     private boolean isDisabled;
@@ -29,7 +30,7 @@ public class User extends BaseEntity {
     private int guildContribution;
     private int salary;
     private int glory;
-    private int msgIndex=-1;
+    private int msgIndex = -1;
 
     public String getInstallUUID() {
         return installUUID;
@@ -107,6 +108,15 @@ public class User extends BaseEntity {
 
     public void setStoreroom(final UserStoreroom storeroom) {
         this.storeroom = storeroom;
+    }
+
+    @OneToOne(mappedBy = "user")
+    public UserProperties getUserProperties() {
+        return userProperties;
+    }
+
+    public void setUserProperties(final UserProperties userProperties) {
+        this.userProperties = userProperties;
     }
 
     @OneToOne(mappedBy = "user")

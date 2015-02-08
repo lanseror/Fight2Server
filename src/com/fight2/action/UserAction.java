@@ -20,6 +20,7 @@ import com.fight2.dao.PartyDao;
 import com.fight2.dao.PartyGridDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserPropertiesDao;
 import com.fight2.dao.UserQuestInfoDao;
 import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.ArenaRanking;
@@ -33,6 +34,7 @@ import com.fight2.model.PartyGrid;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
+import com.fight2.model.UserProperties;
 import com.fight2.model.UserQuestInfo;
 import com.fight2.model.UserStoreroom;
 import com.google.common.collect.Lists;
@@ -54,6 +56,9 @@ public class UserAction extends BaseAction {
     private PartyGridDao partyGridDao;
     @Autowired
     private UserStoreroomDao userStoreroomDao;
+    @Autowired
+    private UserPropertiesDao userPropertiesDao;
+
     @Autowired
     private CardImageDao cardImageDao;
     @Autowired
@@ -113,6 +118,9 @@ public class UserAction extends BaseAction {
             final UserStoreroom userStoreroom = new UserStoreroom();
             userStoreroom.setUser(user);
             userStoreroomDao.add(userStoreroom);
+            final UserProperties userProperties = new UserProperties();
+            userProperties.setUser(user);
+            userPropertiesDao.add(userProperties);
         }
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(user));
@@ -238,6 +246,10 @@ public class UserAction extends BaseAction {
         final UserStoreroom userStorRoom = user.getStoreroom();
         if (userStorRoom != null) {
             userStoreroomDao.delete(userStorRoom);
+        }
+        final UserProperties userProperties = user.getUserProperties();
+        if (userProperties != null) {
+            userPropertiesDao.delete(userProperties);
         }
         final UserQuestInfo userQuestInfo = user.getQuestInfo();
         if (userQuestInfo != null) {
@@ -424,6 +436,14 @@ public class UserAction extends BaseAction {
 
     public void setUserStoreroomDao(final UserStoreroomDao userStoreroomDao) {
         this.userStoreroomDao = userStoreroomDao;
+    }
+
+    public UserPropertiesDao getUserPropertiesDao() {
+        return userPropertiesDao;
+    }
+
+    public void setUserPropertiesDao(final UserPropertiesDao userPropertiesDao) {
+        this.userPropertiesDao = userPropertiesDao;
     }
 
 }

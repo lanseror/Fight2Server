@@ -1,20 +1,16 @@
 package com.fight2.model;
 
-import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 
 @Entity
-public class UserStoreroom extends BaseEntity {
+public class UserProperties extends BaseEntity {
     private static final long serialVersionUID = 1335023426567017048L;
     private int stamina;
     private int ticket;
-    private int coinBag;
+    private int coin;
     private User user;
-    private List<Card> cards;
 
     public int getStamina() {
         return stamina;
@@ -32,21 +28,12 @@ public class UserStoreroom extends BaseEntity {
         this.ticket = ticket;
     }
 
-    public int getCoinBag() {
-        return coinBag;
+    public int getCoin() {
+        return coin;
     }
 
-    public void setCoinBag(final int coinBag) {
-        this.coinBag = coinBag;
-    }
-
-    @Transient
-    public List<Card> getCards() {
-        return cards;
-    }
-
-    public void setCards(final List<Card> cards) {
-        this.cards = cards;
+    public void setCoin(final int coin) {
+        this.coin = coin;
     }
 
     @OneToOne(optional = false)
