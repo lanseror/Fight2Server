@@ -22,6 +22,7 @@ import com.fight2.model.ComboSkill;
 import com.fight2.model.ComboSkillCard;
 import com.fight2.model.Party;
 import com.fight2.model.PartyGrid;
+import com.fight2.model.SkillOperation;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -127,6 +128,17 @@ public class ComboSkillService {
                     cards.add(card);
                 }
                 comboSkillVo.setCards(cards);
+                final List<SkillOperation> operationPos = comboSkill.getOperations();
+                final List<SkillOperation> operations = Lists.newArrayList();
+                for (final SkillOperation operationPo : operationPos) {
+                    final SkillOperation operation = new SkillOperation();
+                    operation.setSign(operationPo.getSign());
+                    operation.setPoint(operationPo.getPoint());
+                    operation.setSkillApplyParty(operationPo.getSkillApplyParty());
+                    operation.setSkillType(operationPo.getSkillType());
+                    operations.add(operation);
+                }
+                comboSkillVo.setOperations(operations);
                 skills.add(comboSkillVo);
             }
             return skills;
