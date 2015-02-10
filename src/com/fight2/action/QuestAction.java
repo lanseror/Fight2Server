@@ -183,13 +183,13 @@ public class QuestAction extends BaseAction {
         final int costStamina = path.size() - 1;
         final UserProperties userProperties = user.getUserProperties();
         calculateStamina(userProperties);
-        System.out.println(user.getName() + ":" + costStamina);
-        // if (costStamina > userProperties.getStamina()) {
-        // userPropertiesDao.update(userProperties);
-        // return false;
-        // }
-        // userProperties.setStamina(userProperties.getStamina() - costStamina);
-        // userPropertiesDao.update(userProperties);
+        // System.out.println(user.getName() + ":" + costStamina);
+        if (costStamina > userProperties.getStamina()) {
+            userPropertiesDao.update(userProperties);
+            return false;
+        }
+        userProperties.setStamina(userProperties.getStamina() - costStamina);
+        userPropertiesDao.update(userProperties);
         return true;
     }
 

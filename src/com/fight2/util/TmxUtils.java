@@ -61,7 +61,6 @@ public class TmxUtils {
             final int row = pointTMXTile.getRow();
             final int col = pointTMXTile.getCol();
             if (row == desTile.getRow() && col == desTile.getCol()) {
-                System.out.println("Found");
                 break;
             }
 
