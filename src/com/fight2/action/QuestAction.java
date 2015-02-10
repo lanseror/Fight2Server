@@ -180,15 +180,16 @@ public class QuestAction extends BaseAction {
     }
 
     private boolean useStamina(final Stack<QuestTile> path, final User user) {
-        final int costStamina = path.size();
+        final int costStamina = path.size() - 1;
         final UserProperties userProperties = user.getUserProperties();
         calculateStamina(userProperties);
-        if (costStamina > userProperties.getStamina()) {
-            userPropertiesDao.update(userProperties);
-            return false;
-        }
-        userProperties.setStamina(userProperties.getStamina() - costStamina);
-        userPropertiesDao.update(userProperties);
+        System.out.println(user.getName() + ":" + costStamina);
+        // if (costStamina > userProperties.getStamina()) {
+        // userPropertiesDao.update(userProperties);
+        // return false;
+        // }
+        // userProperties.setStamina(userProperties.getStamina() - costStamina);
+        // userPropertiesDao.update(userProperties);
         return true;
     }
 
@@ -260,6 +261,19 @@ public class QuestAction extends BaseAction {
             context.put("jsonMsg", new Gson().toJson(oldData));
         }
 
+        return SUCCESS;
+    }
+
+    @Action(value = "user-props", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String getUserProperties() {
+        final User currentUser = (User) this.getSession().get(LOGIN_USER);
+        final User user = userDao.get(currentUser.getId());
+        final UserProperties userProperties = user.getUserProperties();
+        final UserProperties userPropertiesVo = new UserProperties();
+        userPropertiesVo.setCoin(userProperties.getCoin());
+        userPropertiesVo.setStamina(userProperties.getStamina());
+        userPropertiesVo.setTicket(userProperties.getTicket());
+        jsonMsg = new Gson().toJson(userPropertiesVo);
         return SUCCESS;
     }
 

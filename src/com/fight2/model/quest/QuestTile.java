@@ -9,6 +9,16 @@ public class QuestTile extends BaseEntity {
     private int col;
     private TileItem item;
 
+    public QuestTile(final int row, final int col) {
+        super();
+        this.row = row;
+        this.col = col;
+    }
+
+    public QuestTile() {
+
+    }
+
     public int getRow() {
         return row;
     }
@@ -35,6 +45,28 @@ public class QuestTile extends BaseEntity {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
+    }
+
+    @Override
+    public String toString() {
+        return row + "," + col;
+    }
+
+    @Override
+    public int hashCode() {
+        return (row + "," + col).hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object tile) {
+        if (this == tile) {
+            return true;
+        } else if (tile != null && tile instanceof QuestTile) {
+            final QuestTile questTile = (QuestTile) tile;
+            return this.col == questTile.getCol() && this.row == questTile.getRow();
+        } else {
+            return false;
+        }
     }
 
     public enum TileItem {

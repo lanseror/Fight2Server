@@ -49,7 +49,22 @@ public class MessageAction extends BaseAction {
                 userQuestTaskVo = new UserQuestTask(userQuestTask);
                 response.put("status", 0);
             } else {
-                response.put("status", 1);
+                final QuestTask latestTask = userLatestTask.getTask();
+                QuestTask nextQuestTask = questTaskDao.get(latestTask.getId() + 1);
+                if (nextQuestTask == null) {
+                    nextQuestTask = questTaskDao.getNextTask(latestTask);
+                }
+                if (nextQuestTask != null) {
+                    final UserQuestTask nextUserQuestTask = new UserQuestTask();
+                    nextUserQuestTask.setUser(user);
+                    nextUserQuestTask.setStatus(UserTaskStatus.Ready);
+                    nextUserQuestTask.setTask(nextQuestTask);
+                    userQuestTaskDao.add(nextUserQuestTask);
+                    userQuestTaskVo = new UserQuestTask(nextUserQuestTask);
+                    response.put("status", 0);
+                } else {
+                    response.put("status", 1);
+                }
             }
 
         }

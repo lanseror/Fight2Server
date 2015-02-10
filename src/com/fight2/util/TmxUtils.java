@@ -8,8 +8,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
+import java.util.Vector;
 
 import tiled.core.Map;
+import tiled.core.MapLayer;
 import tiled.core.Tile;
 import tiled.core.TileLayer;
 import tiled.io.TMXMapReader;
@@ -45,65 +47,88 @@ public class TmxUtils {
 
     public static Stack<QuestTile> findPath(final QuestTile startTile, final QuestTile desTile) {
         final tiled.core.Map map = TmxUtils.getMap();
-        final TileLayer tmxLayer = (TileLayer) map.getLayers().get(0);
+        final Vector<MapLayer> layers = map.getLayers();
+        final TileLayer collisionLayer = (TileLayer) layers.get(0);
         TMXTilePoint currentPoint = new TMXTilePoint(startTile, null);
         final Queue<TMXTilePoint> queue = new LinkedList<TMXTilePoint>();
         queue.add(currentPoint);
-        final Set<Tile> visitedTiles = new HashSet<Tile>();
-        final Tile startTMXTile = tmxLayer.getTile(startTile.getRow(), startTile.getCol());
-        visitedTiles.add(startTMXTile);
+        final Set<QuestTile> visitedTiles = new HashSet<QuestTile>();
+        final QuestTile startRoadTile = new QuestTile(startTile.getRow(), startTile.getCol());
+        visitedTiles.add(startRoadTile);
         while (!queue.isEmpty()) {
             currentPoint = queue.poll();
             final QuestTile pointTMXTile = currentPoint.getTmxTile();
             final int row = pointTMXTile.getRow();
             final int col = pointTMXTile.getCol();
-            if (pointTMXTile == desTile) {
+            if (row == desTile.getRow() && col == desTile.getCol()) {
+                System.out.println("Found");
                 break;
             }
 
-            final Tile upTile = tmxLayer.getTile(row - 1, col);
-            if (upTile == null && !visitedTiles.contains(upTile)) {/* up */
-                visit(row - 1, col, currentPoint, queue);
-                visitedTiles.add(upTile);
+            final int upRow = row - 1;
+            final int upCol = col;
+            final Tile upTile = collisionLayer.getTile(upRow, upCol);
+            final QuestTile upRoadTile = createRoadTile(upRow, upCol);
+            if (upTile == null && !visitedTiles.contains(upRoadTile)) {/* up */
+                visit(upRow, upCol, currentPoint, queue);
+                visitedTiles.add(upRoadTile);
             }
-            final Tile leftTile = tmxLayer.getTile(row, col - 1);
-            if (leftTile == null && !visitedTiles.contains(leftTile)) {/* left */
-                visit(row, col - 1, currentPoint, queue);
-                visitedTiles.add(leftTile);
+            final int leftRow = row;
+            final int leftCol = col - 1;
+            final Tile leftTile = collisionLayer.getTile(leftRow, leftCol);
+            final QuestTile leftRoadTile = createRoadTile(leftRow, leftCol);
+            if (leftTile == null && !visitedTiles.contains(leftRoadTile)) {/* left */
+                visit(leftRow, leftCol, currentPoint, queue);
+                visitedTiles.add(leftRoadTile);
             }
-            final Tile rightTile = tmxLayer.getTile(row, col + 1);
-            if (rightTile == null && !visitedTiles.contains(rightTile)) { /* right */
-                visit(row, col + 1, currentPoint, queue);
-                visitedTiles.add(rightTile);
+            final int rightRow = row;
+            final int rightCol = col + 1;
+            final Tile rightTile = collisionLayer.getTile(rightRow, rightCol);
+            final QuestTile rightRoadTile = createRoadTile(rightRow, rightCol);
+            if (rightTile == null && !visitedTiles.contains(rightRoadTile)) { /* right */
+                visit(rightRow, rightCol, currentPoint, queue);
+                visitedTiles.add(rightRoadTile);
             }
-            final Tile downTile = tmxLayer.getTile(row + 1, col);
-            if (downTile != null && !visitedTiles.contains(downTile)) { /* down */
-                visit(row + 1, col, currentPoint, queue);
-                visitedTiles.add(downTile);
+            final int downRow = row + 1;
+            final int downCol = col;
+            final Tile downTile = collisionLayer.getTile(downRow, downCol);
+            final QuestTile downRoadTile = createRoadTile(downRow, downCol);
+            if (downTile == null && !visitedTiles.contains(downRoadTile)) { /* down */
+                visit(downRow, downCol, currentPoint, queue);
+                visitedTiles.add(downRoadTile);
             }
-            final Tile leftUpTile = tmxLayer.getTile(row - 1, col - 1);
-            if (leftUpTile != null && !visitedTiles.contains(leftUpTile)) {/* left up */
-                visit(row - 1, col - 1, currentPoint, queue);
-                visitedTiles.add(leftUpTile);
+            final int leftUpRow = row - 1;
+            final int leftUpCol = col - 1;
+            final Tile leftUpTile = collisionLayer.getTile(leftUpRow, leftUpCol);
+            final QuestTile leftUpRoadTile = createRoadTile(leftUpRow, leftUpCol);
+            if (leftUpTile == null && !visitedTiles.contains(leftUpRoadTile)) {/* left up */
+                visit(leftUpRow, leftUpCol, currentPoint, queue);
+                visitedTiles.add(leftUpRoadTile);
             }
-            final Tile rightUpTile = tmxLayer.getTile(row - 1, col + 1);
-            if (rightUpTile != null && !visitedTiles.contains(rightUpTile)) {/* right up */
-                visit(row - 1, col + 1, currentPoint, queue);
-                visitedTiles.add(rightUpTile);
+            final int rightUpRow = row - 1;
+            final int rightUpCol = col + 1;
+            final Tile rightUpTile = collisionLayer.getTile(rightUpRow, rightUpCol);
+            final QuestTile righUpRoadTile = createRoadTile(rightUpRow, rightUpCol);
+            if (rightUpTile == null && !visitedTiles.contains(righUpRoadTile)) {/* right up */
+                visit(rightUpRow, rightUpCol, currentPoint, queue);
+                visitedTiles.add(righUpRoadTile);
             }
-
-            final Tile leftDownTile = tmxLayer.getTile(row + 1, col - 1);
-            if (leftDownTile != null && !visitedTiles.contains(leftDownTile)) { /* left down */
-                visit(row + 1, col - 1, currentPoint, queue);
-                visitedTiles.add(leftDownTile);
+            final int leftDownRow = row + 1;
+            final int leftDownCol = col - 1;
+            final Tile leftDownTile = collisionLayer.getTile(leftDownRow, leftDownCol);
+            final QuestTile leftDownRoadTile = createRoadTile(leftDownRow, leftDownCol);
+            if (leftDownTile == null && !visitedTiles.contains(leftDownRoadTile)) { /* left down */
+                visit(leftDownRow, leftDownCol, currentPoint, queue);
+                visitedTiles.add(leftDownRoadTile);
             }
-
-            final Tile rightDownTile = tmxLayer.getTile(row + 1, col + 1);
-            if (rightDownTile != null && !visitedTiles.contains(rightDownTile)) { /* right down */
-                visit(row + 1, col + 1, currentPoint, queue);
-                visitedTiles.add(rightDownTile);
+            final int rightDownRow = row + 1;
+            final int rightDownCol = col + 1;
+            final Tile rightDownTile = collisionLayer.getTile(rightDownRow, rightDownCol);
+            final QuestTile rightDownRoadTile = createRoadTile(rightDownRow, rightDownCol);
+            if (rightDownTile == null && !visitedTiles.contains(rightDownRoadTile)) { /* right down */
+                visit(rightDownRow, rightDownCol, currentPoint, queue);
+                visitedTiles.add(rightDownRoadTile);
             }
-
         }
 
         final Stack<QuestTile> stack = new Stack<QuestTile>();
@@ -111,12 +136,16 @@ public class TmxUtils {
         while (currentPoint.getPredecessor() != null) {
             currentPoint = currentPoint.getPredecessor();
             stack.push(currentPoint.getTmxTile());
-            if (currentPoint.getTmxTile() == startTile) {
+            if (currentPoint.getTmxTile().equals(startTile)) {
                 break;
             }
         }
-
+        // System.out.println("test:" + stack.size());
         return stack;
+    }
+
+    private static QuestTile createRoadTile(final int row, final int col) {
+        return new QuestTile(row, col);
     }
 
     private static void visit(final int row, final int col, final TMXTilePoint predecessor, final Queue<TMXTilePoint> queue) {

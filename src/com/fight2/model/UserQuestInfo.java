@@ -41,4 +41,9 @@ public class UserQuestInfo extends BaseEntity {
         return serialVersionUID;
     }
 
+    public void reset() {
+        this.row = 22;
+        this.col = 32;
+    }
+
 }

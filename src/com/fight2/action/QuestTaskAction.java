@@ -204,9 +204,9 @@ public class QuestTaskAction extends BaseAction {
         }
         if (nextQuestTask != null) {
             final UserQuestTask nextUserQuestTask = new UserQuestTask();
-            userQuestTask.setUser(user);
-            userQuestTask.setStatus(UserTaskStatus.Ready);
-            userQuestTask.setTask(nextQuestTask);
+            nextUserQuestTask.setUser(user);
+            nextUserQuestTask.setStatus(UserTaskStatus.Ready);
+            nextUserQuestTask.setTask(nextQuestTask);
             userQuestTaskDao.add(nextUserQuestTask);
         }
         final Map<String, Object> response = Maps.newHashMap();

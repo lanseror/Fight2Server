@@ -58,7 +58,6 @@ public class UserAction extends BaseAction {
     private UserStoreroomDao userStoreroomDao;
     @Autowired
     private UserPropertiesDao userPropertiesDao;
-
     @Autowired
     private CardImageDao cardImageDao;
     @Autowired
@@ -93,9 +92,12 @@ public class UserAction extends BaseAction {
     public String fix() {
         datas = userDao.list();
         for (final User user : datas) {
-            final UserProperties userProperties = user.getUserProperties();
-            userProperties.setStamina(100);
-            userPropertiesDao.update(userProperties);
+            if (user.getUserProperties() == null) {
+                final UserProperties userProperties = new UserProperties();
+                userProperties.setUser(user);
+                userProperties.setStamina(100);
+                userPropertiesDao.add(userProperties);
+            }
         }
         return SUCCESS;
     }
@@ -183,6 +185,11 @@ public class UserAction extends BaseAction {
         voUser.setName(user.getName());
         voUser.setInstallUUID(user.getInstallUUID());
         voUser.setUsername(user.getUsername());
+
+        // Reset user to home position.
+        final UserQuestInfo questInfo = user.getQuestInfo();
+        questInfo.reset();
+        userQuestInfoDao.update(questInfo);
 
         final List<CardTemplate> cardTemplateVos = Lists.newArrayList();
         final List<CardTemplate> cardTemplates = cardTemplateDao.list();
