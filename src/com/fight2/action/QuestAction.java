@@ -198,9 +198,17 @@ public class QuestAction extends BaseAction {
         final long timeDiff = now - userProperties.getStaminaTime();
         final long minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiff);
         final int recoverStamina = (int) (minutes * 1) + userProperties.getStamina();
-        final int nowStamina = recoverStamina > 100 ? 100 : recoverStamina;
-        userProperties.setStamina(nowStamina);
-        userProperties.setStaminaTime(now);
+        if (recoverStamina > UserProperties.MAX_STAMINA) {
+            userProperties.setStamina(UserProperties.MAX_STAMINA);
+            userProperties.setStaminaTime(now);
+        } else {
+            userProperties.setStamina(recoverStamina);
+            if (minutes > 1) {
+                final long remainCoverTime = timeDiff - TimeUnit.MINUTES.toMillis(minutes);
+                userProperties.setStaminaTime(now - remainCoverTime);
+            }
+        }
+
     }
 
     private void summonTreasure(final Map<String, Object> response, final User user) {
@@ -269,6 +277,8 @@ public class QuestAction extends BaseAction {
         final User currentUser = (User) this.getSession().get(LOGIN_USER);
         final User user = userDao.get(currentUser.getId());
         final UserProperties userProperties = user.getUserProperties();
+        calculateStamina(userProperties);
+        userPropertiesDao.update(userProperties);
         final UserProperties userPropertiesVo = new UserProperties();
         userPropertiesVo.setCoin(userProperties.getCoin());
         userPropertiesVo.setStamina(userProperties.getStamina());

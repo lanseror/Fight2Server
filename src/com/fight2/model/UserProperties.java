@@ -6,6 +6,7 @@ import javax.persistence.OneToOne;
 
 @Entity
 public class UserProperties extends BaseEntity {
+    public static final int MAX_STAMINA =100;
     private static final long serialVersionUID = 1335023426567017048L;
     private int stamina;
     private long staminaTime = 0;

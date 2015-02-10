@@ -95,7 +95,7 @@ public class UserAction extends BaseAction {
             if (user.getUserProperties() == null) {
                 final UserProperties userProperties = new UserProperties();
                 userProperties.setUser(user);
-                userProperties.setStamina(100);
+                userProperties.setStamina(UserProperties.MAX_STAMINA);
                 userPropertiesDao.add(userProperties);
             }
         }
