@@ -203,10 +203,8 @@ public class QuestAction extends BaseAction {
             userProperties.setStaminaTime(now);
         } else {
             userProperties.setStamina(recoverStamina);
-            if (minutes > 1) {
-                final long remainCoverTime = timeDiff - TimeUnit.MINUTES.toMillis(minutes);
-                userProperties.setStaminaTime(now - remainCoverTime);
-            }
+            final long remainCoverTime = timeDiff - TimeUnit.MINUTES.toMillis(minutes);
+            userProperties.setStaminaTime(now - remainCoverTime);
         }
 
     }
