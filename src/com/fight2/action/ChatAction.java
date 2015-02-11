@@ -87,7 +87,7 @@ public class ChatAction extends BaseAction {
 
         final int maxId = chatMessageDao.getMaxId();
         if (maxId - index > MAX_MSG_SIZE) {
-            index = maxId - index;
+            index = maxId - MAX_MSG_SIZE;
         }
         final List<ChatMessage> messages = chatMessageDao.listFromId(index, MAX_MSG_SIZE);
         final int msgSize = messages.size();

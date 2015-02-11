@@ -22,6 +22,7 @@ import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserPropertiesDao;
 import com.fight2.dao.UserQuestInfoDao;
+import com.fight2.dao.UserQuestTaskDao;
 import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.ArenaRanking;
 import com.fight2.model.BaseEntity;
@@ -36,6 +37,7 @@ import com.fight2.model.User;
 import com.fight2.model.User.UserType;
 import com.fight2.model.UserProperties;
 import com.fight2.model.UserQuestInfo;
+import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserStoreroom;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -66,6 +68,8 @@ public class UserAction extends BaseAction {
     private ArenaRankingDao arenaRankingDao;
     @Autowired
     private UserQuestInfoDao userQuestInfoDao;
+    @Autowired
+    private UserQuestTaskDao userQuestTaskDao;
     @Autowired
     private CardTemplateDao cardTemplateDao;
     private User user;
@@ -125,6 +129,9 @@ public class UserAction extends BaseAction {
                     final PartyGrid partyGrid = new PartyGrid();
                     partyGrid.setGridNumber(gridIndex);
                     partyGrid.setParty(party);
+                    if (i == 1 && gridIndex == 1) {
+                        partyGrid.setCard(defaultLeader(user));
+                    }
                     partyGridDao.add(partyGrid);
                 }
             }
@@ -134,10 +141,34 @@ public class UserAction extends BaseAction {
             final UserProperties userProperties = new UserProperties();
             userProperties.setUser(user);
             userPropertiesDao.add(userProperties);
+            final UserQuestInfo userQuestInfo = new UserQuestInfo();
+            userQuestInfo.setUser(user);
+            userQuestInfoDao.add(userQuestInfo);
         }
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(user));
         return SUCCESS;
+    }
+
+    private Card defaultLeader(final User user) {
+        final CardTemplate cardTemplate = cardTemplateDao.get(22);
+        final Card card = new Card();
+        final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, card.getTier(), cardTemplate);
+        final String avatar = avatarObj.getUrl();
+        final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, card.getTier(), cardTemplate);
+        final String image = imageObj.getUrl();
+        card.setAtk(cardTemplate.getAtk());
+        card.setAvatar(avatar);
+        card.setHp(cardTemplate.getHp());
+        card.setImage(image);
+        card.setRace(cardTemplate.getRace());
+        card.setName(cardTemplate.getName());
+        card.setStar(cardTemplate.getStar());
+        card.setCardTemplate(cardTemplate);
+        card.setStatus(CardStatus.InCardPack);
+        card.setUser(user);
+        cardDao.add(card);
+        return card;
     }
 
     @Action(value = "parties", results = { @Result(name = SUCCESS, location = "user_parties.ftl") })
@@ -273,6 +304,12 @@ public class UserAction extends BaseAction {
         if (userQuestInfo != null) {
             userQuestInfoDao.delete(userQuestInfo);
         }
+
+        final List<UserQuestTask> userQuestTasks = userQuestTaskDao.listByUser(user);
+        for (final UserQuestTask userQuestTask : userQuestTasks) {
+            userQuestTaskDao.delete(userQuestTask);
+        }
+
         userDao.delete(user);
         return SUCCESS;
     }
@@ -428,6 +465,14 @@ public class UserAction extends BaseAction {
 
     public void setUserQuestInfoDao(final UserQuestInfoDao userQuestInfoDao) {
         this.userQuestInfoDao = userQuestInfoDao;
+    }
+
+    public UserQuestTaskDao getUserQuestTaskDao() {
+        return userQuestTaskDao;
+    }
+
+    public void setUserQuestTaskDao(final UserQuestTaskDao userQuestTaskDao) {
+        this.userQuestTaskDao = userQuestTaskDao;
     }
 
     public CardTemplateDao getCardTemplateDao() {

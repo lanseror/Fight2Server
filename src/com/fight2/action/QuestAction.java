@@ -129,8 +129,10 @@ public class QuestAction extends BaseAction {
                         summonTreasure(response, user);
                     } else {
                         final UserStoreroom userStoreroom = user.getStoreroom();
+                        final UserProperties userProps = user.getUserProperties();
                         if (tileItem == TileItem.CoinBag) {
-                            userStoreroom.setCoinBag(userStoreroom.getCoinBag() + 1);
+                            userProps.setCoin(userProps.getCoin() + 500);
+                            userPropertiesDao.update(userProps);
                         } else if (tileItem == TileItem.Stamina) {
                             userStoreroom.setStamina(userStoreroom.getStamina() + 1);
                         } else if (tileItem == TileItem.Ticket) {
