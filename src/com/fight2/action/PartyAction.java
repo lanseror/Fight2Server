@@ -136,7 +136,8 @@ public class PartyAction extends BaseAction {
 
     @Action(value = "edit", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String edit() {
-        final User user = (User) this.getSession().get(LOGIN_USER);
+        final User loginUser = (User) this.getSession().get(LOGIN_USER);
+        final User user = userDao.get(loginUser.getId());
         final PartyInfo poPartyInfo = partyInfoDao.getByUser(user);
         final List<Party> poParties = poPartyInfo.getParties();
         @SuppressWarnings("unchecked")

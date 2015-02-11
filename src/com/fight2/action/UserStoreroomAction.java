@@ -116,19 +116,34 @@ public class UserStoreroomAction extends BaseAction {
         final List<Card> cards = cardDao.listByUserAndStatus(userPo, CardStatus.InStoreroom);
         final int templateId = id;
         int receiveSize = 0;
+        final List<Card> receivedCards = Lists.newArrayList();
         for (final Card card : cards) {
             final CardTemplate cardTemplate = card.getCardTemplate();
             if (cardTemplate.getId() == templateId && cardpackSize + receiveSize < User.USER_CARDPACK_SIZE) {
                 receiveSize++;
+                receivedCards.add(card);
                 card.setStatus(CardStatus.InCardPack);
                 cardDao.update(card);
             }
         }
 
-        final Map<String, Integer> response = Maps.newHashMap();
-        response.put("size", receiveSize);
-        final ActionContext context = ActionContext.getContext();
-        context.put("jsonMsg", new Gson().toJson(response));
+        final List<Card> receivedCardVos = Lists.newArrayList();
+        for (final Card receivedCard : receivedCards) {
+            final CardTemplate cardTemplate = receivedCard.getCardTemplate();
+            final CardImage avatarObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_AVATAR, receivedCard.getTier(), cardTemplate);
+            final String avatar = avatarObj.getUrl();
+            final CardImage imageObj = cardImageDao.getByTypeTierAndCardTemplate(CardImage.TYPE_THUMB, receivedCard.getTier(), cardTemplate);
+            final String image = imageObj.getUrl();
+            final Card cardVo = new Card(receivedCard);
+            cardVo.setAvatar(avatar);
+            cardVo.setImage(image);
+            final CardTemplate cardTemplateVo = new CardTemplate();
+            cardTemplateVo.setId(cardTemplate.getId());
+            cardVo.setCardTemplate(cardTemplateVo);
+            receivedCardVos.add(cardVo);
+        }
+
+        jsonMsg = new Gson().toJson(receivedCardVos);
         return SUCCESS;
     }
 

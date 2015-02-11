@@ -27,7 +27,6 @@ public class User extends BaseEntity {
     private boolean isDisabled;
     private UserType type;
     private Guild guild;
-    private int guildContribution;
     private int salary;
     private int glory;
     private int msgIndex = -1;
@@ -153,14 +152,6 @@ public class User extends BaseEntity {
 
     public void setGuild(final Guild guild) {
         this.guild = guild;
-    }
-
-    public int getGuildContribution() {
-        return guildContribution;
-    }
-
-    public void setGuildContribution(final int guildContribution) {
-        this.guildContribution = guildContribution;
     }
 
     public UserType getType() {

@@ -66,67 +66,83 @@ public class TmxUtils {
 
             final int upRow = row - 1;
             final int upCol = col;
-            final Tile upTile = collisionLayer.getTile(upRow, upCol);
-            final QuestTile upRoadTile = createRoadTile(upRow, upCol);
-            if (upTile == null && !visitedTiles.contains(upRoadTile)) {/* up */
-                visit(upRow, upCol, currentPoint, queue);
-                visitedTiles.add(upRoadTile);
+            if (upRow >= 0 && upCol >= 0) {
+                final Tile upTile = collisionLayer.getTile(upRow, upCol);
+                final QuestTile upRoadTile = createRoadTile(upRow, upCol);
+                if (upTile == null && !visitedTiles.contains(upRoadTile)) {/* up */
+                    visit(upRow, upCol, currentPoint, queue);
+                    visitedTiles.add(upRoadTile);
+                }
             }
             final int leftRow = row;
             final int leftCol = col - 1;
-            final Tile leftTile = collisionLayer.getTile(leftRow, leftCol);
-            final QuestTile leftRoadTile = createRoadTile(leftRow, leftCol);
-            if (leftTile == null && !visitedTiles.contains(leftRoadTile)) {/* left */
-                visit(leftRow, leftCol, currentPoint, queue);
-                visitedTiles.add(leftRoadTile);
+            if (leftRow >= 0 && leftCol >= 0) {
+                final Tile leftTile = collisionLayer.getTile(leftRow, leftCol);
+                final QuestTile leftRoadTile = createRoadTile(leftRow, leftCol);
+                if (leftTile == null && !visitedTiles.contains(leftRoadTile)) {/* left */
+                    visit(leftRow, leftCol, currentPoint, queue);
+                    visitedTiles.add(leftRoadTile);
+                }
             }
             final int rightRow = row;
             final int rightCol = col + 1;
-            final Tile rightTile = collisionLayer.getTile(rightRow, rightCol);
-            final QuestTile rightRoadTile = createRoadTile(rightRow, rightCol);
-            if (rightTile == null && !visitedTiles.contains(rightRoadTile)) { /* right */
-                visit(rightRow, rightCol, currentPoint, queue);
-                visitedTiles.add(rightRoadTile);
+            if (rightRow >= 0 && rightCol >= 0) {
+                final Tile rightTile = collisionLayer.getTile(rightRow, rightCol);
+                final QuestTile rightRoadTile = createRoadTile(rightRow, rightCol);
+                if (rightTile == null && !visitedTiles.contains(rightRoadTile)) { /* right */
+                    visit(rightRow, rightCol, currentPoint, queue);
+                    visitedTiles.add(rightRoadTile);
+                }
             }
             final int downRow = row + 1;
             final int downCol = col;
-            final Tile downTile = collisionLayer.getTile(downRow, downCol);
-            final QuestTile downRoadTile = createRoadTile(downRow, downCol);
-            if (downTile == null && !visitedTiles.contains(downRoadTile)) { /* down */
-                visit(downRow, downCol, currentPoint, queue);
-                visitedTiles.add(downRoadTile);
+            if (downRow >= 0 && downCol >= 0) {
+                final Tile downTile = collisionLayer.getTile(downRow, downCol);
+                final QuestTile downRoadTile = createRoadTile(downRow, downCol);
+                if (downTile == null && !visitedTiles.contains(downRoadTile)) { /* down */
+                    visit(downRow, downCol, currentPoint, queue);
+                    visitedTiles.add(downRoadTile);
+                }
             }
             final int leftUpRow = row - 1;
             final int leftUpCol = col - 1;
-            final Tile leftUpTile = collisionLayer.getTile(leftUpRow, leftUpCol);
-            final QuestTile leftUpRoadTile = createRoadTile(leftUpRow, leftUpCol);
-            if (leftUpTile == null && !visitedTiles.contains(leftUpRoadTile)) {/* left up */
-                visit(leftUpRow, leftUpCol, currentPoint, queue);
-                visitedTiles.add(leftUpRoadTile);
+            if (leftUpRow >= 0 && leftUpCol >= 0) {
+                final Tile leftUpTile = collisionLayer.getTile(leftUpRow, leftUpCol);
+                final QuestTile leftUpRoadTile = createRoadTile(leftUpRow, leftUpCol);
+                if (leftUpTile == null && !visitedTiles.contains(leftUpRoadTile)) {/* left up */
+                    visit(leftUpRow, leftUpCol, currentPoint, queue);
+                    visitedTiles.add(leftUpRoadTile);
+                }
             }
             final int rightUpRow = row - 1;
             final int rightUpCol = col + 1;
-            final Tile rightUpTile = collisionLayer.getTile(rightUpRow, rightUpCol);
-            final QuestTile righUpRoadTile = createRoadTile(rightUpRow, rightUpCol);
-            if (rightUpTile == null && !visitedTiles.contains(righUpRoadTile)) {/* right up */
-                visit(rightUpRow, rightUpCol, currentPoint, queue);
-                visitedTiles.add(righUpRoadTile);
+            if (rightUpRow >= 0 && rightUpCol >= 0) {
+                final Tile rightUpTile = collisionLayer.getTile(rightUpRow, rightUpCol);
+                final QuestTile righUpRoadTile = createRoadTile(rightUpRow, rightUpCol);
+                if (rightUpTile == null && !visitedTiles.contains(righUpRoadTile)) {/* right up */
+                    visit(rightUpRow, rightUpCol, currentPoint, queue);
+                    visitedTiles.add(righUpRoadTile);
+                }
             }
             final int leftDownRow = row + 1;
             final int leftDownCol = col - 1;
-            final Tile leftDownTile = collisionLayer.getTile(leftDownRow, leftDownCol);
-            final QuestTile leftDownRoadTile = createRoadTile(leftDownRow, leftDownCol);
-            if (leftDownTile == null && !visitedTiles.contains(leftDownRoadTile)) { /* left down */
-                visit(leftDownRow, leftDownCol, currentPoint, queue);
-                visitedTiles.add(leftDownRoadTile);
+            if (leftDownRow >= 0 && leftDownCol >= 0) {
+                final Tile leftDownTile = collisionLayer.getTile(leftDownRow, leftDownCol);
+                final QuestTile leftDownRoadTile = createRoadTile(leftDownRow, leftDownCol);
+                if (leftDownTile == null && !visitedTiles.contains(leftDownRoadTile)) { /* left down */
+                    visit(leftDownRow, leftDownCol, currentPoint, queue);
+                    visitedTiles.add(leftDownRoadTile);
+                }
             }
             final int rightDownRow = row + 1;
             final int rightDownCol = col + 1;
-            final Tile rightDownTile = collisionLayer.getTile(rightDownRow, rightDownCol);
-            final QuestTile rightDownRoadTile = createRoadTile(rightDownRow, rightDownCol);
-            if (rightDownTile == null && !visitedTiles.contains(rightDownRoadTile)) { /* right down */
-                visit(rightDownRow, rightDownCol, currentPoint, queue);
-                visitedTiles.add(rightDownRoadTile);
+            if (rightDownRow >= 0 && rightDownCol >= 0) {
+                final Tile rightDownTile = collisionLayer.getTile(rightDownRow, rightDownCol);
+                final QuestTile rightDownRoadTile = createRoadTile(rightDownRow, rightDownCol);
+                if (rightDownTile == null && !visitedTiles.contains(rightDownRoadTile)) { /* right down */
+                    visit(rightDownRow, rightDownCol, currentPoint, queue);
+                    visitedTiles.add(rightDownRoadTile);
+                }
             }
         }
 

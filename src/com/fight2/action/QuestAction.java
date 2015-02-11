@@ -280,8 +280,32 @@ public class QuestAction extends BaseAction {
         final UserProperties userPropertiesVo = new UserProperties();
         userPropertiesVo.setCoin(userProperties.getCoin());
         userPropertiesVo.setStamina(userProperties.getStamina());
+        userPropertiesVo.setGuildContrib(userProperties.getGuildContrib());
         userPropertiesVo.setTicket(userProperties.getTicket());
         jsonMsg = new Gson().toJson(userPropertiesVo);
+        return SUCCESS;
+    }
+
+    @Action(value = "usb", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String useStaminaBottle() {
+        final User currentUser = (User) this.getSession().get(LOGIN_USER);
+        final User user = userDao.get(currentUser.getId());
+        final UserProperties userProperties = user.getUserProperties();
+        final UserStoreroom storeroom = user.getStoreroom();
+        final int staminaBottle = storeroom.getStamina();
+        int status = 0;
+        if (staminaBottle > 0) {
+            userProperties.setStamina(UserProperties.MAX_STAMINA);
+            userPropertiesDao.update(userProperties);
+            storeroom.setStamina(staminaBottle - 1);
+            userStoreroomDao.update(storeroom);
+            status = 0;
+        } else {
+            status = 1;
+        }
+        final Map<String, Object> response = Maps.newHashMap();
+        response.put("status", status);
+        jsonMsg = new Gson().toJson(response);
         return SUCCESS;
     }
 

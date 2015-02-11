@@ -14,6 +14,7 @@ import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.QuestTaskDao;
 import com.fight2.dao.TaskRewardDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserPropertiesDao;
 import com.fight2.dao.UserQuestTaskDao;
 import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.BaseEntity;
@@ -28,6 +29,7 @@ import com.fight2.model.TaskRewardItem;
 import com.fight2.model.TaskRewardItem.TaskRewardItemType;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
+import com.fight2.model.UserProperties;
 import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserQuestTask.UserTaskStatus;
 import com.fight2.model.UserStoreroom;
@@ -52,6 +54,8 @@ public class QuestTaskAction extends BaseAction {
     private TaskRewardDao taskRewardDao;
     @Autowired
     private UserStoreroomDao userStoreroomDao;
+    @Autowired
+    private UserPropertiesDao userPropertiesDao;
     @Autowired
     private CardDao cardDao;
     @Autowired
@@ -190,8 +194,9 @@ public class QuestTaskAction extends BaseAction {
                     user.setCardCount(cards.size());
                     userDao.update(user);
                 } else if (rewardItemType == TaskRewardItemType.GuildContribution) {
-                    user.setGuildContribution(user.getGuildContribution() + amount);
-                    userDao.update(user);
+                    final UserProperties userProperties = user.getUserProperties();
+                    userProperties.setGuildContrib(userProperties.getGuildContrib() + amount);
+                    userPropertiesDao.update(userProperties);
                 }
             }
         }
@@ -316,6 +321,14 @@ public class QuestTaskAction extends BaseAction {
 
     public void setUserStoreroomDao(final UserStoreroomDao userStoreroomDao) {
         this.userStoreroomDao = userStoreroomDao;
+    }
+
+    public UserPropertiesDao getUserPropertiesDao() {
+        return userPropertiesDao;
+    }
+
+    public void setUserPropertiesDao(final UserPropertiesDao userPropertiesDao) {
+        this.userPropertiesDao = userPropertiesDao;
     }
 
     public CardDao getCardDao() {

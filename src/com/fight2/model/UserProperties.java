@@ -6,12 +6,13 @@ import javax.persistence.OneToOne;
 
 @Entity
 public class UserProperties extends BaseEntity {
-    public static final int MAX_STAMINA =100;
+    public static final int MAX_STAMINA = 100;
     private static final long serialVersionUID = 1335023426567017048L;
     private int stamina;
     private long staminaTime = 0;
     private int ticket;
     private int coin;
+    private int guildContrib;
     private User user;
 
     public int getStamina() {
@@ -44,6 +45,14 @@ public class UserProperties extends BaseEntity {
 
     public void setCoin(final int coin) {
         this.coin = coin;
+    }
+
+    public int getGuildContrib() {
+        return guildContrib;
+    }
+
+    public void setGuildContrib(final int guildContrib) {
+        this.guildContrib = guildContrib;
     }
 
     @OneToOne(optional = false)

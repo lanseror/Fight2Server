@@ -13,6 +13,7 @@ import com.fight2.dao.CardDao;
 import com.fight2.dao.GuildCardDao;
 import com.fight2.dao.GuildStoreroomDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserPropertiesDao;
 import com.fight2.dao.UserStoreroomDao;
 import com.fight2.model.Arena;
 import com.fight2.model.ArenaRanking;
@@ -28,6 +29,7 @@ import com.fight2.model.Guild;
 import com.fight2.model.GuildCard;
 import com.fight2.model.GuildStoreroom;
 import com.fight2.model.User;
+import com.fight2.model.UserProperties;
 import com.fight2.model.UserStoreroom;
 import com.fight2.util.HibernateUtils;
 
@@ -43,6 +45,8 @@ public class ArenaService {
     private CardDao cardDao;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private UserPropertiesDao userPropertiesDao;
     @Autowired
     private UserStoreroomDao userStoreroomDao;
     @Autowired
@@ -121,8 +125,9 @@ public class ArenaService {
                         userDao.update(user);
                     } else if (rewardItemType == ArenaRewardItemType.GuildContribution) {
                         if (isGuildArena && guildStoreroom != null) {
-                            user.setGuildContribution(user.getGuildContribution() + amount);
-                            userDao.update(user);
+                            final UserProperties userProperties = user.getUserProperties();
+                            userProperties.setGuildContrib(userProperties.getGuildContrib() + amount);
+                            userPropertiesDao.update(userProperties);
                         }
                     }
                 }
@@ -214,6 +219,14 @@ public class ArenaService {
 
     public void setUserDao(final UserDao userDao) {
         this.userDao = userDao;
+    }
+
+    public UserPropertiesDao getUserPropertiesDao() {
+        return userPropertiesDao;
+    }
+
+    public void setUserPropertiesDao(final UserPropertiesDao userPropertiesDao) {
+        this.userPropertiesDao = userPropertiesDao;
     }
 
     public UserStoreroomDao getUserStoreroomDao() {
