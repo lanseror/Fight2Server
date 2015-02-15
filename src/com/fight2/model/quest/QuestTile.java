@@ -70,11 +70,25 @@ public class QuestTile extends BaseEntity {
     }
 
     public enum TileItem {
-        Ticket,
-        Stamina,
-        CoinBag,
-        Card,
-        SummonCharm,
-        Diamon
+        Ticket(true),
+        Stamina(true),
+        CoinBag(true),
+        Card(true),
+        SummonCharm(true),
+        Diamon(true),
+        Wood(false),
+        Mineral(false),
+        Crystal(false);
+
+        private final boolean inBox;
+
+        private TileItem(final boolean inBox) {
+            this.inBox = inBox;
+        }
+
+        public boolean isInBox() {
+            return inBox;
+        }
+
     }
 }
