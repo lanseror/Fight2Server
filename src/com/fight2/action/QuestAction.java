@@ -132,12 +132,16 @@ public class QuestAction extends BaseAction {
                         final UserProperties userProps = user.getUserProperties();
                         if (tileItem == TileItem.CoinBag) {
                             userProps.setCoin(userProps.getCoin() + 500);
-                            userPropertiesDao.update(userProps);
                         } else if (tileItem == TileItem.Stamina) {
                             userStoreroom.setStamina(userStoreroom.getStamina() + 1);
                         } else if (tileItem == TileItem.Ticket) {
                             userStoreroom.setTicket(userStoreroom.getTicket() + 1);
+                        } else if (tileItem == TileItem.SummonCharm) {
+                            userProps.setSummonCharm(userProps.getSummonCharm() + 50);
+                        } else if (tileItem == TileItem.Diamon) {
+                            userProps.setDiamon(userProps.getDiamon() + 1);
                         }
+                        userPropertiesDao.update(userProps);
                         userStoreroomDao.update(userStoreroom);
                     }
                     response.put("treasureIndex", treasureIndex);
@@ -284,6 +288,8 @@ public class QuestAction extends BaseAction {
         userPropertiesVo.setStamina(userProperties.getStamina());
         userPropertiesVo.setGuildContrib(userProperties.getGuildContrib());
         userPropertiesVo.setTicket(userProperties.getTicket());
+        userPropertiesVo.setSummonCharm(userProperties.getSummonCharm());
+        userPropertiesVo.setDiamon(userProperties.getDiamon());
         jsonMsg = new Gson().toJson(userPropertiesVo);
         return SUCCESS;
     }

@@ -73,6 +73,8 @@ public class QuestTile extends BaseEntity {
         Ticket,
         Stamina,
         CoinBag,
-        Card
+        Card,
+        SummonCharm,
+        Diamon
     }
 }

@@ -13,6 +13,8 @@ public class UserProperties extends BaseEntity {
     private int ticket;
     private int coin;
     private int guildContrib;
+    private int summonCharm;
+    private int diamon;
     private User user;
 
     public int getStamina() {
@@ -53,6 +55,22 @@ public class UserProperties extends BaseEntity {
 
     public void setGuildContrib(final int guildContrib) {
         this.guildContrib = guildContrib;
+    }
+
+    public int getSummonCharm() {
+        return summonCharm;
+    }
+
+    public void setSummonCharm(final int summonCharm) {
+        this.summonCharm = summonCharm;
+    }
+
+    public int getDiamon() {
+        return diamon;
+    }
+
+    public void setDiamon(final int diamon) {
+        this.diamon = diamon;
     }
 
     @OneToOne(optional = false)
