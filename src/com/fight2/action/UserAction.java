@@ -39,6 +39,7 @@ import com.fight2.model.UserProperties;
 import com.fight2.model.UserQuestInfo;
 import com.fight2.model.UserQuestTask;
 import com.fight2.model.UserStoreroom;
+import com.fight2.service.PartyService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -72,6 +73,8 @@ public class UserAction extends BaseAction {
     private UserQuestTaskDao userQuestTaskDao;
     @Autowired
     private CardTemplateDao cardTemplateDao;
+    @Autowired
+    private PartyService partyService;
     private User user;
     private List<User> datas;
     private int id;
@@ -130,7 +133,14 @@ public class UserAction extends BaseAction {
                     partyGrid.setGridNumber(gridIndex);
                     partyGrid.setParty(party);
                     if (i == 1 && gridIndex == 1) {
-                        partyGrid.setCard(defaultLeader(user));
+                        final Card defaultLeader = defaultLeader(user);
+                        partyGrid.setCard(defaultLeader);
+                        party.setAtk(defaultLeader.getAtk());
+                        party.setHp(defaultLeader.getHp());
+                        partyDao.update(party);
+                        partyInfo.setAtk(defaultLeader.getAtk());
+                        partyInfo.setHp(defaultLeader.getHp());
+                        partyInfoDao.update(partyInfo);
                     }
                     partyGridDao.add(partyGrid);
                 }
@@ -507,6 +517,14 @@ public class UserAction extends BaseAction {
 
     public void setUserPropertiesDao(final UserPropertiesDao userPropertiesDao) {
         this.userPropertiesDao = userPropertiesDao;
+    }
+
+    public PartyService getPartyService() {
+        return partyService;
+    }
+
+    public void setPartyService(final PartyService partyService) {
+        this.partyService = partyService;
     }
 
 }

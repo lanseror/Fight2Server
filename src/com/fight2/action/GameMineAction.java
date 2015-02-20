@@ -9,16 +9,20 @@ import org.apache.struts2.convention.annotation.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fight2.dao.GameMineDao;
+import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserPropertiesDao;
 import com.fight2.model.BaseEntity;
 import com.fight2.model.BattleResult;
+import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
 import com.fight2.model.UserProperties;
 import com.fight2.model.UserQuestInfo;
 import com.fight2.model.quest.GameMine;
 import com.fight2.model.quest.QuestTile;
-import com.fight2.service.MineService;
+import com.fight2.service.BattleService;
+import com.fight2.service.ComboSkillService;
 import com.fight2.util.Constants;
 import com.google.gson.Gson;
 
@@ -26,11 +30,15 @@ import com.google.gson.Gson;
 public class GameMineAction extends BaseAction {
     private static final long serialVersionUID = -4473064014262040889L;
     @Autowired
+    private PartyInfoDao partyInfoDao;
+    @Autowired
     private UserDao userDao;
+    @Autowired
+    private UserPropertiesDao userPropertiesDao;
     @Autowired
     private GameMineDao gameMineDao;
     @Autowired
-    private MineService mineService;
+    private ComboSkillService comboSkillService;
     private GameMine mine;
     private List<GameMine> datas;
     private int id;
@@ -97,14 +105,29 @@ public class GameMineAction extends BaseAction {
 
         final UserProperties userProps = user.getUserProperties();
         // Validate
-        if (!mineService.check(mineTile)) {
+        final GameMine gameMine = gameMineDao.getByPosition(mineTile.getRow(), mineTile.getCol());
+        if (gameMine == null) {
             throw new RuntimeException("Mine position not match.");
         }
         if (userProps.getDiamon() < Constants.MINE_ATTACK_COST) {
             throw new RuntimeException("No enough diamon.");
         }
 
-        final BattleResult battleResult = mineService.attack(user, mineTile);
+        final User attacker = user;
+        final User defender = userDao.get(gameMine.getOwnerId());
+        final PartyInfo attackerPartyInfo = partyInfoDao.getByUser(attacker);
+        final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
+
+        final BattleService battleService = new BattleService(attacker, defender, attackerPartyInfo, defenderPartyInfo, null);
+        battleService.setComboSkillService(comboSkillService);
+        final BattleResult battleResult = battleService.fight(0);
+        final boolean isWinner = battleResult.isWinner();
+        if (isWinner) {
+            gameMine.setOwnerId(attacker.getId());
+            gameMineDao.update(gameMine);
+        }
+        userProps.setDiamon(userProps.getDiamon() - Constants.MINE_ATTACK_COST);
+        userPropertiesDao.update(userProps);
         jsonMsg = new Gson().toJson(battleResult);
         return SUCCESS;
     }
@@ -153,12 +176,28 @@ public class GameMineAction extends BaseAction {
         this.datas = datas;
     }
 
-    public MineService getMineService() {
-        return mineService;
+    public PartyInfoDao getPartyInfoDao() {
+        return partyInfoDao;
     }
 
-    public void setMineService(final MineService mineService) {
-        this.mineService = mineService;
+    public void setPartyInfoDao(final PartyInfoDao partyInfoDao) {
+        this.partyInfoDao = partyInfoDao;
+    }
+
+    public UserPropertiesDao getUserPropertiesDao() {
+        return userPropertiesDao;
+    }
+
+    public void setUserPropertiesDao(final UserPropertiesDao userPropertiesDao) {
+        this.userPropertiesDao = userPropertiesDao;
+    }
+
+    public ComboSkillService getComboSkillService() {
+        return comboSkillService;
+    }
+
+    public void setComboSkillService(final ComboSkillService comboSkillService) {
+        this.comboSkillService = comboSkillService;
     }
 
 }
