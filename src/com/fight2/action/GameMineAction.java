@@ -11,9 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fight2.dao.GameMineDao;
 import com.fight2.dao.UserDao;
 import com.fight2.model.BaseEntity;
+import com.fight2.model.BattleResult;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
+import com.fight2.model.UserProperties;
+import com.fight2.model.UserQuestInfo;
 import com.fight2.model.quest.GameMine;
+import com.fight2.model.quest.QuestTile;
+import com.fight2.service.MineService;
+import com.fight2.util.Constants;
+import com.google.gson.Gson;
 
 @Namespace("/mine")
 public class GameMineAction extends BaseAction {
@@ -22,6 +29,8 @@ public class GameMineAction extends BaseAction {
     private UserDao userDao;
     @Autowired
     private GameMineDao gameMineDao;
+    @Autowired
+    private MineService mineService;
     private GameMine mine;
     private List<GameMine> datas;
     private int id;
@@ -76,6 +85,30 @@ public class GameMineAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "attack", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String attack() {
+        final User loginUser = (User) this.getSession().get(LOGIN_USER);
+        final User user = userDao.get(loginUser.getId());
+        final UserQuestInfo userQuestInfo = user.getQuestInfo();
+
+        final QuestTile mineTile = new QuestTile();
+        mineTile.setCol(userQuestInfo.getCol());
+        mineTile.setRow(userQuestInfo.getRow());
+
+        final UserProperties userProps = user.getUserProperties();
+        // Validate
+        if (!mineService.check(mineTile)) {
+            throw new RuntimeException("Mine position not match.");
+        }
+        if (userProps.getDiamon() < Constants.MINE_ATTACK_COST) {
+            throw new RuntimeException("No enough diamon.");
+        }
+
+        final BattleResult battleResult = mineService.attack(user, mineTile);
+        jsonMsg = new Gson().toJson(battleResult);
+        return SUCCESS;
+    }
+
     public UserDao getUserDao() {
         return userDao;
     }
@@ -118,6 +151,14 @@ public class GameMineAction extends BaseAction {
 
     public void setDatas(final List<GameMine> datas) {
         this.datas = datas;
+    }
+
+    public MineService getMineService() {
+        return mineService;
+    }
+
+    public void setMineService(final MineService mineService) {
+        this.mineService = mineService;
     }
 
 }
