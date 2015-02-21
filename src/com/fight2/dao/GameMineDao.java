@@ -4,6 +4,6 @@ import com.fight2.model.quest.GameMine;
 
 public interface GameMineDao extends BaseDao<GameMine> {
 
-    public GameMine getByPosition(int row, int col);
+    public GameMine getByHeroPosition(int row, int col);
 
 }

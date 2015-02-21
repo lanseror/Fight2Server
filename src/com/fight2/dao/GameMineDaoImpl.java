@@ -14,10 +14,10 @@ public class GameMineDaoImpl extends BaseDaoImpl<GameMine> implements GameMineDa
     }
 
     @Override
-    public GameMine getByPosition(final int row, final int col) {
+    public GameMine getByHeroPosition(final int row, final int col) {
         final Criteria criteria = getSession().createCriteria(getMyType());
-        criteria.add(Restrictions.eq("row", row));
-        criteria.add(Restrictions.eq("col", col));
+        criteria.add(Restrictions.eq("heroRow", row));
+        criteria.add(Restrictions.eq("heroCol", col));
         return (GameMine) criteria.uniqueResult();
     }
 

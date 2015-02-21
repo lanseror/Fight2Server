@@ -20,6 +20,7 @@ import com.fight2.model.User.UserType;
 import com.fight2.model.UserProperties;
 import com.fight2.model.UserQuestInfo;
 import com.fight2.model.quest.GameMine;
+import com.fight2.model.quest.GameMine.MineType;
 import com.fight2.model.quest.QuestTile;
 import com.fight2.service.BattleService;
 import com.fight2.service.ComboSkillService;
@@ -73,15 +74,21 @@ public class GameMineAction extends BaseAction {
     private String createSave() {
         final List<User> npcs = userDao.listByType(UserType.QuestNpc);
         mine.setOwnerId(npcs.get(0).getId());
+        final MineType mineType = mine.getType();
+        mine.setHeroCol(mine.getCol() + mineType.getxOffset());
+        mine.setHeroRow(mine.getRow() + mineType.getyOffset());
         gameMineDao.add(mine);
         return SUCCESS;
     }
 
     private String editSave() {
         final GameMine mineUpdate = gameMineDao.load(mine.getId());
-        mineUpdate.setType(mine.getType());
+        final MineType mineType = mine.getType();
+        mineUpdate.setType(mineType);
         mineUpdate.setCol(mine.getCol());
         mineUpdate.setRow(mine.getRow());
+        mineUpdate.setHeroCol(mine.getCol() + mineType.getxOffset());
+        mineUpdate.setHeroRow(mine.getRow() + mineType.getyOffset());
         gameMineDao.update(mineUpdate);
         return SUCCESS;
     }
@@ -90,6 +97,30 @@ public class GameMineAction extends BaseAction {
     public String delete() {
         mine = gameMineDao.load(id);
         gameMineDao.delete(mine);
+        return SUCCESS;
+    }
+
+    @Action(value = "owner", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String getMineOwner() {
+        final User loginUser = (User) this.getSession().get(LOGIN_USER);
+        final User user = userDao.get(loginUser.getId());
+        final UserQuestInfo userQuestInfo = user.getQuestInfo();
+
+        final QuestTile mineTile = new QuestTile();
+        mineTile.setCol(userQuestInfo.getCol());
+        mineTile.setRow(userQuestInfo.getRow());
+
+        // Validate
+        final GameMine gameMine = gameMineDao.getByHeroPosition(mineTile.getRow(), mineTile.getCol());
+        if (gameMine == null) {
+            throw new RuntimeException("Mine position not match.");
+        }
+
+        final User owner = userDao.get(gameMine.getOwnerId());
+        final User ownerVo = new User();
+        ownerVo.setId(owner.getId());
+        ownerVo.setName(owner.getName());
+        jsonMsg = new Gson().toJson(ownerVo);
         return SUCCESS;
     }
 
@@ -105,7 +136,7 @@ public class GameMineAction extends BaseAction {
 
         final UserProperties userProps = user.getUserProperties();
         // Validate
-        final GameMine gameMine = gameMineDao.getByPosition(mineTile.getRow(), mineTile.getCol());
+        final GameMine gameMine = gameMineDao.getByHeroPosition(mineTile.getRow(), mineTile.getCol());
         if (gameMine == null) {
             throw new RuntimeException("Mine position not match.");
         }

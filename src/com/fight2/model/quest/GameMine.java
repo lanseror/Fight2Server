@@ -11,6 +11,8 @@ public class GameMine extends BaseEntity {
     private int amount;
     private int row;
     private int col;
+    private int heroRow;
+    private int heroCol;
     private MineType type;
 
     public int getOwnerId() {
@@ -45,6 +47,22 @@ public class GameMine extends BaseEntity {
         this.col = col;
     }
 
+    public int getHeroRow() {
+        return heroRow;
+    }
+
+    public void setHeroRow(final int heroRow) {
+        this.heroRow = heroRow;
+    }
+
+    public int getHeroCol() {
+        return heroCol;
+    }
+
+    public void setHeroCol(final int heroCol) {
+        this.heroCol = heroCol;
+    }
+
     public MineType getType() {
         return type;
     }
@@ -58,8 +76,24 @@ public class GameMine extends BaseEntity {
     }
 
     public enum MineType {
-        Mineral,
-        Wood,
-        Crystal
+        Wood(2, 0),
+        Mineral(1, 0),
+        Crystal(1, 0);
+
+        private final int xOffset;
+        private final int yOffset;
+
+        private MineType(final int xOffset, final int yOffset) {
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+        }
+
+        public int getxOffset() {
+            return xOffset;
+        }
+
+        public int getyOffset() {
+            return yOffset;
+        }
     }
 }

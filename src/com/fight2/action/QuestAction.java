@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
 import com.fight2.dao.CardDao;
+import com.fight2.dao.GameMineDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
 import com.fight2.dao.UserPropertiesDao;
@@ -67,6 +68,8 @@ public class QuestAction extends BaseAction {
     private TaskScheduler taskScheduler;
     @Autowired
     private ComboSkillService comboSkillService;
+    @Autowired
+    private GameMineDao gameMineDao;
     private int id;
     private int row;
     private int col;
@@ -90,6 +93,9 @@ public class QuestAction extends BaseAction {
         final QuestTile desTile = new QuestTile();
         desTile.setCol(col);
         desTile.setRow(row);
+        if (startTile.equals(desTile)) {
+            throw new RuntimeException("StartTile equals desTile.");
+        }
         final Stack<QuestTile> path = TmxUtils.findPath(startTile, desTile);
         final boolean staminaEnough = useStamina(path, user);
 
@@ -101,7 +107,6 @@ public class QuestAction extends BaseAction {
         } else {
             response.put("treasureUpdate", false);
         }
-
         final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(user);
         if (!staminaEnough) {
             status = 4;
@@ -113,6 +118,8 @@ public class QuestAction extends BaseAction {
             bossVo.setId(boss.getId());
             bossVo.setName(boss.getName());
             response.put("enemy", bossVo);
+        } else if (gameMineDao.getByHeroPosition(desTile.getRow(), desTile.getCol()) != null) {
+            status = 5;
         } else {
             final List<QuestTile> treasures = questTreasureData.getQuestTiles();
             final Iterator<QuestTile> it = treasures.iterator();
@@ -454,6 +461,14 @@ public class QuestAction extends BaseAction {
 
     public void setComboSkillService(final ComboSkillService comboSkillService) {
         this.comboSkillService = comboSkillService;
+    }
+
+    public GameMineDao getGameMineDao() {
+        return gameMineDao;
+    }
+
+    public void setGameMineDao(final GameMineDao gameMineDao) {
+        this.gameMineDao = gameMineDao;
     }
 
 }
