@@ -12,12 +12,14 @@ import org.springframework.stereotype.Component;
 
 import com.fight2.dao.ArenaDao;
 import com.fight2.dao.BidDao;
+import com.fight2.dao.GameMineDao;
 import com.fight2.model.Arena;
 import com.fight2.model.ArenaStatus;
 import com.fight2.model.Bid;
 import com.fight2.util.ArenaUtils;
 import com.fight2.util.BidUtils;
 import com.fight2.util.HibernateUtils;
+import com.fight2.util.MineUtils;
 import com.fight2.util.QuestUtils;
 
 @Component
@@ -32,12 +34,17 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
     private BidService bidService;
     @Autowired
     private TaskScheduler taskScheduler;
+    @Autowired
+    private GameMineDao gameMineDao;
 
     @Override
     public void onApplicationEvent(final ContextRefreshedEvent event) {
         QuestUtils.init();
         final Runnable refreshTreasureSchedule = createRefreshTreasureSchedule();
         taskScheduler.scheduleAtFixedRate(refreshTreasureSchedule, TimeUnit.MINUTES.toMillis(5));
+        final Runnable produceMineSchedule = MineUtils.createPruduceMineSchedule(gameMineDao);
+        taskScheduler.scheduleAtFixedRate(produceMineSchedule, TimeUnit.HOURS.toMillis(1));
+
         final SessionFactory sessionFactory = arenaDao.getSessionFactory();
         HibernateUtils.openSession(sessionFactory);
         final List<Arena> arenas = arenaDao.getAliveArenas();
@@ -62,7 +69,7 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
         HibernateUtils.closeSession(sessionFactory);
     }
 
-    public static Runnable createRefreshTreasureSchedule() {
+    private static Runnable createRefreshTreasureSchedule() {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -103,6 +110,22 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
 
     public void setArenaService(final ArenaService arenaService) {
         this.arenaService = arenaService;
+    }
+
+    public BidService getBidService() {
+        return bidService;
+    }
+
+    public void setBidService(final BidService bidService) {
+        this.bidService = bidService;
+    }
+
+    public GameMineDao getGameMineDao() {
+        return gameMineDao;
+    }
+
+    public void setGameMineDao(final GameMineDao gameMineDao) {
+        this.gameMineDao = gameMineDao;
     }
 
 }

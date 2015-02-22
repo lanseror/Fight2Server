@@ -6,6 +6,7 @@ import com.fight2.model.BaseEntity;
 
 @Entity
 public class GameMine extends BaseEntity {
+    public static final int MAX_AMOUNT = 50;
     private static final long serialVersionUID = -4613964966772845997L;
     private int ownerId;
     private int amount;
