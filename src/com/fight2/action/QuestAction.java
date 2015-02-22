@@ -302,6 +302,7 @@ public class QuestAction extends BaseAction {
         userPropertiesVo.setGuildContrib(userProperties.getGuildContrib());
         userPropertiesVo.setTicket(userProperties.getTicket());
         userPropertiesVo.setSummonCharm(userProperties.getSummonCharm());
+        userPropertiesVo.setSummonStone(userProperties.getSummonStone());
         userPropertiesVo.setDiamon(userProperties.getDiamon());
         jsonMsg = new Gson().toJson(userPropertiesVo);
         return SUCCESS;

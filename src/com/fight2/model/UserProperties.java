@@ -14,6 +14,7 @@ public class UserProperties extends BaseEntity {
     private int coin;
     private int guildContrib;
     private int summonCharm;
+    private int summonStone;
     private int diamon;
     private User user;
 
@@ -63,6 +64,18 @@ public class UserProperties extends BaseEntity {
 
     public void setSummonCharm(final int summonCharm) {
         this.summonCharm = summonCharm;
+    }
+
+    public int getSummonStone() {
+        return summonStone;
+    }
+
+    public void setSummonStone(final int summonStone) {
+        this.summonStone = summonStone;
+    }
+
+    public static int getMaxStamina() {
+        return MAX_STAMINA;
     }
 
     public int getDiamon() {

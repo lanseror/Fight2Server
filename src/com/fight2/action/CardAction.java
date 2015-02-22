@@ -12,15 +12,18 @@ import com.fight2.dao.CardDao;
 import com.fight2.dao.CardImageDao;
 import com.fight2.dao.CardTemplateDao;
 import com.fight2.dao.UserDao;
+import com.fight2.dao.UserPropertiesDao;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardImage;
 import com.fight2.model.CardTemplate;
 import com.fight2.model.ComboSkill;
 import com.fight2.model.User;
+import com.fight2.model.UserProperties;
 import com.fight2.service.ComboSkillService;
 import com.fight2.service.PartyService;
 import com.fight2.util.CardUtils;
+import com.fight2.util.CostConstants;
 import com.fight2.util.SummonHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -36,6 +39,8 @@ public class CardAction extends BaseAction {
     private SummonHelper summonHelper;
     @Autowired
     private CardImageDao cardImageDao;
+    @Autowired
+    private UserPropertiesDao userPropertiesDao;
     @Autowired
     private CardTemplateDao cardTemplateDao;
     @Autowired
@@ -54,6 +59,26 @@ public class CardAction extends BaseAction {
         final ActionContext context = ActionContext.getContext();
         final User sessionUser = (User) this.getSession().get(LOGIN_USER);
         final User user = userDao.get(sessionUser.getId());
+
+        // Validate
+        final UserProperties userProps = user.getUserProperties();
+        if (type == 1) {
+            if (userProps.getSummonCharm() < CostConstants.BASIC_SUMMON_COST) {
+                throw new RuntimeException("Summon charm not enough!");
+            }
+            userProps.setSummonCharm(userProps.getSummonCharm() - CostConstants.BASIC_SUMMON_COST);
+        } else if (type == 2) {
+            if (userProps.getSummonStone() < CostConstants.HERO_SUMMON_STONE_COST) {
+                throw new RuntimeException("Summon stone not enough!");
+            }
+            userProps.setSummonStone(userProps.getSummonStone() - CostConstants.HERO_SUMMON_STONE_COST);
+        } else if (type == 3) {
+            if (userProps.getDiamon() < CostConstants.HERO_SUMMON_DIAMON_COST) {
+                throw new RuntimeException("Summon diamon not enough!");
+            }
+            userProps.setDiamon(userProps.getDiamon() - CostConstants.HERO_SUMMON_DIAMON_COST);
+        }
+
         final Map<String, Object> jsonMap = Maps.newHashMap();
         if (user.getCardCount() >= 500) {
             jsonMap.put("status", 1);
@@ -68,7 +93,7 @@ public class CardAction extends BaseAction {
         if (type == 1) {
             min = 1;
             max = 3;
-        } else if (type == 2) {
+        } else if (type == 2 || type == 3) {
             min = 3;
             max = 6;
         }
@@ -108,7 +133,7 @@ public class CardAction extends BaseAction {
 
         user.setCardCount(cards.size());
         userDao.update(user);
-
+        userPropertiesDao.update(userProps);
         return SUCCESS;
     }
 
@@ -347,6 +372,14 @@ public class CardAction extends BaseAction {
 
     public void setCardTemplateDao(final CardTemplateDao cardTemplateDao) {
         this.cardTemplateDao = cardTemplateDao;
+    }
+
+    public UserPropertiesDao getUserPropertiesDao() {
+        return userPropertiesDao;
+    }
+
+    public void setUserPropertiesDao(final UserPropertiesDao userPropertiesDao) {
+        this.userPropertiesDao = userPropertiesDao;
     }
 
 }

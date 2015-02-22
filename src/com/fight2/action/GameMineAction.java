@@ -24,7 +24,7 @@ import com.fight2.model.quest.GameMine.MineType;
 import com.fight2.model.quest.QuestTile;
 import com.fight2.service.BattleService;
 import com.fight2.service.ComboSkillService;
-import com.fight2.util.Constants;
+import com.fight2.util.CostConstants;
 import com.google.gson.Gson;
 
 @Namespace("/mine")
@@ -140,7 +140,7 @@ public class GameMineAction extends BaseAction {
         if (gameMine == null) {
             throw new RuntimeException("Mine position not match.");
         }
-        if (userProps.getDiamon() < Constants.MINE_ATTACK_COST) {
+        if (userProps.getDiamon() < CostConstants.MINE_ATTACK_COST) {
             throw new RuntimeException("No enough diamon.");
         }
 
@@ -157,7 +157,7 @@ public class GameMineAction extends BaseAction {
             gameMine.setOwnerId(attacker.getId());
             gameMineDao.update(gameMine);
         }
-        userProps.setDiamon(userProps.getDiamon() - Constants.MINE_ATTACK_COST);
+        userProps.setDiamon(userProps.getDiamon() - CostConstants.MINE_ATTACK_COST);
         userPropertiesDao.update(userProps);
         jsonMsg = new Gson().toJson(battleResult);
         return SUCCESS;
