@@ -1,14 +1,17 @@
 package com.fight2.model.quest;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import com.fight2.model.BaseEntity;
+import com.fight2.model.User;
 
 @Entity
 public class GameMine extends BaseEntity {
     public static final int MAX_AMOUNT = 50;
     private static final long serialVersionUID = -4613964966772845997L;
-    private int ownerId;
+    private User owner;
     private int amount;
     private int row;
     private int col;
@@ -16,12 +19,18 @@ public class GameMine extends BaseEntity {
     private int heroCol;
     private MineType type;
 
-    public int getOwnerId() {
-        return ownerId;
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    public User getOwner() {
+        return owner;
     }
 
-    public void setOwnerId(final int ownerId) {
-        this.ownerId = ownerId;
+    public void setOwner(final User owner) {
+        this.owner = owner;
+    }
+
+    public static int getMaxAmount() {
+        return MAX_AMOUNT;
     }
 
     public int getAmount() {

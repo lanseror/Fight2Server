@@ -25,6 +25,7 @@ import com.fight2.model.quest.QuestTile;
 import com.fight2.service.BattleService;
 import com.fight2.service.ComboSkillService;
 import com.fight2.util.CostConstants;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
 @Namespace("/mine")
@@ -73,7 +74,7 @@ public class GameMineAction extends BaseAction {
 
     private String createSave() {
         final List<User> npcs = userDao.listByType(UserType.QuestNpc);
-        mine.setOwnerId(npcs.get(0).getId());
+        mine.setOwner(npcs.get(0));
         final MineType mineType = mine.getType();
         mine.setHeroCol(mine.getCol() + mineType.getxOffset());
         mine.setHeroRow(mine.getRow() + mineType.getyOffset());
@@ -116,11 +117,35 @@ public class GameMineAction extends BaseAction {
             throw new RuntimeException("Mine position not match.");
         }
 
-        final User owner = userDao.get(gameMine.getOwnerId());
+        final User owner = gameMine.getOwner();
         final User ownerVo = new User();
         ownerVo.setId(owner.getId());
         ownerVo.setName(owner.getName());
         jsonMsg = new Gson().toJson(ownerVo);
+        return SUCCESS;
+    }
+
+    @Action(value = "mines", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String mines() {
+        final List<GameMine> mines = gameMineDao.list();
+        final List<GameMine> mineVos = Lists.newArrayList();
+        for (final GameMine mine : mines) {
+            final GameMine mineVo = new GameMine();
+            mineVo.setId(mine.getId());
+            mineVo.setAmount(mine.getAmount());
+            mineVo.setCol(mine.getCol());
+            mineVo.setRow(mine.getRow());
+            mineVo.setHeroCol(mine.getHeroCol());
+            mineVo.setHeroRow(mine.getHeroRow());
+            mineVo.setType(mine.getType());
+            final User owner = mine.getOwner();
+            final User ownerVo = new User();
+            ownerVo.setId(owner.getId());
+            ownerVo.setName(owner.getName());
+            mineVo.setOwner(ownerVo);
+            mineVos.add(mineVo);
+        }
+        jsonMsg = new Gson().toJson(mineVos);
         return SUCCESS;
     }
 
@@ -145,7 +170,7 @@ public class GameMineAction extends BaseAction {
         }
 
         final User attacker = user;
-        final User defender = userDao.get(gameMine.getOwnerId());
+        final User defender = gameMine.getOwner();
         final PartyInfo attackerPartyInfo = partyInfoDao.getByUser(attacker);
         final PartyInfo defenderPartyInfo = partyInfoDao.getByUser(defender);
 
@@ -154,7 +179,7 @@ public class GameMineAction extends BaseAction {
         final BattleResult battleResult = battleService.fight(0);
         final boolean isWinner = battleResult.isWinner();
         if (isWinner) {
-            gameMine.setOwnerId(attacker.getId());
+            gameMine.setOwner(attacker);
             gameMineDao.update(gameMine);
         }
         userProps.setDiamon(userProps.getDiamon() - CostConstants.MINE_ATTACK_COST);
