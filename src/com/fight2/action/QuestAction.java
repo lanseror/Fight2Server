@@ -119,6 +119,7 @@ public class QuestAction extends BaseAction {
             bossVo.setName(boss.getName());
             response.put("enemy", bossVo);
         } else if (gameMineDao.getByHeroPosition(desTile.getRow(), desTile.getCol()) != null) {
+            response.put("mineId", gameMineDao.getByHeroPosition(desTile.getRow(), desTile.getCol()).getId());
             status = 5;
         } else {
             final List<QuestTile> treasures = questTreasureData.getQuestTiles();
