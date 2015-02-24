@@ -1,6 +1,7 @@
 package com.fight2.action;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
@@ -26,6 +27,7 @@ import com.fight2.service.BattleService;
 import com.fight2.service.ComboSkillService;
 import com.fight2.util.CostConstants;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 
 @Namespace("/mine")
@@ -155,13 +157,9 @@ public class GameMineAction extends BaseAction {
         final User user = userDao.get(loginUser.getId());
         final UserQuestInfo userQuestInfo = user.getQuestInfo();
 
-        final QuestTile mineTile = new QuestTile();
-        mineTile.setCol(userQuestInfo.getCol());
-        mineTile.setRow(userQuestInfo.getRow());
-
         final UserProperties userProps = user.getUserProperties();
         // Validate
-        final GameMine gameMine = gameMineDao.getByHeroPosition(mineTile.getRow(), mineTile.getCol());
+        final GameMine gameMine = gameMineDao.getByHeroPosition(userQuestInfo.getRow(), userQuestInfo.getCol());
         if (gameMine == null) {
             throw new RuntimeException("Mine position not match.");
         }
@@ -185,6 +183,39 @@ public class GameMineAction extends BaseAction {
         userProps.setDiamon(userProps.getDiamon() - CostConstants.MINE_ATTACK_COST);
         userPropertiesDao.update(userProps);
         jsonMsg = new Gson().toJson(battleResult);
+        return SUCCESS;
+    }
+
+    @Action(value = "gather", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String gather() {
+        final User loginUser = (User) this.getSession().get(LOGIN_USER);
+        final User user = userDao.get(loginUser.getId());
+        final UserQuestInfo userQuestInfo = user.getQuestInfo();
+
+        final UserProperties userProps = user.getUserProperties();
+        // Validate
+        final GameMine gameMine = gameMineDao.getByHeroPosition(userQuestInfo.getRow(), userQuestInfo.getCol());
+        if (gameMine == null) {
+            throw new RuntimeException("Mine position not match.");
+        }
+        if (gameMine.getOwner().getId() != user.getId()) {
+            throw new RuntimeException("You are not the mine owner.");
+        }
+        final MineType type = gameMine.getType();
+        final int amount = gameMine.getAmount();
+        if (type == MineType.Crystal) {
+            userProps.setGuildContrib(userProps.getGuildContrib() + amount * 10);
+        } else if (type == MineType.Wood) {
+            userProps.setGuildContrib(userProps.getGuildContrib() + amount * 5);
+        } else if (type == MineType.Mineral) {
+            userProps.setGuildContrib(userProps.getGuildContrib() + amount * 5);
+        }
+        gameMine.setAmount(0);
+        userDao.update(user);
+        gameMineDao.update(gameMine);
+        final Map<String, String> response = Maps.newHashMap();
+        response.put("status", "0");
+        jsonMsg = new Gson().toJson(response);
         return SUCCESS;
     }
 
