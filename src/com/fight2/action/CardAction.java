@@ -274,6 +274,16 @@ public class CardAction extends BaseAction {
         return SUCCESS;
     }
 
+    // @Action(value = "fix", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    // public String fix() {
+    // final List<User> users = userDao.list();
+    // for (final User user : users) {
+    // partyService.refreshPartyHpAtk(user.getId());
+    // }
+    // jsonMsg = "ok";
+    // return SUCCESS;
+    // }
+
     @Action(value = "combos", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String combos() {
         final CardTemplate cardTemplate = cardTemplateDao.get(id);

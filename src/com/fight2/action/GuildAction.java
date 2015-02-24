@@ -223,6 +223,9 @@ public class GuildAction extends BaseAction {
             cardVo.setAmount(count);
             cardVo.setSkill(template.getSkill().getName());
             cardVo.setSkillEffect(CardUtils.getSkillEffectString(template));
+            final CardTemplate templateVo = new CardTemplate();
+            templateVo.setId(template.getId());
+            cardVo.setCardTemplate(templateVo);
             cardVos.add(cardVo);
         }
 
