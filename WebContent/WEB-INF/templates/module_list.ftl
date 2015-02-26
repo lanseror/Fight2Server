@@ -19,6 +19,8 @@
     <a href="<@s.url namespace="/combo-skill" action="list" />">组合技能</a>
     <br/><br/>
     <a href="<@s.url namespace="/mine" action="list" />">矿管理</a>
+    <br/><br/>
+    <a href="<@s.url namespace="/dialog" action="list" />">对话管理</a>
     <br/>
     
 </h2>

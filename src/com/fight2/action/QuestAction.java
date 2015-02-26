@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
 import com.fight2.dao.CardDao;
+import com.fight2.dao.DialogDao;
 import com.fight2.dao.GameMineDao;
 import com.fight2.dao.PartyInfoDao;
 import com.fight2.dao.UserDao;
@@ -25,6 +26,9 @@ import com.fight2.model.BattleResult;
 import com.fight2.model.Card;
 import com.fight2.model.Card.CardStatus;
 import com.fight2.model.CardTemplate;
+import com.fight2.model.Dialog;
+import com.fight2.model.Dialog.OrderType;
+import com.fight2.model.Dialog.Speaker;
 import com.fight2.model.PartyInfo;
 import com.fight2.model.User;
 import com.fight2.model.User.UserType;
@@ -70,6 +74,8 @@ public class QuestAction extends BaseAction {
     private ComboSkillService comboSkillService;
     @Autowired
     private GameMineDao gameMineDao;
+    @Autowired
+    private DialogDao dialogDao;
     private int id;
     private int row;
     private int col;
@@ -176,6 +182,8 @@ public class QuestAction extends BaseAction {
                     enemyVo.setId(enemy.getId());
                     enemyVo.setName(enemy.getName());
                     response.put("enemy", enemyVo);
+                    final Dialog dialog = randomDialog(OrderType.Random, Speaker.OtherPlayer);
+                    response.put("dialog", dialog);
                 } else if (randomNum >= 2 && randomNum < 10) {
                     status = 2;
                     final List<User> npcs = userDao.listByType(UserType.QuestNpc);
@@ -184,6 +192,8 @@ public class QuestAction extends BaseAction {
                     enemyVo.setId(enemy.getId());
                     enemyVo.setName(enemy.getName());
                     response.put("enemy", enemyVo);
+                    final Dialog dialog = randomDialog(OrderType.Random, Speaker.Self, Speaker.NPC);
+                    response.put("dialog", dialog);
                 }
             }
         }
@@ -197,6 +207,13 @@ public class QuestAction extends BaseAction {
         final ActionContext context = ActionContext.getContext();
         context.put("jsonMsg", new Gson().toJson(response));
         return SUCCESS;
+    }
+
+    private Dialog randomDialog(final OrderType type, final Speaker... speakers) {
+        final List<Dialog> dialogs = dialogDao.listByTypeAndSpeakers(type, speakers);
+        final Random random = new Random();
+        final int ranNum = random.nextInt(dialogs.size());
+        return dialogs.get(ranNum);
     }
 
     private boolean useStamina(final Stack<QuestTile> path, final User user) {
@@ -471,6 +488,14 @@ public class QuestAction extends BaseAction {
 
     public void setGameMineDao(final GameMineDao gameMineDao) {
         this.gameMineDao = gameMineDao;
+    }
+
+    public DialogDao getDialogDao() {
+        return dialogDao;
+    }
+
+    public void setDialogDao(final DialogDao dialogDao) {
+        this.dialogDao = dialogDao;
     }
 
 }

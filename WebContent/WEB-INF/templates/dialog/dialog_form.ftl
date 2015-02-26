@@ -16,7 +16,7 @@
     </tr>
     <tr>
         <td>说话人</td>
-        <td><@s.select name="dialog.speaker" list=r"#{'Self':'自己', 'NPC':'NPC'}" value="dialog.speaker"  /></td>
+        <td><@s.select name="dialog.speaker" list=r"#{'Self':'自己', 'NPC':'NPC', 'OtherPlayer':'其他玩家'}" value="dialog.speaker"  /></td>
     </tr>
     <tr>
         <td>内容</td>

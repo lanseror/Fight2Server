@@ -15,9 +15,9 @@
     <@s.iterator value="datas" status="status">
     <tr>
         <td>${id}</td>
-        <td>${speaker}</td>
+        <td><@s.select name="speaker" list=r"#{'Self':'自己', 'NPC':'NPC', 'OtherPlayer':'其他玩家'}" value="speaker" disabled=true /></td>
         <td>${content}</td>
-        <td>${orderType}</td>
+        <td><@s.select name="orderType" list=r"#{'Random':'随机', 'Sequence':'顺序'}" value="orderType" disabled=true /></td>
         <td align="center">
             <a href="<@s.url namespace="/dialog" action="edit"><@s.param name="id" value="${id}" /></@s.url>">修改</a>
             &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;

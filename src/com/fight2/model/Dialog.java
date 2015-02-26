@@ -44,7 +44,8 @@ public class Dialog extends BaseEntity {
 
     public enum Speaker {
         Self,
-        NPC
+        NPC,
+        OtherPlayer
     }
 
 }
