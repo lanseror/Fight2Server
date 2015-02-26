@@ -177,7 +177,14 @@ public class QuestAction extends BaseAction {
                 if (randomNum < 2) {
                     status = 2;
                     final List<User> users = userDao.listByType(UserType.User);
-                    final User enemy = users.get(random.nextInt(users.size()));
+                    User enemy = null;
+                    while (true) {
+                        final User enemyCheck = users.get(random.nextInt(users.size()));
+                        if (enemyCheck.getId() != user.getId()) {
+                            enemy = enemyCheck;
+                            break;
+                        }
+                    }
                     final User enemyVo = new User();
                     enemyVo.setId(enemy.getId());
                     enemyVo.setName(enemy.getName());
