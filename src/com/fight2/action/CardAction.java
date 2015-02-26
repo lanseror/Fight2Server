@@ -77,6 +77,16 @@ public class CardAction extends BaseAction {
                 throw new RuntimeException("Summon diamon not enough!");
             }
             userProps.setDiamon(userProps.getDiamon() - CostConstants.HERO_SUMMON_DIAMON_COST);
+        } else if (type == 4) {
+            if (userProps.getSummonStone() < CostConstants.HERO_SUMMON_STONE_COST * 10) {
+                throw new RuntimeException("Summon stone not enough!");
+            }
+            userProps.setSummonStone(userProps.getSummonStone() - CostConstants.HERO_SUMMON_STONE_COST * 10);
+        } else if (type == 5) {
+            if (userProps.getDiamon() < CostConstants.HERO_SUMMON_DIAMON_COST * 10) {
+                throw new RuntimeException("Summon diamon not enough!");
+            }
+            userProps.setDiamon(userProps.getDiamon() - CostConstants.HERO_SUMMON_DIAMON_COST * 10);
         }
 
         final Map<String, Object> jsonMap = Maps.newHashMap();
@@ -90,43 +100,56 @@ public class CardAction extends BaseAction {
 
         int min = 0;
         int max = 0;
+        int count = 1;
         if (type == 1) {
             min = 1;
             max = 3;
         } else if (type == 2 || type == 3) {
             min = 3;
             max = 6;
+        } else if (type == 4 || type == 5) {
+            min = 3;
+            max = 6;
+            count = 10;
+        }
+        final List<Card> cardVos = Lists.newArrayList();
+        for (int i = 0; i < count; i++) {
+            final CardTemplate cardTemplate = summonHelper.summon(min, max);
+            final String avatar = cardTemplate.getAvatars().get(0).getUrl();
+            final String image = cardTemplate.getThumbImages().get(0).getUrl();
+
+            final Card card = new Card();
+            card.setAtk(cardTemplate.getAtk());
+            card.setAvatar(avatar);
+            card.setHp(cardTemplate.getHp());
+            card.setImage(image);
+            card.setRace(cardTemplate.getRace());
+            card.setName(cardTemplate.getName());
+            card.setStar(cardTemplate.getStar());
+            card.setCardTemplate(cardTemplate);
+            if (cardpackSize < User.USER_CARDPACK_SIZE) {
+                card.setStatus(CardStatus.InCardPack);
+            } else {
+                card.setStatus(CardStatus.InStoreroom);
+            }
+            card.setUser(user);
+            cardDao.add(card);
+
+            final Card cardVo = new Card(card);
+            cardVo.setAvatar(avatar);
+            cardVo.setImage(image);
+            final CardTemplate cardTemplateVo = new CardTemplate();
+            cardTemplateVo.setId(cardTemplate.getId());
+            cardVo.setCardTemplate(cardTemplateVo);
+            cardVos.add(cardVo);
         }
 
-        final CardTemplate cardTemplate = summonHelper.summon(min, max);
-        final String avatar = cardTemplate.getAvatars().get(0).getUrl();
-        final String image = cardTemplate.getThumbImages().get(0).getUrl();
-
-        final Card card = new Card();
-        card.setAtk(cardTemplate.getAtk());
-        card.setAvatar(avatar);
-        card.setHp(cardTemplate.getHp());
-        card.setImage(image);
-        card.setRace(cardTemplate.getRace());
-        card.setName(cardTemplate.getName());
-        card.setStar(cardTemplate.getStar());
-        card.setCardTemplate(cardTemplate);
-        if (cardpackSize < User.USER_CARDPACK_SIZE) {
-            card.setStatus(CardStatus.InCardPack);
-        } else {
-            card.setStatus(CardStatus.InStoreroom);
-        }
-        card.setUser(user);
-        cardDao.add(card);
-
-        final Card cardVo = new Card(card);
-        cardVo.setAvatar(avatar);
-        cardVo.setImage(image);
-        final CardTemplate cardTemplateVo = new CardTemplate();
-        cardTemplateVo.setId(cardTemplate.getId());
-        cardVo.setCardTemplate(cardTemplateVo);
         jsonMap.put("status", 0);
-        jsonMap.put("card", cardVo);
+        if (count > 1) {
+            jsonMap.put("cards", cardVos);
+        } else {
+            jsonMap.put("card", cardVos.get(0));
+        }
         context.put("jsonMsg", new Gson().toJson(jsonMap));
 
         final List<Card> cards = cardDao.listByUser(user);
@@ -240,6 +263,9 @@ public class CardAction extends BaseAction {
 
         if (cards.size() != 2) {
             return INPUT;
+        }
+        if (card1.getId() == card2.getId()) {
+            throw new RuntimeException("Duplicate evo card.");
         }
         if (card1.getCardTemplate().getId() != card2.getCardTemplate().getId()) {
             return INPUT;
