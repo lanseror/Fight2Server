@@ -250,6 +250,16 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "session", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String checkSession() {
+        final User loginUser = this.getLoginUser();
+        final int status = (loginUser == null) ? 1 : 0;
+        final Map<String, Integer> response = Maps.newHashMap();
+        response.put("status", status);
+        jsonMsg = new Gson().toJson(response);
+        return SUCCESS;
+    }
+
     @Action(value = "save-user-info", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String saveUserInfo() {
         final User loginUser = this.getLoginUser();

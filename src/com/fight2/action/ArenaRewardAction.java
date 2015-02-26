@@ -170,6 +170,9 @@ public class ArenaRewardAction extends BaseAction {
                     card.setStar(cardTemplate.getStar());
                     card.setImage(thumbObj.getUrl());
                     card.setRace(cardTemplate.getRace());
+                    final CardTemplate cardTemplateVo = new CardTemplate();
+                    cardTemplateVo.setId(cardTemplate.getId());
+                    card.setCardTemplate(cardTemplateVo);
                     rewardItem.setCard(card);
                 }
                 rewardItems.add(rewardItem);

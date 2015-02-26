@@ -110,7 +110,7 @@ public class QuestTaskAction extends BaseAction {
         if (userQuestTask.getStatus() == UserTaskStatus.Ready) {
             userQuestTask.setStatus(UserTaskStatus.Started);
             userQuestTaskDao.update(userQuestTask);
-        } else {
+        } else if (userQuestTask.getStatus() != UserTaskStatus.Started) {
             throw new RuntimeException("Cannot start a task if it's not in ready status!");
         }
         final Map<String, Object> response = Maps.newHashMap();
@@ -137,7 +137,7 @@ public class QuestTaskAction extends BaseAction {
         final User attacker = (User) this.getSession().get(LOGIN_USER);
         final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(attacker);
         if (userQuestTask.getStatus() != UserTaskStatus.Started) {
-            return INPUT;
+            throw new RuntimeException("Only started task can attack");
         }
 
         final User defender = userQuestTask.getTask().getBoss();
@@ -162,7 +162,7 @@ public class QuestTaskAction extends BaseAction {
         final User user = userDao.load(loginUser.getId());
         final UserQuestTask userQuestTask = userQuestTaskDao.getUserCurrentTask(user);
         if (userQuestTask.getStatus() != UserTaskStatus.Finished) {
-            return INPUT;
+            throw new RuntimeException("Only Finished task can be completed");
         }
         final UserStoreroom userStoreroom = user.getStoreroom();
         final QuestTask questTask = userQuestTask.getTask();
