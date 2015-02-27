@@ -250,6 +250,25 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "chat-login", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
+    public String chatLogin() {
+        user = userDao.getByInstallUUID(installUUID);
+        final User voUser = new User();
+        voUser.setId(user.getId());
+        voUser.setAvatar(user.getAvatar());
+        voUser.setCardCount(user.getCardCount());
+        voUser.setLevel(user.getLevel());
+        voUser.setName(user.getName());
+        voUser.setInstallUUID(user.getInstallUUID());
+        voUser.setUsername(user.getUsername());
+        final Map<String, Object> response = Maps.newHashMap();
+        response.put("status", 0);
+
+        jsonMsg = new Gson().toJson(response);
+        this.getSession().put(LOGIN_USER, voUser);
+        return SUCCESS;
+    }
+
     @Action(value = "session", results = { @Result(name = SUCCESS, location = "../jsonMsg.ftl") })
     public String checkSession() {
         final User loginUser = this.getLoginUser();
