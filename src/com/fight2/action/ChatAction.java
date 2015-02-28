@@ -107,8 +107,8 @@ public class ChatAction extends BaseAction {
         final User userLogin = getLoginUser();
         final User user = userDao.get(userLogin.getId());
         final int userIndex = user.getMsgIndex();
-        if (userIndex == -1) {
-            return userIndex;
+        if (index == -1 && userIndex == -1) {
+            return index;
         } else {
             if (index > userIndex) {
                 user.setMsgIndex(index);
