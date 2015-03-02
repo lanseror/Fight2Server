@@ -88,7 +88,8 @@ public class GameMine extends BaseEntity {
     public enum MineType {
         Wood(2, 0),
         Mineral(1, 0),
-        Crystal(1, 0);
+        Crystal(1, 0),
+        Diamon(1, 0);
 
         private final int xOffset;
         private final int yOffset;

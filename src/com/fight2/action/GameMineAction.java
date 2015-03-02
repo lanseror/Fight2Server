@@ -209,6 +209,8 @@ public class GameMineAction extends BaseAction {
             userProps.setGuildContrib(userProps.getGuildContrib() + amount * 5);
         } else if (type == MineType.Mineral) {
             userProps.setGuildContrib(userProps.getGuildContrib() + amount * 5);
+        } else if (type == MineType.Diamon) {
+            userProps.setDiamon(userProps.getDiamon() + amount);
         }
         gameMine.setAmount(0);
         userDao.update(user);

@@ -307,6 +307,22 @@ public class UserAction extends BaseAction {
         return SUCCESS;
     }
 
+    @Action(value = "add-diamon", results = { @Result(name = SUCCESS, location = "user_form.ftl") })
+    public String addDiamon() {
+        user = userDao.get(id);
+        return SUCCESS;
+    }
+
+    @Action(value = "diamon-save", interceptorRefs = { @InterceptorRef("tokenSession"), @InterceptorRef("defaultStack") }, results = { @Result(
+            name = SUCCESS, location = "list", type = "redirect") })
+    public String diamonSave() {
+        final User userUpdate = userDao.get(user.getId());
+        final UserProperties userProps = userUpdate.getUserProperties();
+        userProps.setDiamon(userProps.getDiamon() + user.getSalary());
+        userPropertiesDao.update(userProps);
+        return SUCCESS;
+    }
+
     @Action(value = "delete", results = { @Result(name = SUCCESS, location = "list", type = "redirect") })
     public String delete() {
         user = userDao.load(id);

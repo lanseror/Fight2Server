@@ -16,7 +16,7 @@
     <@s.iterator value="datas" status="status">
     <tr>
         <td>${id}</td>
-        <td>${type}</td>
+        <td><@s.select name="mine.type" list=r"#{'Mineral':'石矿', 'Wood':'木矿', 'Crystal':'水晶矿', 'Diamon':'钻石矿'}" value="type" disabled=true  /></td>
         <td>${col}</td>
         <td>${row}</td>
         <td>${amount}</td>

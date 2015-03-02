@@ -15,7 +15,7 @@
     </@s.if>
     <tr>
         <td><b>类型</b></td>
-        <td><@s.select name="mine.type" list=r"#{'Mineral':'石矿', 'Wood':'木矿', 'Crystal':'水晶矿'}" value="mine.type"  /></td>
+        <td><@s.select name="mine.type" list=r"#{'Mineral':'石矿', 'Wood':'木矿', 'Crystal':'水晶矿', 'Diamon':'钻石矿'}" value="mine.type"  /></td>
     </tr>
     <tr>
         <td>x</td>

@@ -38,6 +38,7 @@
          <a href="<@s.url namespace="/user-storeroom" action="view"><@s.param name="id" value="${storeroom.id}" /></@s.url>">玩家仓库</a>
          &nbsp;&nbsp;|&nbsp;&nbsp;
          </#if>
+         <a href="<@s.url namespace="/user" action="add-diamon"><@s.param name="id" value="${id}" /></@s.url>">加钻石</a>
          <a href="javascript:confirmDelete('<@s.url namespace="/user" action="delete"><@s.param name="id" value="${id}" /></@s.url>')">删除</a>
         </td>
     </tr>
