@@ -24,6 +24,7 @@ public class Card extends BaseEntity {
     private String skill;
     private String skillEffect;
     private int cardVersion;
+    private int price;
     private CardStatus status = CardStatus.InCardPack;
     private User user;
     private CardTemplate cardTemplate;
@@ -51,6 +52,7 @@ public class Card extends BaseEntity {
         this.skill = template.getSkill().getName();
         this.skillEffect = CardUtils.getSkillEffectString(card);
         this.cardVersion = card.getCardVersion();
+        this.price = card.getPrice();
         this.status = card.getStatus();
         this.amount = card.getAmount();
         this.race = template.getRace();
@@ -160,6 +162,14 @@ public class Card extends BaseEntity {
 
     public void setCardVersion(final int cardVersion) {
         this.cardVersion = cardVersion;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(final int price) {
+        this.price = price;
     }
 
     public CardStatus getStatus() {

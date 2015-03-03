@@ -23,6 +23,7 @@ public class CardTemplate extends BaseEntity {
     private int skillLevel;
     private Race race;
     private int cardVersion;
+    private int price;
 
     public CardTemplate() {
         super();
@@ -40,6 +41,7 @@ public class CardTemplate extends BaseEntity {
         this.skillLevel = cardTemplate.getSkillLevel();
         this.race = cardTemplate.getRace();
         this.cardVersion = cardTemplate.getCardVersion();
+        this.price = cardTemplate.price;
     }
 
     public static long getSerialversionuid() {
@@ -160,6 +162,14 @@ public class CardTemplate extends BaseEntity {
 
     public void setCardVersion(final int cardVersion) {
         this.cardVersion = cardVersion;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(final int price) {
+        this.price = price;
     }
 
     public static enum Race {

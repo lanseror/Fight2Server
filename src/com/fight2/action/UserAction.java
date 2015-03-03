@@ -174,6 +174,7 @@ public class UserAction extends BaseAction {
         card.setRace(cardTemplate.getRace());
         card.setName(cardTemplate.getName());
         card.setStar(cardTemplate.getStar());
+        card.setPrice(cardTemplate.getPrice());
         card.setCardTemplate(cardTemplate);
         card.setStatus(CardStatus.InCardPack);
         card.setUser(user);

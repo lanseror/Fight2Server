@@ -126,6 +126,7 @@ public class CardAction extends BaseAction {
             card.setRace(cardTemplate.getRace());
             card.setName(cardTemplate.getName());
             card.setStar(cardTemplate.getStar());
+            card.setPrice(cardTemplate.getPrice());
             card.setCardTemplate(cardTemplate);
             if (cardpackSize < User.USER_CARDPACK_SIZE) {
                 card.setStatus(CardStatus.InCardPack);

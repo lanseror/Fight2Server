@@ -29,6 +29,7 @@ public class User extends BaseEntity {
     private Guild guild;
     private int salary;
     private int glory;
+    private int cardPrice;
     private int msgIndex = -1;
 
     public String getInstallUUID() {
@@ -176,6 +177,14 @@ public class User extends BaseEntity {
 
     public void setGlory(final int glory) {
         this.glory = glory;
+    }
+
+    public int getCardPrice() {
+        return cardPrice;
+    }
+
+    public void setCardPrice(final int cardPrice) {
+        this.cardPrice = cardPrice;
     }
 
     public static int getUserCardpackSize() {

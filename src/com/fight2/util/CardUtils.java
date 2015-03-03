@@ -58,10 +58,13 @@ public class CardUtils {
             final int addedLevel = card.getLevel() - currentLevel;
             final int currentHp = card.getHp();
             final int currentAtk = card.getAtk();
+            final int currentPrice = card.getPrice();
             final int upgradeHp = (int) (card.getHp() * Math.pow(1.015, addedLevel));
             final int upgradeAtk = upgradeHp * currentAtk / currentHp;
+            final int upgradePrice = upgradeHp * currentPrice / currentHp;
             card.setHp(upgradeHp);
             card.setAtk(upgradeAtk);
+            card.setPrice(upgradePrice);
         }
 
     }
@@ -103,18 +106,21 @@ public class CardUtils {
         final int evoAtk = templateAtk.divide(templateHp, 6, RoundingMode.HALF_UP).multiply(evoHpDecimal).intValue();
 
         final int evoBaseExp = (int) (getBaseExp(mainCard) * 0.75 + getBaseExp(supportCard) * 0.75 + mainCard.getExp() * 0.3 + supportCard.getExp() * 0.3);
+        final int evoPrice = (int) (mainCard.getPrice() * 0.75 + supportCard.getPrice() * 0.75);
 
         mainCard.setHp(evoHp);
         mainCard.setAtk(evoAtk);
         mainCard.setTier(higherTierCard.getTier() + 1);
         mainCard.setBaseExp(evoBaseExp);
         mainCard.setExp(0);
+        mainCard.setPrice(evoPrice);
 
         supportCard.setHp(evoHp);
         supportCard.setAtk(evoAtk);
         supportCard.setTier(mainCard.getTier());
         supportCard.setBaseExp(evoBaseExp);
         supportCard.setExp(0);
+        supportCard.setPrice(evoPrice);
     }
 
     public static String getSkillEffectString(final Card card) {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.fight2.dao.ArenaDao;
 import com.fight2.dao.BidDao;
 import com.fight2.dao.GameMineDao;
+import com.fight2.dao.UserDao;
 import com.fight2.model.Arena;
 import com.fight2.model.ArenaStatus;
 import com.fight2.model.Bid;
@@ -21,6 +22,7 @@ import com.fight2.util.BidUtils;
 import com.fight2.util.HibernateUtils;
 import com.fight2.util.MineUtils;
 import com.fight2.util.QuestUtils;
+import com.fight2.util.UserUtils;
 
 @Component
 public class JobInitializer implements ApplicationListener<ContextRefreshedEvent> {
@@ -30,6 +32,8 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
     private ArenaService arenaService;
     @Autowired
     private BidDao bidDao;
+    @Autowired
+    private UserDao userDao;
     @Autowired
     private BidService bidService;
     @Autowired
@@ -44,6 +48,8 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
         taskScheduler.scheduleAtFixedRate(refreshTreasureSchedule, TimeUnit.MINUTES.toMillis(5));
         final Runnable produceMineSchedule = MineUtils.createPruduceMineSchedule(gameMineDao);
         taskScheduler.scheduleAtFixedRate(produceMineSchedule, TimeUnit.HOURS.toMillis(1));
+        final Runnable refreshUserCardPriceSchedule = UserUtils.createRefreshUserCardPriceSchedule(userDao);
+        taskScheduler.scheduleAtFixedRate(refreshUserCardPriceSchedule, TimeUnit.HOURS.toMillis(5));
 
         final SessionFactory sessionFactory = arenaDao.getSessionFactory();
         HibernateUtils.openSession(sessionFactory);
@@ -126,6 +132,14 @@ public class JobInitializer implements ApplicationListener<ContextRefreshedEvent
 
     public void setGameMineDao(final GameMineDao gameMineDao) {
         this.gameMineDao = gameMineDao;
+    }
+
+    public UserDao getUserDao() {
+        return userDao;
+    }
+
+    public void setUserDao(final UserDao userDao) {
+        this.userDao = userDao;
     }
 
 }

@@ -150,6 +150,11 @@
         <td><b>初始攻击力</b></td>
         <td><@s.textfield size="80" name="cardTemplate.atk" cssClass="required validate-integer" /></td>
     </tr>
+    
+    <tr>
+        <td><b>初始身价</b></td>
+        <td><@s.textfield size="80" name="cardTemplate.price" cssClass="required validate-integer" /></td>
+    </tr>
 
     <tr>
         <td><b>召唤机率(万分之*)</b></td>

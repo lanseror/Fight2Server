@@ -11,11 +11,13 @@ public interface UserDao extends BaseDao<User> {
     public User getByInstallUUID(String installUUID);
 
     public List<User> getAllArenaGuardians();
-    
+
     public List<User> getAllNpc();
-    
+
     public List<User> listByType(UserType type);
 
     public List<User> listByGuild(Guild guild);
+
+    public List<Integer> getUserCardPrices(final int userId);
 
 }

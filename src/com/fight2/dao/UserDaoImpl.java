@@ -3,6 +3,7 @@ package com.fight2.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -59,6 +60,17 @@ public class UserDaoImpl extends BaseDaoImpl<User> implements UserDao {
         @SuppressWarnings("unchecked")
         final List<User> users = criteria.list();
         return users;
+    }
+
+    @Override
+    public List<Integer> getUserCardPrices(final int userId) {
+        final String queryString = "select max(c.price) as maxPrice from Card c where c.user.id=:userId group by c.cardTemplate.id order by maxPrice desc";
+        final Query query = getSession().createQuery(queryString);
+        query.setMaxResults(12);
+        query.setInteger("userId", userId);
+        @SuppressWarnings("unchecked")
+        final List<Integer> list = query.list();
+        return list;
     }
 
 }

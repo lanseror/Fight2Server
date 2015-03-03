@@ -33,7 +33,7 @@
                          ${name}<br/><span>HP：${hp}，攻击：${atk}</span><br/>
                          <img src="<@s.url value="${image}" />" height="150" width="100" />
                          <br/>
-                         <a href="<@s.url namespace="/card" action="delete"><@s.param name="id" value="${id}" /></@s.url>">删除</a>
+                         <a href="<@s.url namespace="/card" action="delete"><@s.param name="id" value="#{id}" /></@s.url>">删除</a>
                     </td>
                     <@s.if test="#status.getCount()%8==0&&#status.last==false">
                         </tr><tr>
