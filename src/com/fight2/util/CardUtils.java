@@ -113,6 +113,7 @@ public class CardUtils {
         mainCard.setTier(higherTierCard.getTier() + 1);
         mainCard.setBaseExp(evoBaseExp);
         mainCard.setExp(0);
+        mainCard.setLevel(1);
         mainCard.setPrice(evoPrice);
 
         supportCard.setHp(evoHp);
@@ -120,6 +121,7 @@ public class CardUtils {
         supportCard.setTier(mainCard.getTier());
         supportCard.setBaseExp(evoBaseExp);
         supportCard.setExp(0);
+        supportCard.setLevel(1);
         supportCard.setPrice(evoPrice);
     }
 
